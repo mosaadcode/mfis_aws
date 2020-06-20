@@ -1,0 +1,76 @@
+{% extends 'student/base.html' %}
+
+{% block content %}
+{% load static %}
+<!-- <h2>اتفاقية الاستخدام</h2>
+<h5>{{ error }}</h5> -->
+
+<div class="container-fluid  text-right">
+
+  <br>
+	<div class="row">
+		<div class="col-md-12 ml-auto text-right mt-4">
+			<div id="card-434025">
+				<div class="card">
+					<div class="card-header">
+						 <a class="card-link collapsed" data-toggle="collapse" data-parent="#card-434025" href="#card-element-708669">تعليمات الإشتراك في سيارة المدرسة</a>
+					</div>
+					<div id="card-element-708669" class="collapse">
+						<div class="card-body">
+								<img src="{% static 'images/agrement-s.jpg'%}" class="img-fluid" alt="">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+  </div>
+  <div class="row justify-content-center  mt-3">
+      <div class="col-md-5">
+        {% if error %}
+            <div class="alert alert-danger mt-3" role="alert">
+                {{ error }}
+            </div>
+        {% endif %}
+
+          <form method="POST" class="form-signin">
+              {% csrf_token %}
+
+                  <br>
+
+                  <select dir="rtl" name="living_area" class="form-control" id="id_living_area" required="">
+                    <option value="" selected="">منطقة السكن</option>
+                    <option value="النزهة الجديدة">النزهة الجديدة</option>
+                    <option value="شيراتون">شيراتون</option>
+                    <option value="مصر الجديدة">مصر الجديدة</option>
+                    <option value="الزيتون">الزيتون</option>
+                    <option value="حدائق القبة">حدائق القبة</option>
+                    <option value="العباسية">العباسية</option>
+                    <option value="مدينة نصر">مدينة نصر</option>
+                    <option value="إمتداد رمسيس">إمتداد رمسيس</option>
+                    <option value="المعادى">المعادى</option>
+                    <option value="المقطم">المقطم</option>
+                    <option value="مدينتى">مدينتى</option>
+                    <option value="الرحاب">الرحاب</option>
+                    <option value="التجمع الاول">التجمع الاول</option>
+                    <option value="التجمع الثالث">التجمع الثالث</option>
+                    <option value="التجمع الخامس">التجمع الخامس</option>
+                    
+
+                  </select>
+
+                  <br>
+                    <input type="text" name="address" class="form-control" placeholder="العنوان" maxlength="50" id="id_address" required="">
+              <br>
+              <input type="text" name="old_bus" class="form-control" placeholder="كود سيارة العام السابق" maxlength="3" id="id_old_bus">
+              <button type="submit" class="btn btn-block btn-primary mt-5 cib">اوافق علي التعليمات</button>
+
+          </form>
+
+      </div>
+  </div>
+  <br>
+  <br>
+  <br>
+  <br>
+</div>
+{% endblock %}

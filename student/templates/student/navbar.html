@@ -1,0 +1,37 @@
+{% load static %}
+    <nav class="navbar  p-1 navbar-expand-md cib navbar-dark sticky-top ">
+      <a href="#" class=" m-0"><img src="{% static '/images/logo.png' %}" height="70" alt="MFIS"></a>
+      <a class="navbar-brand m-0 ml-1" href="#">منارة الفاروق الإسلامية للغات</a>
+      <button class="navbar-toggler navbar-toggler-right mr-1" type="button" data-toggle="collapse" data-target="#navb" aria-expanded="true">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div id="navb" class="navbar-collapse collapse hide text-right">
+        <ul class="navbar-nav ml-auto mr-2">
+                {% url 'profile' as profile_url1 %}
+                {% if user.is_authenticated %}
+                {% if request.get_full_path != profile_url1 or  request.get_full_path == profile_url1 and user.father_mobile != "" %}
+                <li class="nav-item">
+                  <li class="nav-item active">
+                    <a class="nav-link" href="{% url 'dashboard' %}">إستعلام مصروفات</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'recorded' %}">مصروفات مسجلة</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'agreement' %}">إشتراك السيارة</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'profile' %}">الملف الشخصي</a>
+                  </li>
+                  <li class="nav-item">
+                      <a href="#" onclick="$('#signOutBtn').click()" class="nav-link"><i class="fa fa-sign-out mr-2"></i>خروج</a>
+                      <form style='display: none;' method="POST" action="{% url 'logoutuser' %}">
+                          {% csrf_token %}
+                          <button id="signOutBtn" type="submit">  تسجيل خروج  </button>
+                      </form>
+                  </li>
+                  {% endif %}
+                  {% endif %}
+        </ul>
+      </div>
+    </nav>

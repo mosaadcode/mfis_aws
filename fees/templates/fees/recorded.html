@@ -1,0 +1,56 @@
+{% extends 'student/base.html' %}
+
+{% block content %}
+
+
+<!-- <div class="container-fluid  text-right">
+  <div class="row justify-content-center mt-5"> -->
+
+<div class="container-fluid">
+
+
+
+  <br>
+  <br>
+  <div class="row ">
+    <div class="col-md-8  ">
+    </div>
+    <div class="col-md-4  mb-3 text-right">
+      <h6><b>مصروفات مسجلة</b></h6>
+    </div>
+  </div>
+
+  <div class="row"
+  <div class="col-md-7 ">
+  </div>
+    <div class="col-md-5 ml-auto text-center">
+  		<table class="table table-hover">
+  		  <thead>
+  		    <tr>
+
+  		      <th scope="col">التاريخ</th>
+            <th scope="col">المبلغ</th>
+            <th scope="col">مصروفات</th>
+  		    </tr>
+  		  </thead>
+  		  <tbody>
+           {% for fee in fees %}
+  		    <tr>
+
+  		      <td>{{ fee.payment_date }}</td>
+            <th scope="row">{{ fee.value }}</th>
+            <td>{{ fee.kind }}</td>
+           {% endfor %}
+  		  </tbody>
+  		</table>
+    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+</div>
+
+{% endblock %}
