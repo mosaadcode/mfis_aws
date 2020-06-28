@@ -40,7 +40,7 @@ def addfees(request):
                     return redirect('dashboard')
                 except ValueError:
                         # tell user when error hapen
-                        return render(request, 'fees/addfees.html', {'form':FeesForm(),'error':'برجاء مراجعة البيانات'})
+                        return render(request, 'fees/addfees.html', {'form':FeesForm(),'error':'لا يمكنك التسجيل, برجاء مراجعة قسم الحسابات'})
             else:
                 if request.user.bus_active == True:
                     # add try: except to solve value Error
