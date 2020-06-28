@@ -40,7 +40,7 @@ def addfees(request):
                     return redirect('dashboard')
                 except ValueError:
                         # tell user when error hapen
-                        return render(request, 'fees/addfees.html', {'form':FeesForm(),'error':'لا يمكنك التسجيل, برجاء مراجعة قسم الحسابات'})
+                        return render(request, 'fees/addfees.html', {'form':FeesForm(),'error':'برجاء مراجعة بيانات الايصال'})
             else:
                 if request.user.bus_active == True:
                     # add try: except to solve value Error
@@ -69,7 +69,7 @@ def addfees(request):
                     return render(request, 'fees/addfees.html', {'form':FeesForm(),'error':error})
 
         else:
-            return render(request, 'fees/addfees.html', {'form':FeesForm(),'error':'برجاء مراجعة قسم الحسابات'})
+            return render(request, 'fees/addfees.html', {'form':FeesForm(),'error':'لا يمكنك التسجيل الان, برجاء مراجعة قسم الحسابات'})
 def recorded(request):
     fees = Fee.objects.filter(student=request.user.id)
     return render(request, 'fees/recorded.html',{'fees':fees})
