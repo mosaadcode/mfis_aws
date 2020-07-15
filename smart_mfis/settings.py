@@ -23,6 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 with open('/home/ubuntu/keys/secret_key.txt') as f:
     SECRET_KEY = f.readlines()[0]
+    dbpassword = f.readlines()[1]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -87,8 +88,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'mfis_db',
         'USER':'mosaad',
-        with open('/home/ubuntu/keys/secret_key.txt') as f:
-            'PASSWORD':f.readlines()[1],
+        'PASSWORD':dbpassword,
         'HOST':'mfis-database.cqiccreor3hz.eu-west-3.rds.amazonaws.com',
         'PORT':'5432'
 
