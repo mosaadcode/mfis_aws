@@ -87,7 +87,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'mfis_db',
         'USER':'mosaad',
-        'PASSWORD':'ghashkash44',
+        with open('/home/ubuntu/keys/secret_key.txt') as f:
+            'PASSWORD':f.readlines()[1],
         'HOST':'mfis-database.cqiccreor3hz.eu-west-3.rds.amazonaws.com',
         'PORT':'5432'
 
