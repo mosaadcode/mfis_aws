@@ -3,6 +3,8 @@ from import_export.widgets import ForeignKeyWidget
 from fees.models import Fee
 from .models import Student
 from django.contrib.auth.hashers import make_password
+from django.utils.encoding import force_text
+from import_export.results import RowResult
 
 class FeesResource(resources.ModelResource):
     student = fields.Field(column_name='student',
@@ -17,6 +19,19 @@ class FeesResource(resources.ModelResource):
 
 class StudentResource(resources.ModelResource):
     # if 'password' in self.fields.keys():
+    def get_row_result_class(self):
+    """
+    Returns the class used to store the result of a row import.
+    """
+    return RowResult
+
+    delete = fields.Field(widget=BooleanWidget())
+    def for_delete(self, row, instance):
+        row_result = self.get_row_result_class()
+        row_result.object_id = instance.pk
+        row_result.object_repr = force_text(instance)
+        return self.fields['delete'].clean(row)
+
     def before_import_row(self,row, **kwargs):
         value = row['password']
         row['password'] = make_password(value)
