@@ -1,5 +1,5 @@
 from import_export import fields, resources
-from import_export.widgets import ForeignKeyWidget
+from import_export.widgets import ForeignKeyWidget, BooleanWidget
 from fees.models import Fee
 from .models import Student
 from django.contrib.auth.hashers import make_password
