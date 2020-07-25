@@ -39,5 +39,5 @@ class StudentResource(resources.ModelResource):
     class Meta:
         model = Student
         import_id_fields = ('code',)
-        fields = ('code','username', 'password','school', 'grade', 'study_payment1', 'study_payment3', 'bus_payment2','message','total_paid','is_active', 'can_pay','father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus')
-        export_order = ('code','username', 'password','school', 'grade', 'study_payment1', 'study_payment3', 'bus_payment2','message','total_paid','is_active', 'can_pay','father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus')
+        fields = ('code','username', 'password','school', 'grade', 'study_payment1', 'study_payment3', 'bus_payment2','message','total_paid','is_active', 'can_pay', 'bus_active', 'father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus')
+        export_order = ('code','username', 'password','school', 'grade', 'study_payment1', 'study_payment3', 'bus_payment2','message','total_paid','is_active', 'can_pay', 'bus_active', 'father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus')
