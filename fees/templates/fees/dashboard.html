@@ -146,7 +146,11 @@
 				</thead>
 				<tbody>
 					<tr>
+						{% if user.payment_status < 0 %}
+						<th scope="row"><button type="button" class="btn btn-info m-0 pr-1 pl-1" style="display:inline-block; width:175px" >سداد مقدم<span class="badge badge-light ml-2"><h6>{{ user.payment_status }}</h6></span></button></th>
+						{% else %}
 						<th scope="row"><button type="button" class="btn btn-danger m-0 pr-1 pl-1" style="display:inline-block; width:175px" >مستحق السداد<span class="badge badge-light ml-2"><h6>{{ user.payment_status }}</h6></span></button></th>
+						{% endif %}
 						<th scope="row"><button type="button" class="btn btn-info m-0 pr-1 pl-1" style="display:inline-block; width:140px" >تم سداد<span class="badge badge-light ml-2"><h6>{{ user.total_paid }}</h6></span></button></th>
 					</tr>
 				</tbody>
