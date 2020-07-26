@@ -12,10 +12,10 @@ class FeesResource(resources.ModelResource):
                       widget=ForeignKeyWidget(Student, 'code'))
 
     def get_row_result_class(self):
-    """
-    Returns the class used to store the result of a row import.
-    """
-    return RowResult
+        """
+        Returns the class used to store the result of a row import.
+        """
+        return RowResult
 
     delete = fields.Field(widget=BooleanWidget())
     def for_delete(self, row, instance):
