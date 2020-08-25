@@ -81,7 +81,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
     )
 
     code = models.CharField(max_length=7, unique=True)
-    username = models.CharField(max_length=36,verbose_name='student name')
+    username = models.CharField(max_length=60,verbose_name='student name')
     school = models.CharField( max_length=4, choices=SCHOOL_CHOICES, blank=True)
     grade = models.CharField( max_length=16, choices=GRADE_CHOICES, blank=True)
     father_mobile = models.CharField(max_length=11, blank=True)
