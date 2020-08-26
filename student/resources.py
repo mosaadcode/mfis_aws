@@ -11,18 +11,18 @@ class FeesResource(resources.ModelResource):
                       attribute='student',
                       widget=ForeignKeyWidget(Student, 'code'))
 
-    # def get_row_result_class(self):
-    #     """
-    #     Returns the class used to store the result of a row import.
-    #     """
-    #     return RowResult
+    def get_row_result_class(self):
+        """
+        Returns the class used to store the result of a row import.
+        """
+        return RowResult
 
-    # delete = fields.Field(widget=BooleanWidget())
-    # def for_delete(self, row, instance):
-    #     row_result = self.get_row_result_class()
-    #     row_result.object_id = instance.pk
-    #     row_result.object_repr = force_text(instance)
-    #     return self.fields['delete'].clean(row)
+    delete = fields.Field(widget=BooleanWidget())
+    def for_delete(self, row, instance):
+        row_result = self.get_row_result_class()
+        row_result.object_id = instance.pk
+        row_result.object_repr = force_text(instance)
+        return self.fields['delete'].clean(row)
 
     class Meta:
         model = Fee
