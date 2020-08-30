@@ -41,7 +41,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
         (None, ""),
         ('بنين', 'بنين'),
         ('بنات', 'بنات'),
-        ('بنات.', 'بنات.'),
+        ('.بنات.', '.بنات.'),
     )
     GRADE_CHOICES = (
         (None, ""),
