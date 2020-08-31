@@ -15,13 +15,13 @@ class Fee(models.Model):
     KIND_CHOICES = (
         ('دراسية', 'دراسية'),
         ('سيارة', 'سيارة'),
-        ('.بنات.', '.بنات.'),
     )
 
     SCHOOL_CHOICES = (
         (None, ""),
         ('بنين', 'بنين'),
         ('بنات', 'بنات'),
+        ('.بنات.', '.بنات.'),
     )
 
     payment_date = models.DateField(null=True, blank=True)
