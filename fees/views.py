@@ -37,7 +37,7 @@ def addfees(request):
                     request.user.total_paid += int(request.POST['value'])
                     request.user.save(update_fields=["total_paid"])
                     # redirect user to currenttodos page
-                    return redirect('dashboard')
+                    return redirect('recorded')
                 except ValueError:
                         # tell user when error hapen
                         return render(request, 'fees/addfees.html', {'form':FeesForm(),'error':'برجاء مراجعة بيانات الايصال'})
@@ -59,7 +59,7 @@ def addfees(request):
                         request.user.total_paid += int(request.POST['value'])
                         request.user.save(update_fields=["total_paid"])
                         # redirect user to currenttodos page
-                        return redirect('dashboard')
+                        return redirect('recorded')
                     except ValueError:
                             # tell user when error hapen
                             return render(request, 'fees/addfees.html', {'form':FeesForm(),'error':'برجاء مراجعة البيانات'})
