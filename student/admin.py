@@ -20,7 +20,7 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
     fieldsets = (
         (None, { 'fields': ('code', 'username', ('school', 'grade'),'password')}),
         # (None, { 'fields': (('is_staff','is_admin'),)}),
-        ('المصروفات', {'fields': (('is_active', 'can_pay', 'bus_active'),('study_payment1', 'study_payment3', 'bus_payment2'),('total_paid','payment_status'), 'message')}),
+        ('المصروفات', {'fields': (('total_paid'), ('is_active', 'can_pay', 'bus_active'),('study_payment1', 'study_payment3', ), 'bus_payment2', 'message')}),
         ('بيانات', {'fields': (('father_mobile','mother_mobile'),('phone_number', 'email'),('living_area', 'address', 'old_bus'), 'last_login')}),
         # ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'is_admin', 'groups', 'user_permissions')}),
                  )
