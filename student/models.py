@@ -90,11 +90,11 @@ class Student(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(max_length=8, blank=True)
     email = models.EmailField(max_length=60, blank=True)
 
-    study_payment1 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 1')
-    study_payment3 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 3')
+    study_payment1 = models.PositiveSmallIntegerField(default=0)
+    study_payment3 = models.PositiveSmallIntegerField(default=0)
 
     bus_active = models.BooleanField( default=False)
-    bus_payment2 = models.PositiveSmallIntegerField( default=0,verbose_name='Bus 2')
+    bus_payment2 = models.PositiveSmallIntegerField( default=0)
     total_paid = models.PositiveSmallIntegerField( default=0)
     def payment_status(self):
 #due date 1st study and 1st bus

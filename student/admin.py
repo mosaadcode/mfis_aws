@@ -18,11 +18,9 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
     # filter_horizontal = ()
     list_filter = ('school','grade', 'is_active','can_pay', 'bus_active')
     fieldsets = (
-        (None, { 'fields': ('code', 'username', ('school', 'grade'),'password', ('is_active', 'can_pay', 'bus_active'))}),
+        (None, { 'fields': ('code', 'username', ('school', 'grade'),'password')}),
         # (None, { 'fields': (('is_staff','is_admin'),)}),
-        ('حالة السداد', {'fields': ('total_paid', 'payment_status')}),
-        ('الأقساط', {'fields': (('study_payment1', 'study_payment3'), ('bus_payment2'))}),
-        ('رسالة', {'fields': ( 'message')}),
+        ('المصروفات', {'fields': (('is_active', 'can_pay', 'bus_active'),('study_payment1', 'study_payment3', 'bus_payment2'),('total_paid','payment_status'), 'message')}),
         ('بيانات', {'fields': (('father_mobile','mother_mobile'),('phone_number', 'email'),('living_area', 'address', 'old_bus'), 'last_login')}),
         # ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'is_admin', 'groups', 'user_permissions')}),
                  )
