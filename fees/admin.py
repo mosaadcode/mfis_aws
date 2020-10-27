@@ -16,8 +16,10 @@ class FeesInline(admin.TabularInline):
     # can_delete = False
     # exclude = ('school',)
     extra = 0
-    def has_change_permission(self, request, obj=None):
-        return False
+    # def has_change_permission(self, request, obj=None):
+    #     return False
+    # def has_add_permission(self, request, obj=None):
+    # return False
 
 
 class FeeAdmin(ImportExportModelAdmin):
