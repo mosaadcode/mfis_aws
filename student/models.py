@@ -90,12 +90,12 @@ class Student(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(max_length=8, blank=True)
     email = models.EmailField(max_length=60, blank=True)
 
-    study_payment1 = models.PositiveSmallIntegerField(default=0)
-    study_payment3 = models.PositiveSmallIntegerField(default=0)
+    study_payment1 = models.PositiveSmallIntegerField(default=0,verbose_name='القسط الدراسي الاول')
+    study_payment3 = models.PositiveSmallIntegerField(default=0,verbose_name='القسط الدراسي الثالث')
 
     bus_active = models.BooleanField( default=False)
-    bus_payment2 = models.PositiveSmallIntegerField( default=0)
-    total_paid = models.PositiveSmallIntegerField( default=0)
+    bus_payment2 = models.PositiveSmallIntegerField( default=0,verbose_name='قسط السيارة الثاني')
+    total_paid = models.PositiveSmallIntegerField( default=0,verbose_name='تم سداد')
     def payment_status(self):
 #due date 1st study and 1st bus
         if date.today() <= date(2020,9,30):
