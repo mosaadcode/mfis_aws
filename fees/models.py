@@ -33,6 +33,7 @@ class Fee(models.Model):
     kind = models.CharField(max_length=6, choices=KIND_CHOICES)
     school = models.CharField( max_length=6, choices=SCHOOL_CHOICES, blank=True)
     student = models.ForeignKey(to='student.Student', on_delete=models.CASCADE, null=True)
+    verified = models.BooleanField(default=False)
 
 
     def __str__(self):

@@ -1,6 +1,7 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
+from django.utils.translation import ngettext
 from .models import Fee
 import csv
 from django.http import HttpResponse
@@ -23,12 +24,12 @@ class FeesInline(admin.TabularInline):
 
 
 class FeeAdmin(ImportExportModelAdmin):
-    list_display = ('student', 'value', 'school', 'kind', 'bank_account', 'payment_date' , 'created')
+    list_display = ('student', 'value', 'school', 'kind', 'bank_account', 'payment_date' , 'created','verified')
     # search_fields = ('student',)
     readonly_fields = ('created',)
 
     filter_horizontal = ()
-    list_filter = ('school', 'kind', 'payment_date','bank_account', 'created', )
+    list_filter = ('verified','school', 'kind', 'payment_date','bank_account', 'created', )
     fieldsets = ()
     resource_class = FeesResource
 
@@ -50,9 +51,25 @@ class FeeAdmin(ImportExportModelAdmin):
 
     export_as_csv.short_description = "Export Selected"
 
+    def verified(self, request, queryset):
+        updated = queryset.update(verified=True)
+        self.message_user(request, ngettext(
+            '%d fee was successfully verified.',
+            '%d fees were successfully verified.',
+            updated,
+        ) % updated, messages.SUCCESS)
+    verified.short_description = "Ok Verified"
 
-    export_as_csv.short_description = "Export Selected"
-    actions = ["export_as_csv"]
+    def unverified(self, request, queryset):
+        updated = queryset.update(verified=False)
+        self.message_user(request, ngettext(
+            '%d fee was successfully unverified.',
+            '%d fees were successfully unverified.',
+            updated,
+        ) % updated, messages.SUCCESS)
+
+
+    actions = ['export_as_csv','verified','unverified']
 
 
 
