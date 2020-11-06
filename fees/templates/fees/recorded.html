@@ -20,14 +20,14 @@
     </div>
   </div>
 
-  <div class="row"
-  <div class="col-md-7 ">
+  <div class="row">
+  <div class="col-md-5 ">
   </div>
-    <div class="col-md-5 ml-auto text-center">
+    <div class="col-md-7 ml-auto text-center">
   		<table class="table table-hover">
   		  <thead>
   		    <tr>
-
+            <th scope="col">التحقق</th>
   		      <th scope="col">التاريخ</th>
             <th scope="col">المبلغ</th>
             <th scope="col">مصروفات</th>
@@ -36,7 +36,11 @@
   		  <tbody>
            {% for fee in fees %}
   		    <tr>
-
+            {% if fee.verified == True %}
+            <td class="align-middle"><i class="fa fa-check" aria-hidden="true"></i></td>
+            {% else %}
+            <td>قيد المراجعة</td>
+            {% endif %}
   		      <td>{{ fee.payment_date }}</td>
             <th scope="row">{{ fee.value }}</th>
             <td>{{ fee.kind }}</td>
