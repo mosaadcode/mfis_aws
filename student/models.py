@@ -95,7 +95,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
 
     bus_active = models.BooleanField( default=False)
     bus_payment2 = models.PositiveSmallIntegerField( default=0,verbose_name='Bus 2')
-    total_paid = models.PositiveSmallIntegerField( default=0)
+    total_paid = models.SmallIntegerField( default=0)
     def payment_status(self):
 #due date 1st study and 1st bus
         if date.today() <= date(2020,9,30):
