@@ -102,27 +102,27 @@ class Student(AbstractBaseUser, PermissionsMixin):
 #due date 1st study and 1st bus
         if date.today() <= date(2020,9,30):
             if self.bus_active == True:
-                return self.study_payment1 + 5000 - self.total_paid
+                return self.study_payment1 + self.bus_payment1 - self.total_paid
             else:
                 return self.study_payment1 - self.total_paid
 #due date 1st study and ( 1st ,2nd ) bus payemnts
         elif date.today() <= date(2020,10,31):
             if self.bus_active == True:
-                return self.study_payment1 + 5000 + self.bus_payment2 - self.total_paid
+                return self.study_payment1 + self.bus_payment1 + self.bus_payment2 - self.total_paid
             else:
                 return self.study_payment1 - self.total_paid
 #due date (1st , 2nd) study and ( 1st ,2nd ) bus payemnts
         elif date.today() <= date(2020,12,31):
             if self.bus_active == True:
-                return self.study_payment1 + 7000 + 5000 + self.bus_payment2 - self.total_paid
+                return self.study_payment1 + self.study_payment2 + self.bus_payment1 + self.bus_payment2 - self.total_paid
             else:
-                return self.study_payment1 + 7000 - self.total_paid
+                return self.study_payment1 + self.study_payment2 - self.total_paid
 #due date (1st , 2nd ,3rd) study and ( 1st ,2nd ) bus payemnts
         elif date.today() >= date(2021,1,1):
             if self.bus_active == True:
-                return self.study_payment1 + 7000 + self.study_payment3 + 5000 + self.bus_payment2 - self.total_paid
+                return self.study_payment1 + self.study_payment2 + self.study_payment3 + self.bus_payment1 + self.bus_payment2 - self.total_paid
             else:
-                return self.study_payment1 + 7000 + self.study_payment3 - self.total_paid
+                return self.study_payment1 + self.study_payment2 + self.study_payment3 - self.total_paid
 
     payment_status
 
