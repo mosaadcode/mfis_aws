@@ -21,7 +21,7 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
         (None, { 'fields': ('code', 'username', ('school', 'grade'),'password', ('is_active', 'can_pay', 'bus_active'))}),
         # (None, { 'fields': (('is_staff','is_admin'),)}),
         ('التواصل', {'fields': ('message', ('father_mobile','mother_mobile'),('phone_number', 'email'),('living_area', 'address', 'old_bus'), 'last_login')}),
-        ('الأقساط والسداد', {'fields': (('study_payment1', 'study_payment3'), 'bus_payment2',('total_paid','payment_status'))}),
+        ('الأقساط والسداد', {'fields': (('study_payment1', 'study_payment2', 'study_payment3'),('bus_payment1', 'bus_payment2'),('total_paid','payment_status'))}),
         # ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'is_admin', 'groups', 'user_permissions')}),
                  )
     resource_class = StudentResource
