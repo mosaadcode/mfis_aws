@@ -3,10 +3,12 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
 from django.utils.translation import ngettext
 from .models import Fee
+from student.models import Student
 import csv
 from django.http import HttpResponse
 from import_export.admin import ImportExportModelAdmin
 from student.resources import FeesResource
+from django.db.models import F
 
 
 
@@ -54,18 +56,28 @@ class FeeAdmin(ImportExportModelAdmin):
 
     export_as_csv.short_description = "Export Selected"
 
-    def verified(self, request, queryset):
+    def verified(modeladmin, request, queryset):
         updated = queryset.update(verified=True)
-        self.message_user(request, ngettext(
+        for obj in queryset:
+            mystudent = Student.objects.get(id=obj.student_id)
+            mystudent.total_paid=F('total_paid')+obj.value
+            mystudent.save()
+            modeladmin.log_change(request, obj, 'verified')
+        modeladmin.message_user(request, ngettext(
             '%d fee was successfully verified.',
             '%d fees were successfully verified.',
             updated,
         ) % updated, messages.SUCCESS)
     verified.short_description = "Ok Verified"
 
-    def unverified(self, request, queryset):
+    def unverified(modeladmin, request, queryset):
         updated = queryset.update(verified=False)
-        self.message_user(request, ngettext(
+        for obj in queryset:
+            mystudent = Student.objects.get(id=obj.student_id)
+            mystudent.total_paid=F('total_paid')-obj.value
+            mystudent.save()
+            modeladmin.log_change(request, obj, 'unverified')
+        modeladmin.message_user(request, ngettext(
             '%d fee was successfully unverified.',
             '%d fees were successfully unverified.',
             updated,
