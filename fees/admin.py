@@ -31,7 +31,7 @@ class FeesInline(admin.TabularInline):
 class FeeAdmin(ImportExportModelAdmin):
     list_display = ('student', 'value', 'school', 'kind', 'bank_account', 'payment_date' , 'created','verified')
     # search_fields = ('student',)
-    readonly_fields = ('created',)
+    readonly_fields = ('created','verified')
 
     filter_horizontal = ()
     list_filter = ('verified','school', 'kind', 'payment_date','bank_account', 'created', )
