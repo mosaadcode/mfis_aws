@@ -16,9 +16,9 @@ class FeesInline(admin.TabularInline):
     model = Fee
     can_delete = False
     # exclude = ('school',)
-    # readonly_fields = [
-    #     'verified'
-    # ]
+    readonly_fields = [
+        'verified'
+    ]
     extra = 0
     def has_change_permission(self, request, obj=None):
         return False
