@@ -30,7 +30,8 @@ class FeesInline(admin.TabularInline):
 
 class FeeAdmin(ImportExportModelAdmin):
     list_display = ('student', 'value', 'school', 'kind', 'bank_account', 'payment_date' , 'created','verified')
-    # search_fields = ('student',)
+    autocomplete_fields = ['student']
+    search_fields = ('student__code','student__username')
     readonly_fields = ('created','verified')
 
     filter_horizontal = ()
