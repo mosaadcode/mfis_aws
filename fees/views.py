@@ -34,8 +34,8 @@ def addfees(request):
                     # save newtodo
                     newfee.save()
                     # update student data
-                    request.user.total_paid += int(request.POST['value'])
-                    request.user.save(update_fields=["total_paid"])
+                    # request.user.total_paid += int(request.POST['value'])
+                    # request.user.save(update_fields=["total_paid"])
                     # redirect user to currenttodos page
                     return redirect('recorded')
                 except ValueError:
@@ -56,8 +56,8 @@ def addfees(request):
                         # save newtodo
                         newfee.save()
                         # update student data
-                        request.user.total_paid += int(request.POST['value'])
-                        request.user.save(update_fields=["total_paid"])
+                        # request.user.total_paid += int(request.POST['value'])
+                        # request.user.save(update_fields=["total_paid"])
                         # redirect user to currenttodos page
                         return redirect('recorded')
                     except ValueError:
