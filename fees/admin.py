@@ -14,11 +14,14 @@ from student.resources import FeesResource
 class FeesInline(admin.TabularInline):
     """Defines format of inline book instance insertion (used in BookAdmin)"""
     model = Fee
-    # can_delete = False
+    can_delete = False
     # exclude = ('school',)
+    # readonly_fields = [
+    #     'verified'
+    # ]
     extra = 0
-    # def has_change_permission(self, request, obj=None):
-    #     return False
+    def has_change_permission(self, request, obj=None):
+        return False
     # def has_add_permission(self, request, obj=None):
     # return False
 
