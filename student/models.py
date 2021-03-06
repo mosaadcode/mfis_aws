@@ -93,6 +93,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
     study_payment1 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 1')
     study_payment2 = models.PositiveSmallIntegerField(default=7000,verbose_name='Study 2')
     study_payment3 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 3')
+    discount = models.PositiveSmallIntegerField(default=0)
 
     bus_active = models.BooleanField( default=False)
     bus_payment1 = models.PositiveSmallIntegerField( default=5000,verbose_name='Bus 1')
@@ -102,27 +103,27 @@ class Student(AbstractBaseUser, PermissionsMixin):
 #due date 1st study and 1st bus
         if date.today() <= date(2020,9,30):
             if self.bus_active == True:
-                return self.study_payment1 + self.bus_payment1 - self.total_paid
+                return self.study_payment1 + self.bus_payment1 - self.total_paid - self.discount
             else:
-                return self.study_payment1 - self.total_paid
+                return self.study_payment1 - self.total_paid - self.discount
 #due date 1st study and ( 1st ,2nd ) bus payemnts
         elif date.today() <= date(2020,10,31):
             if self.bus_active == True:
-                return self.study_payment1 + self.bus_payment1 + self.bus_payment2 - self.total_paid
+                return self.study_payment1 + self.bus_payment1 + self.bus_payment2 - self.total_paid - self.discount
             else:
-                return self.study_payment1 - self.total_paid
+                return self.study_payment1 - self.total_paid - self.discount
 #due date (1st , 2nd) study and ( 1st ,2nd ) bus payemnts
         elif date.today() <= date(2020,12,31):
             if self.bus_active == True:
-                return self.study_payment1 + self.study_payment2 + self.bus_payment1 + self.bus_payment2 - self.total_paid
+                return self.study_payment1 + self.study_payment2 + self.bus_payment1 + self.bus_payment2 - self.total_paid - self.discount
             else:
-                return self.study_payment1 + self.study_payment2 - self.total_paid
+                return self.study_payment1 + self.study_payment2 - self.total_paid - self.discount
 #due date (1st , 2nd ,3rd) study and ( 1st ,2nd ) bus payemnts
         elif date.today() >= date(2021,1,1):
             if self.bus_active == True:
-                return self.study_payment1 + self.study_payment2 + self.study_payment3 + self.bus_payment1 + self.bus_payment2 - self.total_paid
+                return self.study_payment1 + self.study_payment2 + self.study_payment3 + self.bus_payment1 + self.bus_payment2 - self.total_paid - self.discount
             else:
-                return self.study_payment1 + self.study_payment2 + self.study_payment3 - self.total_paid
+                return self.study_payment1 + self.study_payment2 + self.study_payment3 - self.total_paid - self.discount
 
     payment_status
 
