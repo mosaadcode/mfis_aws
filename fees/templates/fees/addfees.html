@@ -19,6 +19,13 @@
           {% endif %}
           <form method="POST" class="form-signin">
               {% csrf_token %}
+                <br>
+                <select dir="rtl" name="year" required="" class="form-control" id="id_year">
+                  <option value="" selected="">العام الدراسي</option>
+                  <option value="21-20">21-20</option>
+                  <option value="22-21">22-21</option>
+                </select>
+
                   <br>
                   <select dir="rtl" name="kind" required="" class="form-control" id="id_kind">
                     <option value="" selected="">مصروفات</option>

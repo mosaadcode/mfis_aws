@@ -35,7 +35,7 @@ class FeeAdmin(ImportExportModelAdmin):
     readonly_fields = ('created','verified')
 
     filter_horizontal = ()
-    list_filter = ('verified','school', 'kind', 'payment_date','bank_account', 'created', )
+    list_filter = ('school', 'year', 'verified', 'kind', 'payment_date','bank_account', 'created', )
     fieldsets = ()
     resource_class = FeesResource
 
