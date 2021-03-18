@@ -26,6 +26,10 @@ class Fee(models.Model):
         ('.بنات.', '.بنات.'),
     )
 
+    YEAR_CHOICES = (
+         ('21-20' , '21-20'),
+         ('22-21' , '22-21'),
+    )
     payment_date = models.DateField(null=True, blank=True)
     bank_account = models.CharField(max_length=19, choices=BankA_CHOICES)
     value = models.SmallIntegerField(null=True)
@@ -34,7 +38,7 @@ class Fee(models.Model):
     school = models.CharField( max_length=6, choices=SCHOOL_CHOICES, blank=True)
     student = models.ForeignKey(to='student.Student', on_delete=models.CASCADE, null=True)
     verified = models.BooleanField(default=False)
-
+    year = models.CharField( max_length=5,choices=YEAR_CHOICES, default='21-20')
 
     def __str__(self):
         return self.student.username
