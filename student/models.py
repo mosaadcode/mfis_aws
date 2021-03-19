@@ -81,6 +81,11 @@ class Student(AbstractBaseUser, PermissionsMixin):
 
     )
 
+    YEAR_CHOICES = (
+         ('21-20' , '21-20'),
+         ('22-21' , '22-21'),
+    )
+
     code = models.CharField(max_length=7, unique=True)
     username = models.CharField(max_length=60,verbose_name='student name')
     school = models.CharField( max_length=6, choices=SCHOOL_CHOICES, blank=True)
@@ -89,6 +94,8 @@ class Student(AbstractBaseUser, PermissionsMixin):
     mother_mobile = models.CharField(max_length=11, blank=True)
     phone_number = models.CharField(max_length=8, blank=True)
     email = models.EmailField(max_length=60, blank=True)
+
+    year = models.CharField( max_length=5,choices=YEAR_CHOICES, default='21-20')
 
     study_payment1 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 1')
     study_payment2 = models.PositiveSmallIntegerField(default=7000,verbose_name='Study 2')
@@ -100,31 +107,32 @@ class Student(AbstractBaseUser, PermissionsMixin):
     bus_payment1 = models.PositiveSmallIntegerField( default=5000,verbose_name='Bus 1')
     bus_payment2 = models.PositiveSmallIntegerField( default=0,verbose_name='Bus 2')
     total_paid = models.SmallIntegerField( default=0)
+    old_paid = models.SmallIntegerField( verbose_name='Old Fee paid', default=0)
     def payment_status(self):
 #due date 1st study and 1st bus
         if date.today() <= date(2020,9,30):
             if self.bus_active == True:
-                return self.study_payment1 + self.bus_payment1 - self.total_paid - self.discount + self.old_fee
+                return self.study_payment1 + self.bus_payment1 - self.total_paid - self.discount + self.old_fee - self.old_paid
             else:
-                return self.study_payment1 - self.total_paid - self.discount + self.old_fee
+                return self.study_payment1 - self.total_paid - self.discount + self.old_fee - self.old_paid
 #due date 1st study and ( 1st ,2nd ) bus payemnts
         elif date.today() <= date(2020,10,31):
             if self.bus_active == True:
-                return self.study_payment1 + self.bus_payment1 + self.bus_payment2 - self.total_paid - self.discount + self.old_fee
+                return self.study_payment1 + self.bus_payment1 + self.bus_payment2 - self.total_paid - self.discount + self.old_fee - self.old_paid
             else:
-                return self.study_payment1 - self.total_paid - self.discount + self.old_fee
+                return self.study_payment1 - self.total_paid - self.discount + self.old_fee - self.old_paid
 #due date (1st , 2nd) study and ( 1st ,2nd ) bus payemnts
         elif date.today() <= date(2020,12,31):
             if self.bus_active == True:
-                return self.study_payment1 + self.study_payment2 + self.bus_payment1 + self.bus_payment2 - self.total_paid - self.discount + self.old_fee
+                return self.study_payment1 + self.study_payment2 + self.bus_payment1 + self.bus_payment2 - self.total_paid - self.discount + self.old_fee - self.old_paid
             else:
-                return self.study_payment1 + self.study_payment2 - self.total_paid - self.discount + self.old_fee
+                return self.study_payment1 + self.study_payment2 - self.total_paid - self.discount + self.old_fee - self.old_paid
 #due date (1st , 2nd ,3rd) study and ( 1st ,2nd ) bus payemnts
         elif date.today() >= date(2021,1,1):
             if self.bus_active == True:
-                return self.study_payment1 + self.study_payment2 + self.study_payment3 + self.bus_payment1 + self.bus_payment2 - self.total_paid - self.discount + self.old_fee
+                return self.study_payment1 + self.study_payment2 + self.study_payment3 + self.bus_payment1 + self.bus_payment2 - self.total_paid - self.discount + self.old_fee - self.old_paid
             else:
-                return self.study_payment1 + self.study_payment2 + self.study_payment3 - self.total_paid - self.discount + self.old_fee
+                return self.study_payment1 + self.study_payment2 + self.study_payment3 - self.total_paid - self.discount + self.old_fee - self.old_paid
 
     payment_status
 
