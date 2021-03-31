@@ -8,5 +8,6 @@ class DateInput(forms.DateInput):
 class FeesForm(ModelForm):
     class Meta:
         model = Fee
-        fields = ['year' ,'kind', 'payment_date', 'bank_account','value']
+        # fields = ['year' ,'kind', 'payment_date', 'bank_account','value']
+        fields = ['kind', 'payment_date', 'bank_account','value']
     payment_date = forms.DateField(widget=DateInput)

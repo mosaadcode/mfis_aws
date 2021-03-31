@@ -32,6 +32,7 @@ def addfees(request):
                     # newfee.grade = request.user.grade
                     newfee.school = request.user.school
                     # save newtodo
+                    newfee.year = request.user.year
                     newfee.save()
                     # update student data
                     # request.user.total_paid += int(request.POST['value'])
@@ -54,6 +55,7 @@ def addfees(request):
                         # newfees.grade = request.user.grade
                         newfee.school = request.user.school
                         # save newtodo
+                        newfee.year = request.user.year
                         newfee.save()
                         # update student data
                         # request.user.total_paid += int(request.POST['value'])
