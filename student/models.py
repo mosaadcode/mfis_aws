@@ -106,7 +106,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
     bus_active = models.BooleanField( default=False)
     bus_payment1 = models.PositiveSmallIntegerField( default=5000,verbose_name='Bus 1')
     bus_payment2 = models.PositiveSmallIntegerField( default=0,verbose_name='Bus 2')
-    total_paid = models.SmallIntegerField( default=0)
+    total_paid = models.IntegerField(default=0)
     old_paid = models.SmallIntegerField( verbose_name='Old Fee paid', default=0)
     def payment_status(self):
 #due date 1st study and 1st bus
