@@ -27,8 +27,8 @@ class FeesResource(resources.ModelResource):
     class Meta:
         model = Fee
         import_id_fields = ('id',)
-        fields = ('id', 'student', 'student__username', 'school', 'student__grade', 'value', 'kind', 'bank_account','created','payment_date','year', 'verified')
-        export_order = ('id','student', 'student__username', 'school', 'student__grade', 'value', 'kind','bank_account','created','payment_date','year','verified')
+        fields = ('id', 'student', 'student__username', 'school', 'student__grade', 'value', 'kind', 'bank_account','created','payment_date','year')
+        export_order = ('id','student', 'student__username', 'school', 'student__grade', 'value', 'kind','bank_account','created','payment_date','year')
 
 class StudentResource(resources.ModelResource):
     # if 'password' in self.fields.keys():
