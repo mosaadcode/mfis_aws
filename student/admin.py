@@ -7,6 +7,7 @@ import csv
 from import_export.admin import ImportExportMixin, ImportExportModelAdmin
 from .resources import StudentResource
 from django.contrib.auth.models import Group
+# from django.db.models import Q
 
 admin.site.unregister(Group)
 
@@ -25,6 +26,15 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
         # ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'is_admin', 'groups', 'user_permissions')}),
                  )
     resource_class = StudentResource
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.code =="mfisb":
+            return qs.filter(school="بنين")
+        elif request.user.code == "mfisg":
+            # return qs.filter(Q(school='.بنات.')| Q(school='بنات'))
+            return qs.filter(school__in = ('.بنات.', 'بنات'))
+        return qs
 
     def export_bus(self, request, queryset):
 

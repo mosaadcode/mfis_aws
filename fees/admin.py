@@ -7,6 +7,7 @@ from student.models import Student
 from import_export.admin import ImportExportModelAdmin
 from student.resources import FeesResource
 from django.db.models import F
+# from django.db.models import Q
 
 class FeesInline(admin.TabularInline):
     model = Fee
@@ -37,6 +38,15 @@ class FeeAdmin(ImportExportModelAdmin):
         if obj.verified == True:
             return ('year','student','school','kind', 'value','bank_account','payment_date',) + self.readonly_fields
         return self.readonly_fields
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.code =="mfisb":
+            return qs.filter(school="بنين")
+        elif request.user.code == "mfisg":
+            # return qs.filter(Q(school='.بنات.')| Q(school='بنات'))
+            return qs.filter(school__in = ('.بنات.', 'بنات'))
+        return qs
 
     def verified(self, request, queryset):
         # updated = queryset.update(verified=True)
