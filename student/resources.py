@@ -5,6 +5,7 @@ from .models import Student
 from django.contrib.auth.hashers import make_password
 from django.utils.encoding import force_text
 from import_export.results import RowResult
+from django.db.models import F
 
 class FeesResource(resources.ModelResource):
     student = fields.Field(column_name='student',
@@ -24,11 +25,17 @@ class FeesResource(resources.ModelResource):
     #     row_result.object_repr = force_text(instance)
     #     return self.fields['delete'].clean(row)
 
+    def before_import_row(self,row, **kwargs):
+        if row['verified']==True:
+            mystudent = Student.objects.get(code=row['student'])
+            mystudent.total_paid=F('total_paid') + row['value']
+            mystudent.save()
+
     class Meta:
         model = Fee
         import_id_fields = ('id',)
-        fields = ('id', 'student', 'student__username', 'school', 'student__grade', 'value', 'kind', 'bank_account','created','payment_date','year')
-        export_order = ('id','student', 'student__username', 'school', 'student__grade', 'value', 'kind','bank_account','created','payment_date','year')
+        fields = ('id', 'student', 'student__username', 'school', 'student__grade', 'value', 'kind', 'bank_account','created','payment_date','year', 'verified')
+        export_order = ('id', 'student', 'student__username', 'school', 'student__grade', 'value', 'kind', 'bank_account','created','payment_date','year', 'verified')
 
 class StudentResource(resources.ModelResource):
     # if 'password' in self.fields.keys():
