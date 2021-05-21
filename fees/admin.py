@@ -55,7 +55,10 @@ class FeeAdmin(ImportExportModelAdmin):
         for obj in queryset:
             if obj.verified == False:
                 mystudent = Student.objects.get(id=obj.student_id)
-                mystudent.total_paid=F('total_paid') + obj.value
+                if obj.year == '22-21':
+                    mystudent.total_paid=F('total_paid') + obj.value
+                else:
+                    mystudent.old_paid=F('old_paid') + obj.value
                 mystudent.save()
                 obj.verified = True
                 obj.save()
@@ -85,7 +88,10 @@ class FeeAdmin(ImportExportModelAdmin):
         for obj in queryset:
             if obj.verified == True:
                 mystudent = Student.objects.get(id=obj.student_id)
-                mystudent.total_paid=F('total_paid') - obj.value
+                if obj.year == '22-21':
+                    mystudent.total_paid=F('total_paid') - obj.value
+                else:
+                    mystudent.old_paid=F('old_paid') - obj.value
                 mystudent.save()
                 obj.verified = False
                 obj.save()
@@ -116,7 +122,10 @@ class FeeAdmin(ImportExportModelAdmin):
         for obj in queryset:
             if obj.verified == True:
                 mystudent = Student.objects.get(id=obj.student_id)
-                mystudent.total_paid=F('total_paid') - obj.value
+                if obj.year == '22-21':
+                    mystudent.total_paid=F('total_paid') - obj.value
+                else:
+                    mystudent.old_paid=F('old_paid') - obj.value
                 mystudent.save()
                 obj.delete()
             else:
@@ -138,7 +147,10 @@ class FeeAdmin(ImportExportModelAdmin):
         """
         if obj.verified == True:
             mystudent = Student.objects.get(id=obj.student_id)
-            mystudent.total_paid=F('total_paid') - obj.value
+            if obj.year == '22-21':
+                mystudent.total_paid=F('total_paid') - obj.value
+            else:
+                mystudent.old_paid=F('old_paid') - obj.value
             mystudent.save()
             obj.delete()
         else:

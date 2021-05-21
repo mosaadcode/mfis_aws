@@ -23,17 +23,29 @@ def addfees(request):
             if request.POST['kind'] == "دراسية":
                 # add try: except to solve value Error
                 try:
-                    # get the information from the post request and connect it with our form
                     form = FeesForm(request.POST)
-                    # Create newtodo but dont't save it yet to the database
                     newfee = form.save(commit=False)
-                    # set the user to newtodo
                     newfee.student = request.user
-                    # newfee.grade = request.user.grade
                     newfee.school = request.user.school
-                    # save newtodo
-                    newfee.year = request.user.year
-                    newfee.save()
+                    LYFee = request.user.old_fee - request.user.old_paid
+                    if LYFee >0:
+                        if int(request.POST['value']) <= LYFee:
+                            newfee.year = '21-20'
+                            newfee.save()
+                        else:
+                            newfee.value = LYFee
+                            newfee.year ='21-20'
+                            newfee.save()
+                            form2 = FeesForm(request.POST)
+                            newfee2 = form2.save(commit=False)
+                            newfee2.student = request.user
+                            newfee2.school = request.user.school
+                            newfee2.value = int(request.POST['value']) - LYFee
+                            newfee2.year = '22-21'
+                            newfee2.save()
+                    else:        
+                        newfee.year = '22-21'
+                        newfee.save()
                     # update student data
                     # request.user.total_paid += int(request.POST['value'])
                     # request.user.save(update_fields=["total_paid"])
@@ -46,21 +58,29 @@ def addfees(request):
                 if request.user.bus_active == True:
                     # add try: except to solve value Error
                     try:
-                        # get the information from the post request and connect it with our form
                         form = FeesForm(request.POST)
-                        # Create newtodo but dont't save it yet to the database
                         newfee = form.save(commit=False)
-                        # set the user to newtodo
                         newfee.student = request.user
-                        # newfees.grade = request.user.grade
                         newfee.school = request.user.school
-                        # save newtodo
-                        newfee.year = request.user.year
-                        newfee.save()
-                        # update student data
-                        # request.user.total_paid += int(request.POST['value'])
-                        # request.user.save(update_fields=["total_paid"])
-                        # redirect user to currenttodos page
+                        LYFee = request.user.old_fee - request.user.old_paid
+                        if LYFee >0:
+                            if int(request.POST['value']) <= LYFee:
+                                newfee.year = '21-20'
+                                newfee.save()
+                            else:
+                                newfee.value = LYFee
+                                newfee.year ='21-20'
+                                newfee.save()
+                                form2 = FeesForm(request.POST)
+                                newfee2 = form2.save(commit=False)
+                                newfee2.student = request.user
+                                newfee2.school = request.user.school
+                                newfee2.value = int(request.POST['value']) - LYFee
+                                newfee2.year = '22-21'
+                                newfee2.save()
+                        else:        
+                            newfee.year = '22-21'
+                            newfee.save()
                         return redirect('recorded')
                     except ValueError:
                             # tell user when error hapen
