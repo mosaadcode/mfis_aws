@@ -101,28 +101,28 @@ def agreement(request):
     if request.method == 'GET':
         return render(request, 'fees/agreement.html', {'form':StudentArea()})
     else:
-        if request.user.bus_active == False:
-            try:
-                # # get the information from the post request and connect it with our form
-                # form = AccountForm(request.POST)
-                # # Create newtodo but dont't save it yet to the database
-                # newfees = form.save(commit=False)
-                # # set the user to newtodo
-                # newfees.student = request.user
-                # newfees.grade = request.user.grade
-                # newfees.school = request.user.school
-                # # save newtodo
-                # newfees.save()
-                # update student data
-                request.user.bus_active = True
-                request.user.old_bus = request.POST['old_bus']
-                request.user.living_area = request.POST['living_area']
-                request.user.address = request.POST['address']
-                request.user.save(update_fields=["bus_active", "old_bus", "living_area", "address"])
-                # redirect user to currenttodos page
-                return redirect('dashboard')
-            except ValueError:
-                    # tell user when error hapen
-                    return render(request, 'fees/agreement.html', {'form':FeesForm(),'error':'برجاء مراجعة البيانات'})
-        else:
-            return render(request, 'fees/agreement.html', {'form':FeesForm(),'error':'لتعديل البيانات يجب التواصل مع إدارة تشغيل السيارات'})
+        # if request.user.bus_active == False:
+        try:
+            # # get the information from the post request and connect it with our form
+            # form = AccountForm(request.POST)
+            # # Create newtodo but dont't save it yet to the database
+            # newfees = form.save(commit=False)
+            # # set the user to newtodo
+            # newfees.student = request.user
+            # newfees.grade = request.user.grade
+            # newfees.school = request.user.school
+            # # save newtodo
+            # newfees.save()
+            # update student data
+            request.user.bus_active = True
+            request.user.old_bus = request.POST['old_bus']
+            request.user.living_area = request.POST['living_area']
+            request.user.address = request.POST['address']
+            request.user.save(update_fields=["bus_active", "old_bus", "living_area", "address"])
+            # redirect user to currenttodos page
+            return redirect('dashboard')
+        except ValueError:
+                # tell user when error hapen
+                return render(request, 'fees/agreement.html', {'form':FeesForm(),'error':'برجاء مراجعة البيانات'})
+        # else:
+        #     return render(request, 'fees/agreement.html', {'form':FeesForm(),'error':'لتعديل البيانات يجب التواصل مع إدارة تشغيل السيارات'})
