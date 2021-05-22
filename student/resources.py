@@ -28,7 +28,10 @@ class FeesResource(resources.ModelResource):
     def before_import_row(self,row, **kwargs):
         if row['verified']==True:
             mystudent = Student.objects.get(code=row['student'])
-            mystudent.total_paid=F('total_paid') + row['value']
+            if row['year'] == "22-21":
+                mystudent.total_paid=F('total_paid') + row['value']
+            else:
+                mystudent.old_paid=F('old_paid') + row['value']
             mystudent.save()
 
     class Meta:
