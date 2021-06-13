@@ -35,8 +35,10 @@ class FeeAdmin(ImportExportModelAdmin):
     resource_class = FeesResource
 
     def get_readonly_fields(self, request, obj=None):
-        if obj.verified == True:
-            return ('year','student','school','kind', 'value','bank_account','payment_date',) + self.readonly_fields
+        if obj:
+            if obj.verified == True:
+                return ('year','student','school','kind', 'value','bank_account','payment_date',) + self.readonly_fields
+            return self.readonly_fields
         return self.readonly_fields
 
     def get_queryset(self, request):
@@ -163,6 +165,11 @@ class FeeAdmin(ImportExportModelAdmin):
 
     actions = ['verified','unverified']
 
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','mfisb','mfisg'):
+                return True
+            return False
 
 
 # class XeesAdmin(ImportExportModelAdmin):

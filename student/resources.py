@@ -1,7 +1,7 @@
 from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget, BooleanWidget
 from fees.models import Fee
-from .models import Student
+from .models import Student,Bus
 from django.contrib.auth.hashers import make_password
 from django.utils.encoding import force_text
 from import_export.results import RowResult
@@ -64,3 +64,15 @@ class StudentResource(resources.ModelResource):
         import_id_fields = ('code',)
         fields = ('year','code','username', 'password','school','grade','study_payment1','study_payment2','study_payment3','bus_payment1', 'bus_payment2','old_fee', 'old_paid', 'discount','total_paid','message','is_active', 'can_pay', 'bus_active', 'father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus')
         export_order = ('year','code','username', 'password','school','grade','study_payment1','study_payment2','study_payment3','bus_payment1', 'bus_payment2','old_fee', 'old_paid', 'discount','total_paid','message','is_active', 'can_pay', 'bus_active', 'father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus')
+
+class BusStudentResource(resources.ModelResource):
+
+    bus_number = fields.Field(column_name='bus_number',
+                    attribute='bus_number',
+                    widget=ForeignKeyWidget(Bus, 'number'))
+    
+    class Meta:
+        model = Student
+        import_id_fields = ('code',)
+        fields = ('code','username','school','grade','bus_number','bus_active', 'father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus')
+        export_order = ('code','username','school','grade','bus_number','bus_active', 'father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus')

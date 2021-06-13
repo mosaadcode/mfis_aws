@@ -1,11 +1,11 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Student
+from .models import Student,Bus,BusStudent
 from fees.admin import FeesInline
-from django.http import HttpResponse
-import csv
+# from django.http import HttpResponse
+# import csv
 from import_export.admin import ImportExportMixin, ImportExportModelAdmin
-from .resources import StudentResource
+from .resources import StudentResource,BusStudentResource
 from django.contrib.auth.models import Group
 # from django.db.models import Q
 
@@ -14,15 +14,16 @@ admin.site.unregister(Group)
 class StudentAdmin(ImportExportMixin, UserAdmin):
     list_display = ('code', 'username', 'total_paid', 'payment_status')
     search_fields = ('code', 'username')
-    readonly_fields = ('total_paid', 'old_fee', 'old_paid','study_payment3', 'bus_payment2', 'payment_status','last_login')
+    readonly_fields = ('living_area', 'address','bus_number','old_bus','total_paid', 'old_fee', 'old_paid','study_payment3', 'bus_payment2', 'payment_status','last_login')
 
     # filter_horizontal = ()
-    list_filter = ('school','year','grade', 'is_active','can_pay', 'bus_active')
+    list_filter = ('school','year','grade','bus_active','is_active','can_pay')
     fieldsets = (
         (None, { 'fields': (('code', 'year'), 'username', ('school', 'grade'),'password', ('is_active', 'can_pay', 'bus_active'))}),
         # (None, { 'fields': (('is_staff','is_admin'),)}),
         ('الأقساط والسداد', {'fields': (('study_payment1', 'study_payment2', 'study_payment3'),('bus_payment1', 'bus_payment2'), ('old_fee','old_paid'),'discount', ('total_paid','payment_status'))}),
-        ('التواصل', {'fields': ('message', ('father_mobile','mother_mobile'),('phone_number', 'email'),('living_area', 'address', 'old_bus'), 'last_login')}),
+        ('التواصل', {'fields': ('message', ('father_mobile','mother_mobile'),('phone_number', 'email'),'last_login')}),
+        ('السيارة', {'fields': ('living_area', 'address','bus_number','old_bus')}),
         # ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'is_admin', 'groups', 'user_permissions')}),
                  )
     resource_class = StudentResource
@@ -34,49 +35,129 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
             return qs.filter(school__in = ('.بنات.', 'بنات'))
         return qs
 
-    def export_bus(self, request, queryset):
+    # def export_bus(self, request, queryset):
 
-        meta = self.model._meta
-        # field_names = [field.name for field in meta.fields]
-        field_names = ['code', 'username', 'school', 'grade', 'old_bus', 'living_area', 'address']
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=bus.csv'.format(meta)
-        writer = csv.writer(response)
+    #     meta = self.model._meta
+    #     # field_names = [field.name for field in meta.fields]
+    #     field_names = ['code', 'username', 'school', 'grade', 'old_bus', 'living_area', 'address']
+    #     response = HttpResponse(content_type='text/csv')
+    #     response['Content-Disposition'] = 'attachment; filename=bus.csv'.format(meta)
+    #     writer = csv.writer(response)
 
-        writer.writerow(field_names)
-        for obj in queryset:
-            row = writer.writerow([getattr(obj, field) for field in field_names])
+    #     writer.writerow(field_names)
+    #     for obj in queryset:
+    #         row = writer.writerow([getattr(obj, field) for field in field_names])
 
-        return response
+    #     return response
 
-    export_bus.short_description = "Bus Data"
-
-
-
-    def export_student(self, request, queryset):
-
-        meta = self.model._meta
-        # field_names = [field.name for field in meta.fields]
-        field_names = ['code', 'username', 'school', 'grade']
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=Students.csv'.format(meta)
-        writer = csv.writer(response)
-
-        writer.writerow(field_names)
-        for obj in queryset:
-            row = writer.writerow([getattr(obj, field) for field in field_names])
-
-        return response
-
-    export_student.short_description = "تصدير بيانات الطلبة"
+    # export_bus.short_description = "Bus Data"
 
 
 
-    actions = ["export_bus", "export_student"]
+    # def export_student(self, request, queryset):
+
+    #     meta = self.model._meta
+    #     # field_names = [field.name for field in meta.fields]
+    #     field_names = ['code', 'username', 'school', 'grade']
+    #     response = HttpResponse(content_type='text/csv')
+    #     response['Content-Disposition'] = 'attachment; filename=Students.csv'.format(meta)
+    #     writer = csv.writer(response)
+
+    #     writer.writerow(field_names)
+    #     for obj in queryset:
+    #         row = writer.writerow([getattr(obj, field) for field in field_names])
+
+    #     return response
+
+    # export_student.short_description = "تصدير بيانات الطلبة"
+
+
+
+    # actions = ["export_bus", "export_student"]
 
     inlines = [FeesInline]
 
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','mfisb','mfisg'):
+                return True
+            return False
+
+class BusAdmin(ImportExportMixin, admin.ModelAdmin):
+    list_display = ('number','supervisor_name','supervisor_mobile','driver_name','driver_mobile','students')
+    search_fields = ('number','area')
+    readonly_fields = ('school',)
+    filter_horizontal = ()
+    list_filter = ('school','area')
+    fieldsets = (
+        (None, {'fields': ('school','number','area','sub_area','supervisor_name','supervisor_mobile','driver_name' ,'driver_mobile')}),
+                 )
+    def save_model(self, request, obj, form, change):
+        if obj.school =="":
+            if request.user.code == "busb":
+                obj.school = "بنين"
+            elif request.user.code == "busg":
+                obj.school = "بنات"
+            else:
+                obj.school = ""
+        super().save_model(request, obj, form, change)
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.code == "busg":
+            return qs.filter(school='بنات')
+        elif request.user.code =="busb":
+            return qs.filter(school="بنين")
+        return qs
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','busb','busg'):
+                return True
+            return False
+    def has_delete_permission(self, request, obj=None):
+        if request.user.code == "mosaad":
+            return True
+        return False
+
+class BusStudentAdmin(ImportExportMixin, admin.ModelAdmin):
+    list_display = ('code', 'username','living_area')
+    autocomplete_fields = ['bus_number']
+    search_fields = ('username','bus_number__number','bus_number__area')
+    readonly_fields = ('code', 'school','username','grade','father_mobile' ,'mother_mobile','phone_number', 'email')
+
+    filter_horizontal = ()
+    list_filter = ('school','grade', 'bus_active')
+    fieldsets = (
+        ('بيانات الطالب', {'fields': ('code','username','grade','father_mobile','mother_mobile','phone_number','email')}),
+        ('إشتراك السيارة ', {'fields': ('bus_number','living_area', 'address', 'old_bus' )}),
+                 )
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.code == "busg":
+            return qs.filter(bus_active=True,school__in = ('.بنات.', 'بنات'))
+        elif request.user.code =="busb":
+            return qs.filter(bus_active=True,school="بنين")
+        return qs
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','busb','busg'):
+                return True
+            return False
+    def has_delete_permission(self, request, obj=None):
+        if request.user.code == "mosaad":
+            return True
+        return False
+    def has_add_permission(self, request, obj=None):
+        if request.user.code == "mosaad":
+            return True
+        return False
+
+    resource_class = BusStudentResource
+
 
 admin.site.register(Student, StudentAdmin)
+admin.site.register(Bus,BusAdmin)
+admin.site.register(BusStudent,BusStudentAdmin)
 
 admin.site.site_header = "Manarat Al Farouk Islamic Language School"

@@ -113,10 +113,10 @@ class Student(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=60,verbose_name='student name')
     school = models.CharField( max_length=6, choices=SCHOOL_CHOICES, blank=True)
     grade = models.CharField( max_length=16, choices=GRADE_CHOICES, blank=True)
-    father_mobile = models.CharField(max_length=11, blank=True)
-    mother_mobile = models.CharField(max_length=11, blank=True)
-    phone_number = models.CharField(max_length=8, blank=True)
-    email = models.EmailField(max_length=60, blank=True)
+    father_mobile = models.CharField(max_length=11, null=True, blank=True)
+    mother_mobile = models.CharField(max_length=11, null=True, blank=True)
+    phone_number = models.CharField(max_length=8, null=True, blank=True)
+    email = models.EmailField(max_length=60, null=True, blank=True)
 
     year = models.CharField( max_length=5,choices=YEAR_CHOICES, default='22-21')
 
@@ -159,10 +159,10 @@ class Student(AbstractBaseUser, PermissionsMixin):
 
     payment_status
 
-    living_area = models.CharField( max_length=16, choices=AREA_CHOICES, blank=True,verbose_name='المنطقة السكنية ')
-    address = models.CharField( max_length=50, blank=True,verbose_name='العنوان ')
-    old_bus = models.CharField( max_length=4, blank=True,verbose_name='رقم سيارة العام السابق ')
-    # bus_number = models.ForeignKey(Bus, on_delete=models.CASCADE, null=True,verbose_name='رقم السيارة ')
+    living_area = models.CharField( max_length=16, choices=AREA_CHOICES,null=True,blank=True,verbose_name='المنطقة السكنية ')
+    address = models.CharField( max_length=50,null=True,blank=True,verbose_name='العنوان ')
+    old_bus = models.CharField( max_length=4,null=True,blank=True,verbose_name='رقم سيارة العام السابق ')
+    bus_number = models.ForeignKey(Bus, on_delete=models.CASCADE,null=True, blank=True,verbose_name='رقم السيارة ')
     message = models.CharField(max_length=260, null=True, blank=True)
 
     is_active = models.BooleanField(default=True)
