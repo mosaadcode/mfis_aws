@@ -10,6 +10,48 @@ class Grade(models.Model):
     def __str__(self):
         return self.name
 
+AREA_CHOICES = (
+    (None, ""),
+    ('النزهة الجديدة','النزهة الجديدة'),
+    ('شيراتون','شيراتون'),
+    ('مصر الجديدة','مصر الجديدة'),
+    ('الزيتون','الزيتون'),
+    ('حدائق القبة','حدائق القبة'),
+    ('العباسية','العباسية'),
+    ('مدينة نصر','مدينة نصر'),
+    ('إمتداد رمسيس','إمتداد رمسيس'),
+    ('المعادى','المعادى'),
+    ('المقطم','المقطم'),
+    ('مدينتى','مدينتى'),
+    ('الرحاب','الرحاب'),
+    ('التجمع الاول','التجمع الاول'),
+    ('التجمع الثالث','التجمع الثالث'),
+    ('التجمع الخامس','التجمع الخامس'),
+)
+
+class Bus(models.Model):
+    SCHOOL_CHOICES1 = (
+        (None, ""),
+        ('بنين', 'بنين'),
+        ('بنات', 'بنات'),
+    )
+
+    number = models.CharField(unique=True,max_length=4,verbose_name='رقم السيارة')
+    area = models.CharField( max_length=16, choices=AREA_CHOICES, blank=True,null=True,verbose_name='المنطقة')
+    sub_area = models.CharField(max_length=24,blank=True,null=True,verbose_name='المنطقة الفرعية')
+    school = models.CharField( max_length=6, choices=SCHOOL_CHOICES1,verbose_name='المدرسة')
+    driver_name = models.CharField(max_length=24,blank=True,null=True,verbose_name='اسم السائق')
+    driver_mobile = models.CharField(max_length=11,blank=True,null=True,verbose_name='تليفون السائق')
+    supervisor_name = models.CharField(max_length=24,blank=True,null=True,verbose_name='اسم المشرف')
+    supervisor_mobile = models.CharField(max_length=11,blank=True,null=True,verbose_name='تليفون المشرف')
+
+    def students(self):
+        return Student.objects.filter(bus_number=self.id).count()
+    students
+
+    def __str__(self):
+        return self.number 
+
 class StudentManager(BaseUserManager):
     def create_user(self, code, username, password=None):
         if not code:
@@ -61,25 +103,6 @@ class Student(AbstractBaseUser, PermissionsMixin):
         ('الثانى الثانوى','الثانى الثانوى'),
         ('الثالث الثانوى','الثالث الثانوى'),
     )
-    AREA_CHOICES = (
-        (None, ""),
-        ('النزهة الجديدة','النزهة الجديدة'),
-        ('شيراتون','شيراتون'),
-        ('مصر الجديدة','مصر الجديدة'),
-        ('الزيتون','الزيتون'),
-        ('حدائق القبة','حدائق القبة'),
-        ('العباسية','العباسية'),
-        ('مدينة نصر','مدينة نصر'),
-        ('إمتداد رمسيس','إمتداد رمسيس'),
-        ('المعادى','المعادى'),
-        ('المقطم','المقطم'),
-        ('مدينتى','مدينتى'),
-        ('الرحاب','الرحاب'),
-        ('التجمع الاول','التجمع الاول'),
-        ('التجمع الثالث','التجمع الثالث'),
-        ('التجمع الخامس','التجمع الخامس'),
-
-    )
 
     YEAR_CHOICES = (
          ('21-20' , '21-20'),
@@ -95,16 +118,16 @@ class Student(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(max_length=8, blank=True)
     email = models.EmailField(max_length=60, blank=True)
 
-    year = models.CharField( max_length=5,choices=YEAR_CHOICES, default='21-20')
+    year = models.CharField( max_length=5,choices=YEAR_CHOICES, default='22-21')
 
     study_payment1 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 1')
-    study_payment2 = models.PositiveSmallIntegerField(default=7000,verbose_name='Study 2')
+    study_payment2 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 2')
     study_payment3 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 3')
     discount = models.PositiveSmallIntegerField(default=0)
     old_fee = models.SmallIntegerField(default=0)
 
     bus_active = models.BooleanField( default=False)
-    bus_payment1 = models.PositiveSmallIntegerField( default=5000,verbose_name='Bus 1')
+    bus_payment1 = models.PositiveSmallIntegerField( default=10000,verbose_name='Bus 1')
     bus_payment2 = models.PositiveSmallIntegerField( default=0,verbose_name='Bus 2')
     total_paid = models.IntegerField(default=0)
     old_paid = models.SmallIntegerField( verbose_name='Old Fee paid', default=0)
@@ -136,9 +159,10 @@ class Student(AbstractBaseUser, PermissionsMixin):
 
     payment_status
 
-    living_area = models.CharField( max_length=16, choices=AREA_CHOICES, blank=True)
-    address = models.CharField( max_length=50, blank=True)
-    old_bus = models.CharField( max_length=4, blank=True)
+    living_area = models.CharField( max_length=16, choices=AREA_CHOICES, blank=True,verbose_name='المنطقة السكنية ')
+    address = models.CharField( max_length=50, blank=True,verbose_name='العنوان ')
+    old_bus = models.CharField( max_length=4, blank=True,verbose_name='رقم سيارة العام السابق ')
+    # bus_number = models.ForeignKey(Bus, on_delete=models.CASCADE, null=True,verbose_name='رقم السيارة ')
     message = models.CharField(max_length=260, null=True, blank=True)
 
     is_active = models.BooleanField(default=True)
@@ -168,3 +192,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
 
     def has_module_perms(self, app_label):
         return True
+
+class BusStudent(Student):
+    class Meta:
+        proxy = True
