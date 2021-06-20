@@ -4,6 +4,7 @@ AbstractBaseUser, BaseUserManager, PermissionsMixin
 )
 from django.db.models import Sum
 from datetime import date
+from django.db.models.deletion import SET_NULL
 
 class Grade(models.Model):
     name = models.CharField(max_length=24, blank=True)
@@ -29,13 +30,13 @@ AREA_CHOICES = (
     ('التجمع الخامس','التجمع الخامس'),
 )
 
-class Bus(models.Model):
-    SCHOOL_CHOICES1 = (
-        (None, ""),
-        ('بنين', 'بنين'),
-        ('بنات', 'بنات'),
-    )
+SCHOOL_CHOICES1 = (
+    (None, ""),
+    ('بنين', 'بنين'),
+    ('بنات', 'بنات'),
+)
 
+class Bus(models.Model):
     number = models.CharField(unique=True,max_length=4,verbose_name='رقم السيارة')
     area = models.CharField( max_length=16, choices=AREA_CHOICES, blank=True,null=True,verbose_name='المنطقة')
     sub_area = models.CharField(max_length=24,blank=True,null=True,verbose_name='المنطقة الفرعية')
@@ -44,13 +45,36 @@ class Bus(models.Model):
     driver_mobile = models.CharField(max_length=11,blank=True,null=True,verbose_name='تليفون السائق')
     supervisor_name = models.CharField(max_length=24,blank=True,null=True,verbose_name='اسم المشرف')
     supervisor_mobile = models.CharField(max_length=11,blank=True,null=True,verbose_name='تليفون المشرف')
+    supervisor_address = models.CharField( max_length=50,null=True,blank=True,verbose_name='عنوان المشرف ')
+    supervisor_time = models.CharField(max_length=5,null=True,blank=True,verbose_name='موعد المشرف صباحا ')
 
-    def students(self):
-        return Student.objects.filter(bus_number=self.id).count()
-    students
+    class Meta:
+        verbose_name='Bus'
+        verbose_name_plural ='السيارات المدرسية '
+
+    def bus_count(self):
+        s_count = Student.objects.filter(bus_number=self.id).count()
+        t_count = Teacher.objects.filter(bus_number=self.id).count()
+        return '( '+str(s_count+t_count)+' ) , '+str(t_count)+'t , '+str(s_count)+'s'
 
     def __str__(self):
         return self.number 
+
+class Teacher(models.Model):
+    name = models.CharField(unique=True,max_length=60,verbose_name='الاسم ')
+    school = models.CharField( max_length=6, choices=SCHOOL_CHOICES1,null=True,verbose_name='المدرسة ')
+    job = models.CharField(max_length=36, null=True, blank=True,verbose_name='الوظيفة ')
+    phone_number = models.CharField(max_length=11, null=True, blank=True,verbose_name='رقم الهاتف ')
+    living_area = models.CharField( max_length=16, choices=AREA_CHOICES,null=True,blank=True,verbose_name='المنطقة السكنية ')
+    address = models.CharField( max_length=50,null=True,blank=True,verbose_name='العنوان ')
+    bus_number = models.ForeignKey(Bus, on_delete=SET_NULL,null=True, blank=True,verbose_name='رقم السيارة ')
+    bus_order = models.CharField(max_length=5,null=True,blank=True,verbose_name='موعد الركوب ')
+    bus_notes = models.CharField(max_length=24, null=True, blank=True,verbose_name='نوع الاشتراك ')
+    class Meta:
+        verbose_name='Teacher'
+        verbose_name_plural ='اشتركات مدرسين '
+    def __str__(self):
+        return self.name
 
 class StudentManager(BaseUserManager):
     def create_user(self, code, username, password=None):
@@ -109,28 +133,25 @@ class Student(AbstractBaseUser, PermissionsMixin):
          ('22-21' , '22-21'),
     )
 
-    code = models.CharField(max_length=7, unique=True)
-    username = models.CharField(max_length=60,verbose_name='student name')
-    school = models.CharField( max_length=6, choices=SCHOOL_CHOICES, blank=True)
-    grade = models.CharField( max_length=16, choices=GRADE_CHOICES, blank=True)
-    father_mobile = models.CharField(max_length=11, null=True, blank=True)
-    mother_mobile = models.CharField(max_length=11, null=True, blank=True)
-    phone_number = models.CharField(max_length=8, null=True, blank=True)
+    code = models.CharField(max_length=7, unique=True,verbose_name='كود ')
+    username = models.CharField(max_length=60,verbose_name='اسم الطالب ')
+    school = models.CharField( max_length=6, choices=SCHOOL_CHOICES, blank=True,verbose_name='المدرسة ')
+    grade = models.CharField( max_length=16, choices=GRADE_CHOICES, blank=True,verbose_name='الصف ')
+    father_mobile = models.CharField(max_length=11, null=True, blank=True,verbose_name='موبيل الاب ')
+    mother_mobile = models.CharField(max_length=11, null=True, blank=True,verbose_name='موبيل الام ')
+    phone_number = models.CharField(max_length=8, null=True, blank=True,verbose_name='تليفون المنزل ')
     email = models.EmailField(max_length=60, null=True, blank=True)
-
-    year = models.CharField( max_length=5,choices=YEAR_CHOICES, default='22-21')
-
-    study_payment1 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 1')
-    study_payment2 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 2')
-    study_payment3 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 3')
-    discount = models.PositiveSmallIntegerField(default=0)
-    old_fee = models.SmallIntegerField(default=0)
-
+    year = models.CharField( max_length=5,choices=YEAR_CHOICES, default='22-21',verbose_name='العام الدراسي ')
+    study_payment1 = models.PositiveSmallIntegerField(default=0,verbose_name='قسط دراسي 1 ')
+    study_payment2 = models.PositiveSmallIntegerField(default=0,verbose_name='قسط دراسي 2 ')
+    study_payment3 = models.PositiveSmallIntegerField(default=0,verbose_name='قسط دراسي 3 ')
+    discount = models.PositiveSmallIntegerField(default=0,verbose_name='قيمة الخصم ')
+    old_fee = models.SmallIntegerField(default=0,verbose_name='مصروفات سابقة ')
     bus_active = models.BooleanField( default=False)
-    bus_payment1 = models.PositiveSmallIntegerField( default=10000,verbose_name='Bus 1')
-    bus_payment2 = models.PositiveSmallIntegerField( default=0,verbose_name='Bus 2')
-    total_paid = models.IntegerField(default=0)
-    old_paid = models.SmallIntegerField( verbose_name='Old Fee paid', default=0)
+    bus_payment1 = models.PositiveSmallIntegerField( default=10000,verbose_name='قسط سيارة 1 ')
+    bus_payment2 = models.PositiveSmallIntegerField( default=0,verbose_name='قسط سيارة 2 ')
+    total_paid = models.IntegerField(default=0,verbose_name='اجمالي محصل ')
+    old_paid = models.SmallIntegerField( default=0, verbose_name='مسدد من مصروفات سابقة ')
     def payment_status(self):
 #due date 1st study and 1st bus
         if date.today() <= date(2020,9,30):
@@ -162,8 +183,10 @@ class Student(AbstractBaseUser, PermissionsMixin):
     living_area = models.CharField( max_length=16, choices=AREA_CHOICES,null=True,blank=True,verbose_name='المنطقة السكنية ')
     address = models.CharField( max_length=50,null=True,blank=True,verbose_name='العنوان ')
     old_bus = models.CharField( max_length=4,null=True,blank=True,verbose_name='رقم سيارة العام السابق ')
-    bus_number = models.ForeignKey(Bus, on_delete=models.CASCADE,null=True, blank=True,verbose_name='رقم السيارة ')
-    message = models.CharField(max_length=260, null=True, blank=True)
+    bus_number = models.ForeignKey(Bus, on_delete=SET_NULL,null=True, blank=True,verbose_name='رقم السيارة ')
+    bus_order = models.CharField(max_length=5,null=True,blank=True,verbose_name='موعد الركوب ')
+    bus_notes = models.CharField(max_length=24, null=True, blank=True,verbose_name='نوع الاشتراك ')
+    message = models.CharField(max_length=260, null=True, blank=True,verbose_name='رسالة الي الطالب ')
 
     is_active = models.BooleanField(default=True)
     can_pay = models.BooleanField(default=True)
@@ -179,6 +202,9 @@ class Student(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'code'
     REQUIRED_FIELDS = ['username',]
 
+    class Meta:
+        verbose_name='Stuent'
+        verbose_name_plural ='حسابات الطلاب '
 
     def __str__(self):
         return self.username + " " + self.code
@@ -196,3 +222,5 @@ class Student(AbstractBaseUser, PermissionsMixin):
 class BusStudent(Student):
     class Meta:
         proxy = True
+        verbose_name='Stuent'
+        verbose_name_plural ='اشتركات طلاب '
