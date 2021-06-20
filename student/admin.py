@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Student,Bus,BusStudent
+from .models import Student,Bus,BusStudent,Teacher
 from fees.admin import FeesInline
 # from django.http import HttpResponse
 # import csv
@@ -14,7 +14,7 @@ admin.site.unregister(Group)
 class StudentAdmin(ImportExportMixin, UserAdmin):
     list_display = ('code', 'username', 'total_paid', 'payment_status')
     search_fields = ('code', 'username')
-    readonly_fields = ('living_area', 'address','bus_number','old_bus','total_paid', 'old_fee', 'old_paid','study_payment3', 'bus_payment2', 'payment_status','last_login')
+    readonly_fields = ('living_area', 'address','bus_number','old_bus','total_paid', 'old_fee', 'old_paid','study_payment3', 'bus_payment2', 'payment_status','last_login','bus_order')
 
     # filter_horizontal = ()
     list_filter = ('school','year','grade','bus_active','is_active','can_pay')
@@ -23,7 +23,7 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
         # (None, { 'fields': (('is_staff','is_admin'),)}),
         ('الأقساط والسداد', {'fields': (('study_payment1', 'study_payment2', 'study_payment3'),('bus_payment1', 'bus_payment2'), ('old_fee','old_paid'),'discount', ('total_paid','payment_status'))}),
         ('التواصل', {'fields': ('message', ('father_mobile','mother_mobile'),('phone_number', 'email'),'last_login')}),
-        ('السيارة', {'fields': ('living_area', 'address','bus_number','old_bus')}),
+        ('السيارة', {'fields': ('bus_notes','living_area', 'address','bus_number','old_bus','bus_order')}),
         # ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'is_admin', 'groups', 'user_permissions')}),
                  )
     resource_class = StudentResource
@@ -128,16 +128,17 @@ class BusAdmin(ImportExportMixin, admin.ModelAdmin):
         return False
 
 class BusStudentAdmin(ImportExportMixin, admin.ModelAdmin):
-    list_display = ('code', 'username','living_area')
+    list_display = ('username','father_mobile' ,'mother_mobile','bus_number','bus_order','bus_notes')
+    ordering = ('bus_number','bus_order')
     autocomplete_fields = ['bus_number']
     search_fields = ('username','bus_number__number','bus_number__area')
-    readonly_fields = ('code', 'school','username','grade','father_mobile' ,'mother_mobile','phone_number', 'email')
+    readonly_fields = ('code', 'school','username','grade','father_mobile' ,'mother_mobile','phone_number', 'email', 'old_bus')
 
     filter_horizontal = ()
-    list_filter = ('school','grade', 'bus_active')
+    list_filter = ('school','grade', 'living_area')
     fieldsets = (
-        ('بيانات الطالب', {'fields': ('code','username','grade','father_mobile','mother_mobile','phone_number','email')}),
-        ('إشتراك السيارة ', {'fields': ('bus_number','living_area', 'address', 'old_bus' )}),
+        ('بيانات الطالب', {'fields': (('father_mobile','mother_mobile'),('phone_number','code'),'username','grade','old_bus')}),
+        ('إشتراك السيارة ', {'fields': ('bus_number','bus_order','living_area', 'address','bus_notes' )}),
                  )
 
     def get_queryset(self, request):
@@ -163,9 +164,26 @@ class BusStudentAdmin(ImportExportMixin, admin.ModelAdmin):
 
     resource_class = BusStudentResource
 
+class TeacherAdmin(ImportExportMixin, admin.ModelAdmin):
+    list_display = ('name', 'job','phone_number','bus_number','bus_order','bus_notes')
+    ordering = ('bus_number','bus_order')
+    autocomplete_fields = ['bus_number']
+    search_fields = ('name','bus_number__number','bus_number__area')
+    readonly_fields = ()
+    filter_horizontal = ()
+    list_filter = ('school','living_arsea')
+    fieldsets = (
+        (None, {'fields': ('name', 'school','job','phone_number','living_area', 'address','bus_number','bus_order','bus_notes')}),
+                 )
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','busb','busg'):
+                return True
+            return False
 
 admin.site.register(Student, StudentAdmin)
 admin.site.register(Bus,BusAdmin)
 admin.site.register(BusStudent,BusStudentAdmin)
+admin.site.register(Teacher,TeacherAdmin)
 
 admin.site.site_header = "Manarat Al Farouk Islamic Language School"

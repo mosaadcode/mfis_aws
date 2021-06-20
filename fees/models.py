@@ -30,15 +30,19 @@ class Fee(models.Model):
          ('21-20' , '21-20'),
          ('22-21' , '22-21'),
     )
-    payment_date = models.DateField(null=True, blank=True)
-    bank_account = models.CharField(max_length=19, choices=BankA_CHOICES)
-    value = models.SmallIntegerField(null=True)
-    created = models.DateTimeField(auto_now_add=True)
-    kind = models.CharField(max_length=6, choices=KIND_CHOICES)
-    school = models.CharField( max_length=6, choices=SCHOOL_CHOICES, blank=True)
-    student = models.ForeignKey(to='student.Student', on_delete=models.CASCADE, null=True)
-    verified = models.BooleanField(default=False)
-    year = models.CharField( max_length=5,choices=YEAR_CHOICES, default='21-20')
+    payment_date = models.DateField(null=True, blank=True,verbose_name='تاريخ الدفع ')
+    bank_account = models.CharField(max_length=19, choices=BankA_CHOICES,verbose_name='حساب ')
+    value = models.SmallIntegerField(null=True,verbose_name='قيمة ')
+    created = models.DateTimeField(auto_now_add=True,verbose_name='تارخ تسجيل ')
+    kind = models.CharField(max_length=6, choices=KIND_CHOICES,verbose_name='مصروفات ')
+    school = models.CharField( max_length=6, choices=SCHOOL_CHOICES, blank=True,verbose_name='مدرسة ')
+    student = models.ForeignKey(to='student.Student', on_delete=models.CASCADE, null=True,verbose_name='طالب ')
+    verified = models.BooleanField(default=False,verbose_name='تحقق ')
+    year = models.CharField( max_length=5,choices=YEAR_CHOICES, default='21-20',verbose_name='عام دراسي ')
+
+    class Meta:
+        verbose_name='fee'
+        verbose_name_plural ='عمليات السداد '
 
     def __str__(self):
         return self.student.username

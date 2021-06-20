@@ -71,8 +71,8 @@ class Teacher(models.Model):
     bus_order = models.CharField(max_length=5,null=True,blank=True,verbose_name='موعد الركوب ')
     bus_notes = models.CharField(max_length=24, null=True, blank=True,verbose_name='نوع الاشتراك ')
     class Meta:
-        verbose_name='Teacher'
-        verbose_name_plural ='اشتركات مدرسين '
+        verbose_name='teacher'
+        verbose_name_plural ='اشتركات المعلمين '
     def __str__(self):
         return self.name
 
@@ -203,7 +203,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['username',]
 
     class Meta:
-        verbose_name='Stuent'
+        verbose_name='student'
         verbose_name_plural ='حسابات الطلاب '
 
     def __str__(self):
@@ -222,5 +222,5 @@ class Student(AbstractBaseUser, PermissionsMixin):
 class BusStudent(Student):
     class Meta:
         proxy = True
-        verbose_name='Stuent'
-        verbose_name_plural ='اشتركات طلاب '
+        verbose_name='student'
+        verbose_name_plural ='اشتركات الطلاب '
