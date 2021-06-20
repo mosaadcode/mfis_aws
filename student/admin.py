@@ -28,6 +28,9 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
                  )
     resource_class = StudentResource
 
+    def payment_status(self,obj):
+        return obj.payment_status()
+    payment_status.short_description = "مستحق سداد "
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.code == "mfisb":
@@ -86,14 +89,17 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
             return False
 
 class BusAdmin(ImportExportMixin, admin.ModelAdmin):
-    list_display = ('number','supervisor_name','supervisor_mobile','driver_name','driver_mobile','students')
+    list_display = ('number','supervisor_name','supervisor_mobile','driver_name','driver_mobile')
     search_fields = ('number','area')
-    readonly_fields = ('school',)
+    readonly_fields = ('school','bus_count')
     filter_horizontal = ()
     list_filter = ('school','area')
     fieldsets = (
-        (None, {'fields': ('school','number','area','sub_area','supervisor_name','supervisor_mobile','driver_name' ,'driver_mobile')}),
+        (None, {'fields': ('bus_count','number','area','sub_area','supervisor_name','supervisor_mobile','supervisor_address','supervisor_time' ,'driver_name' ,'driver_mobile','school')}),
                  )
+    def bus_count(self, obj):
+        return obj.bus_count()
+    bus_count.short_description = 'مشتركين '
     def save_model(self, request, obj, form, change):
         if obj.school =="":
             if request.user.code == "busb":
