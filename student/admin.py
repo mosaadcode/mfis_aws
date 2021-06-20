@@ -171,7 +171,7 @@ class TeacherAdmin(ImportExportMixin, admin.ModelAdmin):
     search_fields = ('name','bus_number__number','bus_number__area')
     readonly_fields = ()
     filter_horizontal = ()
-    list_filter = ('school','living_arsea')
+    list_filter = ('school','living_area')
     fieldsets = (
         (None, {'fields': ('name', 'school','job','phone_number','living_area', 'address','bus_number','bus_order','bus_notes')}),
                  )
