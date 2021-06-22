@@ -133,25 +133,25 @@ class Student(AbstractBaseUser, PermissionsMixin):
          ('22-21' , '22-21'),
     )
 
-    code = models.CharField(max_length=7, unique=True,verbose_name='كود ')
-    username = models.CharField(max_length=60,verbose_name='اسم الطالب ')
-    school = models.CharField( max_length=6, choices=SCHOOL_CHOICES, blank=True,verbose_name='المدرسة ')
-    grade = models.CharField( max_length=16, choices=GRADE_CHOICES, blank=True,verbose_name='الصف ')
+    code = models.CharField(max_length=7, unique=True)
+    username = models.CharField(max_length=60,verbose_name='Name')
+    school = models.CharField( max_length=6, choices=SCHOOL_CHOICES, blank=True)
+    grade = models.CharField( max_length=16, choices=GRADE_CHOICES, blank=True)
     father_mobile = models.CharField(max_length=11, null=True, blank=True,verbose_name='موبيل الاب ')
     mother_mobile = models.CharField(max_length=11, null=True, blank=True,verbose_name='موبيل الام ')
     phone_number = models.CharField(max_length=8, null=True, blank=True,verbose_name='تليفون المنزل ')
     email = models.EmailField(max_length=60, null=True, blank=True)
-    year = models.CharField( max_length=5,choices=YEAR_CHOICES, default='22-21',verbose_name='العام الدراسي ')
-    study_payment1 = models.PositiveSmallIntegerField(default=0,verbose_name='قسط دراسي 1 ')
-    study_payment2 = models.PositiveSmallIntegerField(default=0,verbose_name='قسط دراسي 2 ')
-    study_payment3 = models.PositiveSmallIntegerField(default=0,verbose_name='قسط دراسي 3 ')
-    discount = models.PositiveSmallIntegerField(default=0,verbose_name='قيمة الخصم ')
-    old_fee = models.SmallIntegerField(default=0,verbose_name='مصروفات سابقة ')
+    year = models.CharField( max_length=5,choices=YEAR_CHOICES, default='22-21')
+    study_payment1 = models.PositiveSmallIntegerField(default=0,verbose_name='Sdudy 1')
+    study_payment2 = models.PositiveSmallIntegerField(default=0,verbose_name='Sdudy 2')
+    study_payment3 = models.PositiveSmallIntegerField(default=0,verbose_name='Sdudy 3')
+    discount = models.PositiveSmallIntegerField(default=0)
+    old_fee = models.SmallIntegerField(default=0)
     bus_active = models.BooleanField( default=False)
-    bus_payment1 = models.PositiveSmallIntegerField( default=10000,verbose_name='قسط سيارة 1 ')
-    bus_payment2 = models.PositiveSmallIntegerField( default=0,verbose_name='قسط سيارة 2 ')
-    total_paid = models.IntegerField(default=0,verbose_name='اجمالي محصل ')
-    old_paid = models.SmallIntegerField( default=0, verbose_name='مسدد من مصروفات سابقة ')
+    bus_payment1 = models.PositiveSmallIntegerField( default=10000,verbose_name='Bus 1')
+    bus_payment2 = models.PositiveSmallIntegerField( default=0,verbose_name='Bus 1')
+    total_paid = models.IntegerField(default=0)
+    old_paid = models.SmallIntegerField( default=0)
     def payment_status(self):
 #due date 1st study and 1st bus
         if date.today() <= date(2020,9,30):
@@ -186,7 +186,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
     bus_number = models.ForeignKey(Bus, on_delete=SET_NULL,null=True, blank=True,verbose_name='رقم السيارة ')
     bus_order = models.CharField(max_length=5,null=True,blank=True,verbose_name='موعد الركوب ')
     bus_notes = models.CharField(max_length=24, null=True, blank=True,verbose_name='نوع الاشتراك ')
-    message = models.CharField(max_length=260, null=True, blank=True,verbose_name='رسالة الي الطالب ')
+    message = models.CharField(max_length=260, null=True, blank=True)
 
     is_active = models.BooleanField(default=True)
     can_pay = models.BooleanField(default=True)
@@ -202,9 +202,9 @@ class Student(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'code'
     REQUIRED_FIELDS = ['username',]
 
-    class Meta:
-        verbose_name='student'
-        verbose_name_plural ='حسابات الطلاب '
+    # class Meta:
+    #     verbose_name='student'
+    #     verbose_name_plural ='حسابات الطلاب '
 
     def __str__(self):
         return self.username + " " + self.code

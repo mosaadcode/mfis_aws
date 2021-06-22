@@ -28,9 +28,9 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
                  )
     resource_class = StudentResource
 
-    def payment_status(self,obj):
-        return obj.payment_status()
-    payment_status.short_description = "مستحق سداد "
+    # def payment_status(self,obj):
+    #     return obj.payment_status()
+    # payment_status.short_description = "مستحق سداد "
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.code == "mfisb":
