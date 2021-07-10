@@ -110,13 +110,13 @@ class BusAdmin(ImportExportMixin, admin.ModelAdmin):
                 obj.school = ""
         super().save_model(request, obj, form, change)
 
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        if request.user.code == "busg":
-            return qs.filter(school='بنات')
-        elif request.user.code =="busb":
-            return qs.filter(school="بنين")
-        return qs
+    # def get_queryset(self, request):
+    #     qs = super().get_queryset(request)
+    #     if request.user.code == "busg":
+    #         return qs.filter(school='بنات')
+    #     elif request.user.code =="busb":
+    #         return qs.filter(school="بنين")
+    #     return qs
     def has_module_permission(self, request):
         if request.user.is_authenticated:
             if request.user.code in ('mosaad','busb','busg'):

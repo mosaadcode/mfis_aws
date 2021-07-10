@@ -39,6 +39,7 @@ SCHOOL_CHOICES1 = (
     (None, ""),
     ('بنين', 'بنين'),
     ('بنات', 'بنات'),
+    ('مشترك','مشترك'),
 )
 
 class Bus(models.Model):
