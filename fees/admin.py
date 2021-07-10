@@ -59,6 +59,8 @@ class FeeAdmin(ImportExportModelAdmin):
                 mystudent = Student.objects.get(id=obj.student_id)
                 if obj.year == '22-21':
                     mystudent.total_paid=F('total_paid') + obj.value
+                    if obj.kind == "سيارة":
+                        mystudent.bus_active = True
                 else:
                     mystudent.old_paid=F('old_paid') + obj.value
                 mystudent.save()
@@ -92,6 +94,9 @@ class FeeAdmin(ImportExportModelAdmin):
                 mystudent = Student.objects.get(id=obj.student_id)
                 if obj.year == '22-21':
                     mystudent.total_paid=F('total_paid') - obj.value
+                    if obj.kind == "سيارة":
+                        if Fee.objects.filter(student=obj.student_id,kind="سيارة",year="22-21",verified=True).count()==1:
+                            mystudent.bus_active = False
                 else:
                     mystudent.old_paid=F('old_paid') - obj.value
                 mystudent.save()
@@ -126,6 +131,9 @@ class FeeAdmin(ImportExportModelAdmin):
                 mystudent = Student.objects.get(id=obj.student_id)
                 if obj.year == '22-21':
                     mystudent.total_paid=F('total_paid') - obj.value
+                    if obj.kind == "سيارة":
+                        if Fee.objects.filter(student=obj.student_id,kind="سيارة",year="22-21",verified=True).count()==1:
+                            mystudent.bus_active = False
                 else:
                     mystudent.old_paid=F('old_paid') - obj.value
                 mystudent.save()
@@ -151,6 +159,9 @@ class FeeAdmin(ImportExportModelAdmin):
             mystudent = Student.objects.get(id=obj.student_id)
             if obj.year == '22-21':
                 mystudent.total_paid=F('total_paid') - obj.value
+                if obj.kind == "سيارة":
+                    if Fee.objects.filter(student=obj.student_id,kind="سيارة",year="22-21",verified=True).count()==1:
+                        mystudent.bus_active = False
             else:
                 mystudent.old_paid=F('old_paid') - obj.value
             mystudent.save()

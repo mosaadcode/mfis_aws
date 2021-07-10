@@ -30,6 +30,8 @@ class FeesResource(resources.ModelResource):
             mystudent = Student.objects.get(code=row['student'])
             if row['year'] == "22-21":
                 mystudent.total_paid=F('total_paid') + row['value']
+                if row['kind'] == "سيارة":
+                    mystudent.bus_active = True
             else:
                 mystudent.old_paid=F('old_paid') + row['value']
             mystudent.save()

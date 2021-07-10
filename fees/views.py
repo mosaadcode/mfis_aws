@@ -114,11 +114,11 @@ def agreement(request):
             # # save newtodo
             # newfees.save()
             # update student data
-            request.user.bus_active = True
+            # request.user.bus_active = True
             request.user.old_bus = request.POST['old_bus']
             request.user.living_area = request.POST['living_area']
             request.user.address = request.POST['address']
-            request.user.save(update_fields=["bus_active", "old_bus", "living_area", "address"])
+            request.user.save(update_fields=["old_bus", "living_area", "address"])
             # redirect user to currenttodos page
             return redirect('dashboard')
         except ValueError:
