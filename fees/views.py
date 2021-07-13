@@ -11,7 +11,7 @@ def dashboard(request):
     # fees = student.fee_set.all()
     #totalfees = feess.aggregate(Sum('value'))
     oldfee = student.old_fee - student.old_paid
-    if len(request.user.living_area) > 3 :
+    if len(str(request.user.living_area)) > 4 :
         bus = True
     else :
         bus = False
@@ -58,7 +58,7 @@ def addfees(request):
                         # tell user when error hapen
                         return render(request, 'fees/addfees.html', {'form':FeesForm(),'error':'برجاء مراجعة بيانات الايصال'})
             else:
-                if len(request.user.living_area) >3:
+                if len(str(request.user.living_area)) > 4 :
                     # add try: except to solve value Error
                     try:
                         form = FeesForm(request.POST)
@@ -106,7 +106,7 @@ def agreement(request):
         error = request.session.get('error')
         return render(request, 'fees/agreement.html', {'form':StudentArea(),'error':error})
     else:
-        if len(request.user.living_area) < 3:
+        if len(str(request.user.living_area)) < 5 :
             try:
                 request.user.old_bus = request.POST['old_bus']
                 request.user.living_area = request.POST['living_area']
