@@ -120,4 +120,4 @@ def agreement(request):
                     # tell user when error hapen
                     return render(request, 'fees/agreement.html', {'form':FeesForm(),'error':'برجاء مراجعة البيانات'})
         else:
-            return render(request, 'fees/agreement.html', {'form':FeesForm(),'error':' لا يمكنكم تغير العنوان المسجل قبل التواصل مباشرة مع إدارة تشغيل السيارات'})
+            return render(request, 'fees/agreement.html', {'form':FeesForm(),'error':' لا يمكنكم تغيير العنوان المسجل قبل التواصل مباشرة مع إدارة تشغيل السيارات'})
