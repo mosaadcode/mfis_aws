@@ -17,6 +17,11 @@
                   {{ error }}
               </div>
           {% endif %}
+          {% if msg %}
+              <div class="alert alert-info" role="alert">
+                  {{ msg }}
+              </div>
+          {% endif %}
           <form method="POST" class="form-signin">
               {% csrf_token %}
                 <!-- <br>

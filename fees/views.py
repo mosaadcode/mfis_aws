@@ -1,8 +1,7 @@
-from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render, redirect
 from .forms import FeesForm
 from .models import Fee
 from student.forms import StudentForm, StudentArea
-# from django.contrib.auth import authenticate, login
 
 def dashboard(request):
     # ddate1=DueDates.objects.get(pk=1)
@@ -16,8 +15,8 @@ def dashboard(request):
 
 def addfees(request):
     if request.method == 'GET':
-        # feess = Fees.objects.filter(student=request.user.id)
-        return render(request, 'fees/addfees.html', {'form':FeesForm()})
+        msg = request.session.get('msg')
+        return render(request, 'fees/addfees.html', {'form':FeesForm(),'msg':msg})
     else:
         if request.user.can_pay == True:
             if request.POST['kind'] == "دراسية":
@@ -55,7 +54,7 @@ def addfees(request):
                         # tell user when error hapen
                         return render(request, 'fees/addfees.html', {'form':FeesForm(),'error':'برجاء مراجعة بيانات الايصال'})
             else:
-                if request.user.bus_active == True:
+                if request.user.living_area != None:
                     # add try: except to solve value Error
                     try:
                         form = FeesForm(request.POST)
@@ -81,14 +80,15 @@ def addfees(request):
                         else:        
                             newfee.year = '22-21'
                             newfee.save()
+                        request.session['msg'] = ''
                         return redirect('recorded')
                     except ValueError:
                             # tell user when error hapen
                             return render(request, 'fees/addfees.html', {'form':FeesForm(),'error':'برجاء مراجعة البيانات'})
                 else:
-                    error = 'لا يمكن تسجيل الايصال قبل الموافقة على تعليمات السيارة وتحديد المنطقة السكنية في صفحة إشتراك السيارة اولاً'
-
-                    return render(request, 'fees/addfees.html', {'form':FeesForm(),'error':error})
+                    error = ' يجب اولاً الاطلاع على تعليمات اشتراك السيارة في الاعلى ثم تحديد المنطقة السكنية والعنوان '
+                    request.session['error'] = error
+                    return redirect('agreement')
 
         else:
             return render(request, 'fees/addfees.html', {'form':FeesForm(),'error':'لا يمكنك التسجيل الان, برجاء مراجعة قسم الحسابات'})
@@ -99,30 +99,21 @@ def recorded(request):
 
 def agreement(request):
     if request.method == 'GET':
-        return render(request, 'fees/agreement.html', {'form':StudentArea()})
+        error = request.session.get('error')
+        return render(request, 'fees/agreement.html', {'form':StudentArea(),'error':error})
     else:
-        # if request.user.bus_active == False:
-        try:
-            # # get the information from the post request and connect it with our form
-            # form = AccountForm(request.POST)
-            # # Create newtodo but dont't save it yet to the database
-            # newfees = form.save(commit=False)
-            # # set the user to newtodo
-            # newfees.student = request.user
-            # newfees.grade = request.user.grade
-            # newfees.school = request.user.school
-            # # save newtodo
-            # newfees.save()
-            # update student data
-            # request.user.bus_active = True
-            request.user.old_bus = request.POST['old_bus']
-            request.user.living_area = request.POST['living_area']
-            request.user.address = request.POST['address']
-            request.user.save(update_fields=["old_bus", "living_area", "address"])
-            # redirect user to currenttodos page
-            return redirect('dashboard')
-        except ValueError:
-                # tell user when error hapen
-                return render(request, 'fees/agreement.html', {'form':FeesForm(),'error':'برجاء مراجعة البيانات'})
-        # else:
-        #     return render(request, 'fees/agreement.html', {'form':FeesForm(),'error':'لتعديل البيانات يجب التواصل مع إدارة تشغيل السيارات'})
+        if request.user.living_area!=None:
+            try:
+                request.user.old_bus = request.POST['old_bus']
+                request.user.living_area = request.POST['living_area']
+                request.user.address = request.POST['address']
+                request.user.save(update_fields=["old_bus", "living_area", "address"])
+                request.session['error'] = ''
+                msg = 'يمكنكم الان تسجيل ايصالات الدفع الخاصة بإشتراك السيارة'
+                request.session['msg'] = msg
+                return redirect('addfees')
+            except ValueError:
+                    # tell user when error hapen
+                    return render(request, 'fees/agreement.html', {'form':FeesForm(),'error':'برجاء مراجعة البيانات'})
+        else:
+            return render(request, 'fees/agreement.html', {'form':FeesForm(),'error':' لا يمكنكم تغير العنوان المسجل قبل التواصل مباشرة مع إدارة تشغيل السيارات'})
