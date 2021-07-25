@@ -132,6 +132,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
         ('الاول الثانوى','الاول الثانوى'),
         ('الثانى الثانوى','الثانى الثانوى'),
         ('الثالث الثانوى','الثالث الثانوى'),
+        ('خريج','خريج'),
     )
 
     YEAR_CHOICES = (
@@ -230,3 +231,15 @@ class BusStudent(Student):
         proxy = True
         verbose_name='student'
         verbose_name_plural ='اشتركات الطلاب '
+
+class SchoolFee(models.Model):
+    school = models.CharField( max_length=6)
+    grade = models.CharField( max_length=16)
+    study_payment1 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 1')
+    study_payment2 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 2')
+    study_payment3 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 3')
+    bus_payment1 = models.PositiveSmallIntegerField( default=10000,verbose_name='Bus 1')
+    bus_payment2 = models.PositiveSmallIntegerField( default=0,verbose_name='Bus 2')
+    study_fee = models.PositiveSmallIntegerField(default=0)
+    activity_fee = models.PositiveSmallIntegerField(default=0)
+    computer_fee = models.PositiveSmallIntegerField(default=0)

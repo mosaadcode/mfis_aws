@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Student,Bus,BusStudent,Teacher
+from .models import Student,Bus,BusStudent,Teacher,SchoolFee
 from fees.admin import FeesInline
 # from django.http import HttpResponse
 # import csv
@@ -181,9 +181,43 @@ class TeacherAdmin(ImportExportMixin, admin.ModelAdmin):
                 return True
             return False
 
+class SchoolFeeAdmin(ImportExportMixin, admin.ModelAdmin):
+    list_display = ('grade' , 'study_fee', 'activity_fee', 'computer_fee','study_payment1','study_payment2','study_payment3','bus_payment1','bus_payment1')
+    ordering = ('id',)
+    readonly_fields = ('school', 'grade',)
+
+    filter_horizontal = ()
+    list_filter = ('school',)
+    # fieldsets = (
+    #     ('بيانات الطالب', {'fields': (('father_mobile','mother_mobile'),('phone_number','code'),'username','grade','old_bus')}),
+    #     ('إشتراك السيارة ', {'fields': ('bus_number','bus_order','living_area', 'address','bus_notes' )}),
+    #              )
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.code == "mfisg":
+            return qs.filter(school__in = ('.بنات.', 'بنات'))
+        elif request.user.code =="mfisb":
+            return qs.filter(school="بنين")
+        return qs
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','mfisb','mfisg'):
+                return True
+            return False
+    def has_delete_permission(self, request, obj=None):
+        if request.user.code == "mosaad":
+            return True
+        return False
+    def has_add_permission(self, request, obj=None):
+        if request.user.code == "mosaad":
+            return True
+        return False
+
 admin.site.register(Student, StudentAdmin)
 admin.site.register(Bus,BusAdmin)
 admin.site.register(BusStudent,BusStudentAdmin)
 admin.site.register(Teacher,TeacherAdmin)
+admin.site.register(SchoolFee,SchoolFeeAdmin)
 
 admin.site.site_header = "Manarat Al Farouk Islamic Language School"
