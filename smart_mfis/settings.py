@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'import_export',
     'student',
     'fees',
+    'student_affairs',
 ]
 
 MIDDLEWARE = [
