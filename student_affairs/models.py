@@ -123,6 +123,7 @@ class Student(models.Model):
     # address_2 = models.CharField( max_length=64,null=True,blank=True,verbose_name='العنوان البديل ')
     email = models.EmailField(max_length=60, blank=True,null=True)
     notes = models.TextField( max_length=64,null=True,blank=True,verbose_name='ملاحظات ')
+    payment_status = models.BooleanField(default=False,verbose_name='حالة السداد ')
 
 
     def __str__(self):
