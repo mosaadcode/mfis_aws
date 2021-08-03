@@ -7,7 +7,7 @@ from student.models import Student
 from import_export.admin import ImportExportModelAdmin
 from student.resources import FeesResource
 from django.db.models import F
-# from django.db.models import Q
+from student_affairs.models import Student as StudentAff
 
 class FeesInline(admin.TabularInline):
     model = Fee
@@ -56,8 +56,13 @@ class FeeAdmin(ImportExportModelAdmin):
         notupdated = 0
         for obj in queryset:
             if obj.verified == False:
+
                 mystudent = Student.objects.get(id=obj.student_id)
                 if obj.year == '22-21':
+                    mystudentAff = StudentAff.objects.get(code=mystudent.code)
+                    mystudentAff.payment_status = True
+                    mystudentAff.save()
+                    
                     mystudent.total_paid=F('total_paid') + obj.value
                     if obj.kind == "سيارة":
                         mystudent.bus_active = True
