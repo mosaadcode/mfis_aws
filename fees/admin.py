@@ -59,9 +59,12 @@ class FeeAdmin(ImportExportModelAdmin):
 
                 mystudent = Student.objects.get(id=obj.student_id)
                 if obj.year == '22-21':
-                    mystudentAff = StudentAff.objects.get(code=mystudent.code)
-                    mystudentAff.payment_status = True
-                    mystudentAff.save()
+                    try:
+                        mystudentAff = StudentAff.objects.get(code=mystudent.code)
+                        mystudentAff.payment_status = True
+                        mystudentAff.save()
+                    except StudentAff.DoesNotExist:
+                        pass
                     
                     mystudent.total_paid=F('total_paid') + obj.value
                     if obj.kind == "سيارة":
