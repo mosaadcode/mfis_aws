@@ -25,7 +25,7 @@ with open('/home/ubuntu/keys/secret_key.txt') as f:
     SECRET_KEY = f.readlines()[0]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 
 ALLOWED_HOSTS = ['*']
