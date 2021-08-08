@@ -57,9 +57,11 @@ class Student(models.Model):
         # (None, ""),
         ('مستجد', 'مستجد'),
         ('منقول', 'منقول'),
-        ('باقي', 'باقي'),
+        ('باقي', 'باقي للإعادة'),
         ('محول', 'محول'),
         ('محول من', 'محول من'),
+        ('عائد','عائد'),
+        ('وافد','وافد'),
     )
     GRADE_CHOICES = (
         ('تمهيدى حضانة', 'تمهيدى حضانة'),
@@ -91,6 +93,12 @@ class Student(models.Model):
         ('الاب والام','الاب والام'),
     )    
 
+    OVER_CHOICES =(
+        ('No',''),
+        ('ضابط','ضابط'),
+        ('وزير','وزير'),
+        ('بعثات','بعثات'),
+    )   
     code = models.CharField(max_length=7, unique=True,blank=True,verbose_name='الكود ')
     global_code = models.CharField(max_length=9,blank=True,null=True,verbose_name='كود الوزارة ')
     name = models.CharField(max_length=60,verbose_name='إسم الطالب ')
@@ -107,7 +115,7 @@ class Student(models.Model):
     group = models.ForeignKey(Class_group,on_delete=models.SET_NULL, null=True,blank=True,verbose_name='المجموعة ')
     religion = models.CharField(max_length=5,choices=RELIGION_CHOICES,default='مسلم',blank=True,null=True,verbose_name='الديانة ')
     nationality = models.ForeignKey(Nationality,on_delete=SET_NULL, blank=True,null=True,verbose_name='الجنسية ')
-    is_over = models.BooleanField(default=False,verbose_name='خارج الكثافة ')
+    is_over = models.CharField( max_length=5, choices=OVER_CHOICES,default='',verbose_name='فوق الكثافة ')
     birth_date = models.DateField(null=True,blank=True, verbose_name='تاريخ الميلاد ')
     birth_gov = models.ForeignKey(Governorate,on_delete=SET_NULL, null=True,blank=True,verbose_name='محل الميلاد ')
     age1oct = models.CharField(default="",max_length=8,null=True,blank=True,verbose_name='(يوم- شهر- سنة) العمر اول اكتوبر ')
