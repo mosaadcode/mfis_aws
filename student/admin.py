@@ -144,7 +144,7 @@ class BusStudentAdmin(ImportExportMixin, admin.ModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.code == "busg":
-            return qs.filter(bus_active=True,school__in = ('.بنات.', 'بنات'))
+            return qs.filter(bus_active=True,school__in = ('.بنات.', 'بنات','Ig'))
         elif request.user.code =="busb":
             return qs.filter(bus_active=True,school="بنين")
         return qs
