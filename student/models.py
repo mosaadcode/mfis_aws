@@ -196,6 +196,8 @@ class Student(AbstractBaseUser, PermissionsMixin):
     bus_notes = models.CharField(max_length=24, null=True, blank=True,verbose_name='نوع الاشتراك ')
     message = models.CharField(max_length=260, null=True, blank=True)
 
+    books  = models.BooleanField(default=False)
+    total_books = models.SmallIntegerField( default=0,verbose_name='Total Books')
     is_active = models.BooleanField(default=True)
     can_pay = models.BooleanField(default=True)
     is_admin  = models.BooleanField(default=False)
@@ -244,3 +246,9 @@ class SchoolFee(models.Model):
     study_fee = models.PositiveSmallIntegerField(default=0)
     activity_fee = models.PositiveSmallIntegerField(default=0)
     computer_fee = models.PositiveSmallIntegerField(default=0)
+    books_all = models.PositiveSmallIntegerField(default=0)
+    books_books = models.PositiveSmallIntegerField(default=0)
+    books_booklet = models.PositiveSmallIntegerField(default=0)
+    books_a_level = models.PositiveSmallIntegerField(default=0)
+    books_fee = models.PositiveSmallIntegerField(default=0)
+    bus_fee = models.PositiveSmallIntegerField(default=0)

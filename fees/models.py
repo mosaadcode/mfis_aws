@@ -21,6 +21,10 @@ class Fee(models.Model):
     KIND_CHOICES = (
         ('دراسية', 'دراسية'),
         ('سيارة', 'سيارة'),
+        ('Books','Books-All'),
+        ('Book','Books-Books'),
+        ('Boklet','Books-Booklet'),
+        ('BokAlv','Books-A_level'),
     )
 
     SCHOOL_CHOICES = (
