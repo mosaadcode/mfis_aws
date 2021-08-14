@@ -6,6 +6,7 @@ from django.contrib.auth.hashers import make_password
 from django.utils.encoding import force_text
 from import_export.results import RowResult
 from django.db.models import F
+from student_affairs.models import Student as StudentAff
 
 class FeesResource(resources.ModelResource):
     student = fields.Field(column_name='student',
@@ -29,8 +30,21 @@ class FeesResource(resources.ModelResource):
         if row['verified']==True:
             mystudent = Student.objects.get(code=row['student'])
             if row['year'] == "22-21":
-                mystudent.total_paid=F('total_paid') + row['value']
-                if row['kind'] == "سيارة":
+                if row['kind'][:3] == 'Boo':
+                    mystudent.total_books = F('total_books')+row['value']
+                    mystudent.books = True
+                elif row['kind'][:3] == 'Bok':
+                    mystudent.total_books = F('total_books')+row['value']
+                elif row['kind'] == 'دراسية':
+                    mystudent.total_paid = F('total_paid')+row['value']
+                    try:
+                        mystudentAff = StudentAff.objects.get(code=mystudent.code)
+                        mystudentAff.payment_status = True
+                        mystudentAff.save()
+                    except StudentAff.DoesNotExist:
+                        pass
+                elif row['kind'] == 'سيارة':
+                    mystudent.total_paid = F('total_paid')+row['value']
                     mystudent.bus_active = True
             else:
                 mystudent.old_paid=F('old_paid') + row['value']

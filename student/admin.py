@@ -12,16 +12,17 @@ from django.contrib.auth.models import Group
 admin.site.unregister(Group)
 
 class StudentAdmin(ImportExportMixin, UserAdmin):
-    list_display = ('code', 'username', 'total_paid', 'payment_status')
+    list_display = ('code', 'username', 'total_paid', 'payment_status','total_books')
     search_fields = ('code', 'username')
-    readonly_fields = ('living_area', 'address','bus_number','old_bus','total_paid', 'old_fee', 'old_paid','study_payment3', 'bus_payment2', 'payment_status','last_login','bus_order')
+    readonly_fields = ('living_area', 'address','bus_number','old_bus','total_paid', 'old_fee', 'old_paid','study_payment3', 'bus_payment2', 'payment_status','last_login','bus_order','books','total_books')
 
     # filter_horizontal = ()
-    list_filter = ('school','year','grade','bus_active','is_active','can_pay')
+    list_filter = ('school','year','grade','bus_active','books','is_active','can_pay')
     fieldsets = (
         (None, { 'fields': (('code', 'year'), 'username', ('school', 'grade'),'password', ('is_active', 'can_pay', 'bus_active'))}),
         # (None, { 'fields': (('is_staff','is_admin'),)}),
         ('الأقساط والسداد', {'fields': (('study_payment1', 'study_payment2', 'study_payment3'),('bus_payment1', 'bus_payment2'), ('old_fee','old_paid'),'discount', ('total_paid','payment_status'))}),
+        ('الكتب الدراسية', {'fields': (('books','total_books'),)}),
         ('التواصل', {'fields': ('message', ('father_mobile','mother_mobile'),('phone_number', 'email'),'last_login')}),
         ('السيارة', {'fields': ('bus_notes','living_area', 'address','bus_number','old_bus','bus_order')}),
         # ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'is_admin', 'groups', 'user_permissions')}),
@@ -188,10 +189,11 @@ class SchoolFeeAdmin(ImportExportMixin, admin.ModelAdmin):
 
     filter_horizontal = ()
     list_filter = ('school',)
-    # fieldsets = (
-    #     ('بيانات الطالب', {'fields': (('father_mobile','mother_mobile'),('phone_number','code'),'username','grade','old_bus')}),
-    #     ('إشتراك السيارة ', {'fields': ('bus_number','bus_order','living_area', 'address','bus_notes' )}),
-    #              )
+    fieldsets = (
+        # ('None', {'fields': ('grade',)}),
+        ('المصروفات الرسمية ', {'fields': ('grade','study_fee', 'activity_fee', 'computer_fee','bus_fee','books_fee' )}),
+        ('المصروفات', {'fields': (('study_payment1','study_payment2','study_payment3'),('bus_payment1','bus_payment2'),('books_all','books_books','books_booklet','books_a_level'))}),
+                 )
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
