@@ -62,7 +62,10 @@ class FeeAdmin(ImportExportModelAdmin):
                     #for book and book
                     if obj.kind[:3] == 'Boo':
                         mystudent.total_books = F('total_books')+obj.value
-                        mystudent.books = True
+                        if obj.value > 0 :
+                            mystudent.books = True
+                        else:
+                            mystudent.books = False
                     elif obj.kind[:3] == 'Bok':
                         mystudent.total_books = F('total_books')+obj.value
                     elif obj.kind == 'دراسية':
@@ -154,8 +157,16 @@ class FeeAdmin(ImportExportModelAdmin):
             if obj.verified == True:
                 mystudent = Student.objects.get(id=obj.student_id)
                 if obj.year == '22-21':
-                    mystudent.total_paid=F('total_paid') - obj.value
-                    if obj.kind == "سيارة":
+                    #for book and book
+                    if obj.kind[:3] == 'Boo':
+                        mystudent.total_books = F('total_books')-obj.value
+                        mystudent.books = False
+                    elif obj.kind[:3] == 'Bok':
+                        mystudent.total_books = F('total_books')-obj.value
+                    elif obj.kind == 'دراسية':
+                        mystudent.total_paid=F('total_paid') - obj.value
+                    elif obj.kind == 'سيارة':
+                        mystudent.total_paid=F('total_paid') - obj.value                                                                     
                         if Fee.objects.filter(student=obj.student_id,kind="سيارة",year="22-21",verified=True).count()==1:
                             mystudent.bus_active = False
                 else:
@@ -182,8 +193,16 @@ class FeeAdmin(ImportExportModelAdmin):
         if obj.verified == True:
             mystudent = Student.objects.get(id=obj.student_id)
             if obj.year == '22-21':
-                mystudent.total_paid=F('total_paid') - obj.value
-                if obj.kind == "سيارة":
+                #for book and book
+                if obj.kind[:3] == 'Boo':
+                    mystudent.total_books = F('total_books')-obj.value
+                    mystudent.books = False
+                elif obj.kind[:3] == 'Bok':
+                    mystudent.total_books = F('total_books')-obj.value
+                elif obj.kind == 'دراسية':
+                    mystudent.total_paid=F('total_paid') - obj.value
+                elif obj.kind == 'سيارة':
+                    mystudent.total_paid=F('total_paid') - obj.value                                                                     
                     if Fee.objects.filter(student=obj.student_id,kind="سيارة",year="22-21",verified=True).count()==1:
                         mystudent.bus_active = False
             else:
