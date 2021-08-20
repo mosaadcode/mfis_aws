@@ -51,14 +51,14 @@ class StudentAdmin(ImportExportModelAdmin):
     list_display = ('code', 'name','grade','status','age1oct','father_mobile','mother_mobile','phone_number','payment_status')
     autocomplete_fields = ['birth_gov','nationality']
     search_fields = ('code','name','father_id',)
-    readonly_fields = ('code','age1oct','start_year','payment_status')
+    readonly_fields = ('age1oct','payment_status')
 
     filter_horizontal = ()
     list_filter = ('school','grade','status','is_over','payment_status')
 
     fieldsets = (
         ('بيانات الطالب', { 'fields': ('name','en_name','student_id',('birth_date', 'age1oct'),'birth_gov',('nationality','religion'))}),
-        ('بيانات الالتحاق', { 'fields': ('payment_status','code','school','start_year','study_year', ('status','from_to'),'status_no', 'grade',('Class','group','is_over'),'global_code')}),
+        ('بيانات الالتحاق', { 'fields': (('study_year','payment_status'),'start_year','code','school', 'grade', ('status','from_to'),'status_no',('Class','group','is_over'),'global_code')}),
         ('بيانات ولي الامر', { 'fields': ('responsibility','father_name','father_job','father_id','mother_name','father_mobile','mother_mobile','phone_number','address_1' ,'email','notes')}),
 
                  )
@@ -66,7 +66,7 @@ class StudentAdmin(ImportExportModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         if obj:
             if obj.code != "":
-                return self.readonly_fields + ('study_year','school')
+                return self.readonly_fields + ('code','study_year','school')
             return self.readonly_fields
         return self.readonly_fields
 
