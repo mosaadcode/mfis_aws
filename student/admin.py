@@ -144,11 +144,13 @@ class BusStudentAdmin(ImportExportMixin, admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        if request.user.code == "busg":
-            return qs.filter(bus_active=True,school__in = ('.بنات.', 'بنات','Ig'))
-        elif request.user.code =="busb":
-            return qs.filter(bus_active=True,school="بنين")
+        if request.user.code in ('busg','busb'):
+        #     return qs.filter(bus_active=True,school__in = ('.بنات.', 'بنات','Ig'))
+            return qs.filter(bus_active=True)
+        # elif request.user.code =="busb":
+        #     return qs.filter(bus_active=True,school="بنين")
         return qs
+        
     def has_module_permission(self, request):
         if request.user.is_authenticated:
             if request.user.code in ('mosaad','busb','busg'):
