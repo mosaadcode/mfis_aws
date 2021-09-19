@@ -93,5 +93,5 @@ class BusStudentResource(resources.ModelResource):
     class Meta:
         model = Student
         import_id_fields = ('code',)
-        fields = ('code','username','school','grade','bus_number','bus_active', 'father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus')
-        export_order = ('code','username','school','grade','bus_number','bus_active', 'father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus')
+        fields = ('code','username','school','grade','bus_number','bus_active', 'father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus','bus_order','bus_notes')
+        export_order = ('code','username','school','grade','bus_number','bus_active', 'father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus','bus_order','bus_notes')
