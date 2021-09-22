@@ -115,6 +115,8 @@ class Student(AbstractBaseUser, PermissionsMixin):
         ('بنات', 'بنات'),
         ('.بنات.', '.بنات.'),
         ('Ig','Ig'),
+        ('Out-b','Out-b'),
+        ('Out-g','Out-g'),
     )
     GRADE_CHOICES = (
         (None, ""),
