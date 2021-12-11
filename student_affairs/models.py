@@ -99,10 +99,16 @@ class Student(models.Model):
         ('وزير','وزير'),
         ('بعثات','بعثات'),
     )   
+
+    KIND_CHOICES = (
+        ('ذكر','ذكر'),
+        ('انثى','انثى'),
+    )
     code = models.CharField(max_length=7, unique=True,blank=True,verbose_name='الكود ')
     global_code = models.CharField(max_length=9,blank=True,null=True,verbose_name='كود الوزارة ')
     name = models.CharField(max_length=60,verbose_name='إسم الطالب ')
     en_name = models.CharField(max_length=60, blank=True, null=True,verbose_name='الإسم بالانجلزية ')
+    kind = models.CharField(max_length=4,choices=KIND_CHOICES,blank=True,null=True,verbose_name='النوع ')
     student_id = models.CharField(max_length=14, blank=True, null=True,verbose_name='رقم قومي ')
     status = models.CharField( max_length=7, choices=STATUS_CHOICES,default='مستجد',verbose_name='حالة القيد ')
     status_no = models.CharField(max_length=7, blank=True, null=True,verbose_name='رقم القيد ')
@@ -123,10 +129,12 @@ class Student(models.Model):
     father_job = models.CharField(max_length=60,null=True, blank=True,verbose_name='الوظيفة ')
     father_id = models.CharField(max_length=14, null=True,blank=True,verbose_name='رقم قومي ')
     mother_name = models.CharField(max_length=36, null=True,blank=True,verbose_name='إسم الام ')
+    mother_job = models.CharField(max_length=60,null=True, blank=True,verbose_name='الوظيفة ')
     responsibility = models.CharField(max_length=11,choices=RESPONSIBILITY_CHOICES,default='الاب والام',blank=True,null=True,verbose_name='الولاية التعليمية ')    
     father_mobile = models.CharField(max_length=14, null=True,blank=True,verbose_name='هاتف الاب ')
     mother_mobile = models.CharField(max_length=11, null=True,blank=True,verbose_name='هاتف الام ')
     phone_number = models.CharField(max_length=11, null=True,blank=True,verbose_name='هاتف المنزل ')
+    phone_number2 = models.CharField(max_length=11, null=True,blank=True,verbose_name='هاتف بديل ')
     address_1 = models.CharField( max_length=64,null=True,blank=True,verbose_name='العنوان ')
     # address_2 = models.CharField( max_length=64,null=True,blank=True,verbose_name='العنوان البديل ')
     email = models.EmailField(max_length=60, blank=True,null=True)
@@ -158,7 +166,7 @@ class Student(models.Model):
     def myage(self):
         if self.birth_date !=None:
             ret = []
-            age = date(2021,9,30) - self.birth_date
+            age = date(2021,10,1) - self.birth_date
             num_years = int(age.days / 365.2425)
             if num_years >= 0:
                 age -= timedelta(days=num_years * 365.2425)
