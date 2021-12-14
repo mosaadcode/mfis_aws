@@ -203,7 +203,10 @@ class Student(models.Model):
 
 def create_student(sender, instance, created, **kwargs):
     if created:
-        GradeFee = SchoolFee.objects.get(school=instance.school,grade=instance.grade)
+        if instance.school == ".بنات.":
+            GradeFee = SchoolFee.objects.get(school="بنات",grade=instance.grade)
+        else:
+            GradeFee = SchoolFee.objects.get(school=instance.school,grade=instance.grade)
         StudentAcc.objects.create(
             code=instance.code,
             username=instance.name,
@@ -222,7 +225,10 @@ post_save.connect(create_student, sender=Student)
 
 def update_student(sender, instance, created, **kwargs):
     if created ==False:
-        GradeFee = SchoolFee.objects.get(school=instance.school,grade=instance.grade)
+        if instance.school == ".بنات.":
+            GradeFee = SchoolFee.objects.get(school="بنات",grade=instance.grade)
+        else:
+            GradeFee = SchoolFee.objects.get(school=instance.school,grade=instance.grade)
         StudentAcc.objects.filter(code=instance.code).update(
             username=instance.name,
             school=instance.school,
