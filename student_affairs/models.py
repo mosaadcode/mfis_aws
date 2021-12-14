@@ -102,13 +102,13 @@ class Student(models.Model):
 
     KIND_CHOICES = (
         ('ذكر','ذكر'),
-        ('انثى','انثى'),
+        ('اُنثى','اُنثى'),
     )
     code = models.CharField(max_length=7, unique=True,blank=True,verbose_name='الكود ')
     global_code = models.CharField(max_length=9,blank=True,null=True,verbose_name='كود الوزارة ')
     name = models.CharField(max_length=60,verbose_name='إسم الطالب ')
     en_name = models.CharField(max_length=60, blank=True, null=True,verbose_name='الإسم بالانجلزية ')
-    kind = models.CharField(max_length=4,choices=KIND_CHOICES,blank=True,null=True,verbose_name='النوع ')
+    kind = models.CharField(max_length=5,choices=KIND_CHOICES,blank=True,null=True,verbose_name='النوع ')
     student_id = models.CharField(max_length=14, blank=True, null=True,verbose_name='رقم قومي ')
     status = models.CharField( max_length=7, choices=STATUS_CHOICES,default='مستجد',verbose_name='حالة القيد ')
     status_no = models.CharField(max_length=7, blank=True, null=True,verbose_name='رقم القيد ')
