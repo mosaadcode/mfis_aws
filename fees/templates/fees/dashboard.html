@@ -150,6 +150,34 @@
 	</div>
 	</div>
 	{% endif %}
+	{% if  user.discount > 0 %}
+	<br>
+	<div class="row">
+	<div class="col-md-12 ">
+		<div class="table-responsive">
+			<table class="table table-hover text-center">
+				<thead>
+					<tr>
+						<th scope="col"></th>
+						<th scope="col "><i class="fa fa-handshake-o mr-2 mt-4"></i>خصومات</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td><button type="button" class="btn btn-deafult text-center mt-3 p-0" style="display:inline-block;width:150px"><h6> </h6></button></td>
+						<th scope="row"><button type="button" class="btn btn-primary cib p-2" style="display:inline-block; width:170px" > مبلغ خصم <span class="badge badge-light ml-2"><h6>{{ user.discount }}</h6></span></button></th>
+					</tr>
+					<!-- <tr>
+						<td><button type="button" class="btn btn-deafult text-center mt-3 p-0" style="display:inline-block;width:150px"><h6>مـن 10/01 الى 10/30</h6></button></td>
+						<th scope="row"><button type="button" class="btn btn-primary cib p-2" style="display:inline-block; width:170px" >القسط الثاني<span class="badge badge-light ml-2"><h6>{{ user.bus_payment2 }}</h6></span></button></th>
+		</tr> -->
+				</tbody>
+			</table>
+		</div>
+	</div>
+	</div>
+	{% endif %}
+	
 	<div class="row">
 	<div class="col-md-12 ">
 		<div class="table-responsive">
