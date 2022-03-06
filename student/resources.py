@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget, BooleanWidget
 from fees.models import Fee
@@ -6,7 +7,7 @@ from django.contrib.auth.hashers import make_password
 from django.utils.encoding import force_text
 from import_export.results import RowResult
 from django.db.models import F
-from student_affairs.models import Student as StudentAff
+from student_affairs.models import School, Student as StudentAff
 
 class FeesResource(resources.ModelResource):
     student = fields.Field(column_name='student',
@@ -83,6 +84,49 @@ class StudentResource(resources.ModelResource):
         import_id_fields = ('code',)
         fields = ('year','code','username', 'password','school','grade','study_payment1','study_payment2','study_payment3','bus_payment1', 'bus_payment2','old_fee', 'old_paid', 'discount','total_paid','message','is_active', 'can_pay', 'bus_active', 'father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus','books','total_books')
         export_order = ('year','code','username', 'password','school','grade','study_payment1','study_payment2','study_payment3','bus_payment1', 'bus_payment2','old_fee', 'old_paid', 'discount','total_paid','message','is_active', 'can_pay', 'bus_active', 'father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus','books','total_books')
+
+class StudentAffResource(resources.ModelResource):
+    # if 'password' in self.fields.keys():
+    def get_row_result_class(self):
+        """
+        Returns the class used to store the result of a row import.
+        """
+        return RowResult
+
+    delete = fields.Field(widget=BooleanWidget())
+    def for_delete(self, row, instance):
+        row_result = self.get_row_result_class()
+        row_result.object_id = instance.pk
+        row_result.object_repr = force_text(instance)
+        return self.fields['delete'].clean(row)
+
+    def before_import_row(self,row, **kwargs):
+        if not row['code']:
+            code_gen = []
+            if row['school'] == "بنين":
+                code_gen.append('2')
+            else:
+                code_gen.append('3')
+            code_gen.append(row['study_year'][3:])
+            if row['school'] == ".بنات.":
+                myschool = School.objects.get(school="بنات")
+            else:
+                myschool = School.objects.get(school=row['school'])
+            myschool.count +=1
+            code_gen.append(format(myschool.count,'04'))
+            myschool.save()
+            row['code']= ''.join(code_gen)
+
+        # value = row['password']
+        # row['password'] = make_password(value)
+
+    class Meta:
+        model = StudentAff
+        import_id_fields = ('code',)
+        fields = ('code','study_year','school','grade','status','name','en_name','student_id','birth_date','age1oct','kind','nationality','address_1','phone_number','phone_number2',
+        'mother_mobile','father_mobile','email','father_id','father_name','father_job','mother_name','mother_job')
+        export_order = ('code','study_year','school','grade','status','name','en_name','student_id','birth_date','age1oct','kind','nationality','address_1','phone_number','phone_number2',
+        'mother_mobile','father_mobile','email','father_id','father_name','father_job','mother_name','mother_job')
 
 class BusStudentResource(resources.ModelResource):
 

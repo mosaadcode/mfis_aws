@@ -117,6 +117,7 @@ class Student(models.Model):
     start_year = models.CharField( max_length=5,blank=True,verbose_name='سنة الالتحاق ')
     school = models.CharField( max_length=6, choices=SCHOOL_CHOICES,verbose_name='المدرسة ')
     grade = models.CharField( max_length=16, choices=GRADE_CHOICES,verbose_name='الصف ')
+    start_grade = models.CharField( max_length=16, null=True,blank=True, choices=GRADE_CHOICES,verbose_name='صف الإلتحاق ')
     Class = models.ForeignKey(Class,on_delete=models.SET_NULL, null=True,blank=True,verbose_name='الفصل ')
     group = models.ForeignKey(Class_group,on_delete=models.SET_NULL, null=True,blank=True,verbose_name='المجموعة ')
     religion = models.CharField(max_length=5,choices=RELIGION_CHOICES,default='مسلم',blank=True,null=True,verbose_name='الديانة ')
@@ -132,9 +133,9 @@ class Student(models.Model):
     mother_job = models.CharField(max_length=60,null=True, blank=True,verbose_name='الوظيفة ')
     responsibility = models.CharField(max_length=11,choices=RESPONSIBILITY_CHOICES,default='الاب والام',blank=True,null=True,verbose_name='الولاية التعليمية ')    
     father_mobile = models.CharField(max_length=14, null=True,blank=True,verbose_name='هاتف الاب ')
-    mother_mobile = models.CharField(max_length=11, null=True,blank=True,verbose_name='هاتف الام ')
-    phone_number = models.CharField(max_length=11, null=True,blank=True,verbose_name='هاتف المنزل ')
-    phone_number2 = models.CharField(max_length=11, null=True,blank=True,verbose_name='هاتف بديل ')
+    mother_mobile = models.CharField(max_length=13, null=True,blank=True,verbose_name='هاتف الام ')
+    phone_number = models.CharField(max_length=13, null=True,blank=True,verbose_name='هاتف المنزل ')
+    phone_number2 = models.CharField(max_length=13, null=True,blank=True,verbose_name='هاتف بديل ')
     address_1 = models.CharField( max_length=86,null=True,blank=True,verbose_name='العنوان ')
     # address_2 = models.CharField( max_length=64,null=True,blank=True,verbose_name='العنوان البديل ')
     email = models.EmailField(max_length=60, blank=True,null=True)
@@ -163,25 +164,25 @@ class Student(models.Model):
             return ''.join(code_gen)
 
 
-    def myage(self):
-        if self.birth_date !=None:
-            ret = []
-            age = date(2021,10,1) - self.birth_date
-            num_years = int(age.days / 365.2425)
-            if num_years >= 0:
-                age -= timedelta(days=num_years * 365.2425)
-                num_years = format(num_years,'02')
-                ret.append(num_years)
-            num_months = int(age.days / 30.436875)
-            if num_months >= 0:
-                age -= timedelta(days=num_months * 30.436875)
-                num_months = format(num_months,'02')
-                ret.append(num_months)
-            if age.days >= 0:
-                days = format(age.days,'02')
-                ret.append(days)
-            return '-'.join(ret)
-        return ""
+    # def myage(self):
+    #     if self.birth_date !=None:
+    #         ret = []
+    #         age = date(2021,10,1) - self.birth_date
+    #         num_years = int(age.days / 365.2425)
+    #         if num_years >= 0:
+    #             age -= timedelta(days=num_years * 365.2425)
+    #             num_years = format(num_years,'02')
+    #             ret.append(num_years)
+    #         num_months = int(age.days / 30.436875)
+    #         if num_months >= 0:
+    #             age -= timedelta(days=num_months * 30.436875)
+    #             num_months = format(num_months,'02')
+    #             ret.append(num_months)
+    #         if age.days >= 0:
+    #             days = format(age.days,'02')
+    #             ret.append(days)
+    #         return '-'.join(ret)
+    #     return ""
     
     # def brothers(self):
     #     return Student.objects.filter(father_id=self.father_id).count()-1
@@ -190,7 +191,7 @@ class Student(models.Model):
     def save(self, *args, **kwargs):
         if self.code == "":
             self.code = self.get_code()
-        self.age1oct = self.myage()
+        # self.age1oct = self.myage()
         if self.start_year == "":
             self.start_year = self.study_year
         super().save(*args, **kwargs)

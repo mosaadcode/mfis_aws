@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import Student, School,Governorate, Nationality, Class, Class_group
 from import_export.admin import ImportExportModelAdmin
+from student.resources import StudentAffResource
 
 class GovernorateAdmin(ImportExportModelAdmin):
     list_display = ('name',)
@@ -58,14 +59,16 @@ class StudentAdmin(ImportExportModelAdmin):
 
     fieldsets = (
         ('بيانات الطالب', { 'fields': ('name','en_name',('student_id','kind'),('birth_date', 'age1oct'),'birth_gov',('nationality','religion'))}),
-        ('بيانات الالتحاق', { 'fields': (('study_year','payment_status'),'start_year','code','school', 'grade', ('status','from_to'),'status_no',('Class','group','is_over'),'global_code')}),
+        ('بيانات الالتحاق', { 'fields': (('study_year','payment_status'),('start_year','start_grade'),'code','school', 'grade', ('status','from_to'),'status_no',('Class','group','is_over'),'global_code')}),
         ('بيانات ولي الامر', { 'fields': ('responsibility','father_name','father_job','father_id','mother_name','mother_job','father_mobile','mother_mobile','phone_number','phone_number2','address_1' ,'email','notes')}),
 
                  )
+    resource_class = StudentAffResource
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
             if obj.code != "":
+                # return self.readonly_fields + ('code','study_year','school')
                 return self.readonly_fields + ('code','study_year','school')
             return self.readonly_fields
         return self.readonly_fields

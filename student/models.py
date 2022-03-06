@@ -141,6 +141,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
     YEAR_CHOICES = (
          ('21-20' , '21-20'),
          ('22-21' , '22-21'),
+         ('23-22' , '23-22'),
     )
 
     code = models.CharField(max_length=7, unique=True)
