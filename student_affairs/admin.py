@@ -55,7 +55,7 @@ class StudentAdmin(ImportExportModelAdmin):
     readonly_fields = ('age1oct','payment_status')
 
     filter_horizontal = ()
-    list_filter = ('school','grade','status','is_over','payment_status')
+    list_filter = ('study_year','school','grade','status','is_over','payment_status')
 
     fieldsets = (
         ('بيانات الطالب', { 'fields': ('name','en_name',('student_id','kind'),('birth_date', 'age1oct'),'birth_gov',('nationality','religion'))}),
