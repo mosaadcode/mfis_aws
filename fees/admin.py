@@ -57,7 +57,8 @@ class FeeAdmin(ImportExportModelAdmin):
         for obj in queryset:
             if obj.verified == False:
                 mystudent = Student.objects.get(id=obj.student_id)
-                if obj.year == '22-21':
+                SYear=mystudent.year
+                if obj.year == SYear:
 
                     #for book and book
                     if obj.kind[:3] == 'Boo':
@@ -111,7 +112,8 @@ class FeeAdmin(ImportExportModelAdmin):
         for obj in queryset:
             if obj.verified == True:
                 mystudent = Student.objects.get(id=obj.student_id)
-                if obj.year == '22-21':
+                SYear=mystudent.year
+                if obj.year == SYear:
                     #for book and book
                     if obj.kind[:3] == 'Boo':
                         mystudent.total_books = F('total_books')-obj.value
@@ -156,7 +158,8 @@ class FeeAdmin(ImportExportModelAdmin):
         for obj in queryset:
             if obj.verified == True:
                 mystudent = Student.objects.get(id=obj.student_id)
-                if obj.year == '22-21':
+                SYear=mystudent.year
+                if obj.year == SYear:
                     #for book and book
                     if obj.kind[:3] == 'Boo':
                         mystudent.total_books = F('total_books')-obj.value
@@ -192,7 +195,8 @@ class FeeAdmin(ImportExportModelAdmin):
         """
         if obj.verified == True:
             mystudent = Student.objects.get(id=obj.student_id)
-            if obj.year == '22-21':
+            SYear=mystudent.year
+            if obj.year == SYear:
                 #for book and book
                 if obj.kind[:3] == 'Boo':
                     mystudent.total_books = F('total_books')-obj.value

@@ -31,6 +31,7 @@ def addfees(request):
                     newfee.student = request.user
                     newfee.school = request.user.school
                     LYFee = request.user.old_fee - request.user.old_paid
+                    SYear=request.user.year
                     if LYFee >0:
                         if int(request.POST['value']) <= LYFee:
                             newfee.year = '21-20'
@@ -44,10 +45,10 @@ def addfees(request):
                             newfee2.student = request.user
                             newfee2.school = request.user.school
                             newfee2.value = int(request.POST['value']) - LYFee
-                            newfee2.year = '22-21'
+                            newfee2.year = SYear
                             newfee2.save()
                     else:        
-                        newfee.year = '22-21'
+                        newfee.year = SYear
                         newfee.save()
                     # update student data
                     # request.user.total_paid += int(request.POST['value'])
@@ -66,6 +67,7 @@ def addfees(request):
                         newfee.student = request.user
                         newfee.school = request.user.school
                         LYFee = request.user.old_fee - request.user.old_paid
+                        SYear=request.user.year
                         if LYFee >0:
                             if int(request.POST['value']) <= LYFee:
                                 newfee.year = '21-20'
@@ -79,10 +81,10 @@ def addfees(request):
                                 newfee2.student = request.user
                                 newfee2.school = request.user.school
                                 newfee2.value = int(request.POST['value']) - LYFee
-                                newfee2.year = '22-21'
+                                newfee2.year = SYear
                                 newfee2.save()
                         else:        
-                            newfee.year = '22-21'
+                            newfee.year = SYear
                             newfee.save()
                         request.session['msg'] = ''
                         return redirect('recorded')

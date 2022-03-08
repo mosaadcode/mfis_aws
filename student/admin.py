@@ -88,7 +88,11 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
             if request.user.code in ('mosaad','mfisb','mfisg'):
                 return True
             return False
-
+    def has_delete_permission(self, request, obj=None):
+        if request.user.code == "mosaad":
+            return True
+        return False
+        
 class BusAdmin(ImportExportMixin, admin.ModelAdmin):
     list_display = ('number','supervisor_name','supervisor_mobile','driver_name','driver_mobile')
     search_fields = ('number','area')

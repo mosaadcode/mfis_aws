@@ -39,6 +39,7 @@ class Fee(models.Model):
     YEAR_CHOICES = (
          ('21-20' , '21-20'),
          ('22-21' , '22-21'),
+         ('23-22' , '23-22'),
     )
     payment_date = models.DateField(null=True, blank=True)
     bank_account = models.CharField(max_length=19, choices=BankA_CHOICES)
