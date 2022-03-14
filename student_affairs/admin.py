@@ -59,7 +59,7 @@ class StudentAdmin(ImportExportModelAdmin):
 
     fieldsets = (
         ('بيانات الطالب', { 'fields': ('name','en_name',('student_id','kind'),('birth_date', 'age1oct'),'birth_gov',('nationality','religion'))}),
-        ('بيانات الالتحاق', { 'fields': (('study_year','payment_status'),('start_year','start_grade'),'code','school', 'grade', ('status','from_to'),'status_no',('Class','group','is_over'),'global_code')}),
+        ('بيانات الالتحاق', { 'fields': (('study_year','payment_status'),('start_year','start_grade'),'code','school', 'grade', ('status','from_to'),'status_no',('Class','group','is_over'),('global_code','document_status'))}),
         ('بيانات ولي الامر', { 'fields': ('responsibility','father_name','father_job','father_id','mother_name','mother_job','father_mobile','mother_mobile','phone_number','phone_number2','address_1' ,'email','notes')}),
 
                  )

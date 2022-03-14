@@ -30,7 +30,8 @@ class FeesResource(resources.ModelResource):
     def before_import_row(self,row, **kwargs):
         if row['verified']==True:
             mystudent = Student.objects.get(code=row['student'])
-            if row['year'] == "22-21":
+            SYear = mystudent.year
+            if row['year'] == SYear:
                 if row['kind'][:3] == 'Boo':
                     mystudent.total_books = F('total_books')+row['value']
                     if row['value'] > 0:
