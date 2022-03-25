@@ -50,6 +50,7 @@ class ClassAdmin(ImportExportModelAdmin):
 
 class StudentAdmin(ImportExportModelAdmin):
     list_display = ('code', 'name','grade','status','age1oct','father_mobile','mother_mobile','phone_number','payment_status')
+    ordering = ('name',)
     autocomplete_fields = ['birth_gov','nationality']
     search_fields = ('code','name','father_id','notes')
     readonly_fields = ('age1oct','payment_status')
@@ -59,12 +60,20 @@ class StudentAdmin(ImportExportModelAdmin):
 
     fieldsets = (
         ('بيانات الطالب', { 'fields': ('name','en_name',('student_id','kind'),('birth_date', 'age1oct'),'birth_gov',('nationality','religion'))}),
-        ('بيانات الالتحاق', { 'fields': (('study_year','payment_status'),('start_year','start_grade'),'code','school', 'grade', ('status','from_to'),'status_no',('Class','group','is_over'),('global_code','document_status'))}),
-        ('بيانات ولي الامر', { 'fields': ('responsibility','father_name','father_job','father_id','mother_name','mother_job','father_mobile','mother_mobile','phone_number','phone_number2','address_1' ,'email','notes')}),
+        ('بيانات الالتحاق', { 'fields': (('study_year','payment_status'),('start_year','start_grade'),('school','code'), 'grade', ('status','from_to'),'status_no',('Class','group','is_over'),('global_code','document_status'))}),
+        ('بيانات ولي الامر', { 'fields': ('responsibility',('father_name','father_job'),('father_id','father_mobile'),('mother_name','mother_job'),'mother_mobile',('phone_number','phone_number2'),('address_1' ,'email'),'notes')}),
 
                  )
     resource_class = StudentAffResource
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.code == "affg":
+            return qs.filter(school__in = ('.بنات.', 'بنات'))
+        elif request.user.code =="affb":
+            return qs.filter(school="بنين")
+        return qs
+        
     def get_readonly_fields(self, request, obj=None):
         if obj:
             if obj.code != "":
