@@ -52,7 +52,7 @@ class StudentAdmin(ImportExportModelAdmin):
     list_display = ('code', 'name','grade','status','age1oct','father_mobile','mother_mobile','phone_number','payment_status')
     ordering = ('name',)
     autocomplete_fields = ['birth_gov','nationality']
-    search_fields = ('code','name','father_id','notes')
+    search_fields = ('code','name','student_id','father_id','notes')
     readonly_fields = ('age1oct','payment_status')
 
     filter_horizontal = ()
