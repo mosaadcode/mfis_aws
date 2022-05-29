@@ -25,13 +25,16 @@ AREA_CHOICES = (
     ('المقطم','المقطم'),
     ('مدينتى','مدينتى'),
     ('الرحاب','الرحاب'),
+    ('الرحاب 2','الرحاب 2'),
     ('التجمع الاول','التجمع الاول'),
     ('التجمع الثالث','التجمع الثالث'),
     ('التجمع الخامس','التجمع الخامس'),
     ('روكسي','روكسي'),
     ('السواح','السواح'),
     ('ارض الجولف','ارض الجولف'),
-    ('الشروق+المستقبل','الشروق+المستقبل'),
+    ('الشروق','الشروق'),
+    ('المستقبل','المستقبل'),
+    ('بدر','بدر'),
     ('الحرفيين','الحرفيين'),
 )
 
@@ -152,7 +155,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
     mother_mobile = models.CharField(max_length=13, null=True, blank=True,verbose_name='موبيل الام ')
     phone_number = models.CharField(max_length=13, null=True, blank=True,verbose_name='تليفون المنزل ')
     email = models.EmailField(max_length=60, null=True, blank=True)
-    year = models.CharField( max_length=5,choices=YEAR_CHOICES, default='22-21')
+    year = models.CharField( max_length=5,choices=YEAR_CHOICES, default='23-22')
     study_payment1 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 1')
     study_payment2 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 2')
     study_payment3 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 3')
@@ -162,7 +165,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
     bus_payment1 = models.PositiveSmallIntegerField( default=10000,verbose_name='Bus 1')
     bus_payment2 = models.PositiveSmallIntegerField( default=0,verbose_name='Bus 2')
     total_paid = models.IntegerField(default=0)
-    old_paid = models.SmallIntegerField( default=0)
+    old_paid = models.IntegerField( default=0)
     def payment_status(self):
 #due date 1st study and 1st bus
         if date.today() <= date(2020,9,30):
