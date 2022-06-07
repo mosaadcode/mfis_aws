@@ -34,11 +34,11 @@ def addfees(request):
                     SYear=request.user.year
                     if LYFee >0:
                         if int(request.POST['value']) <= LYFee:
-                            newfee.year = '21-20'
+                            newfee.year = '22-21'
                             newfee.save()
                         else:
                             newfee.value = LYFee
-                            newfee.year ='21-20'
+                            newfee.year ='22-21'
                             newfee.save()
                             form2 = FeesForm(request.POST)
                             newfee2 = form2.save(commit=False)
@@ -70,11 +70,11 @@ def addfees(request):
                         SYear=request.user.year
                         if LYFee >0:
                             if int(request.POST['value']) <= LYFee:
-                                newfee.year = '21-20'
+                                newfee.year = '22-21'
                                 newfee.save()
                             else:
                                 newfee.value = LYFee
-                                newfee.year ='21-20'
+                                newfee.year ='22-21'
                                 newfee.save()
                                 form2 = FeesForm(request.POST)
                                 newfee2 = form2.save(commit=False)
