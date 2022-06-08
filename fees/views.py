@@ -99,7 +99,7 @@ def addfees(request):
         else:
             return render(request, 'fees/addfees.html', {'form':FeesForm(),'error':'لا يمكنك التسجيل الان, برجاء مراجعة قسم الحسابات'})
 def recorded(request):
-    fees = Fee.objects.filter(student=request.user.id)
+    fees = Fee.objects.filter(student=request.user.id,year="23-22")
     return render(request, 'fees/recorded.html',{'fees':fees})
 
 
