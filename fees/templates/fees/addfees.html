@@ -50,8 +50,13 @@
                     <option value="1903530709961400015">1903530709961400015</option>
                   </select>
                   <br>
-                  <input type="text"  name="payment_date" required="" placeholder="تاريخ الدفع بالبنك" onfocus="(this.type='date')"
-                  onblur="(this.type='text')" class="form-control" id="id_payment_date">
+                  <div>
+                    <h6>تاريخ الدفع بالبنك</h6>
+                   </div>
+                   <input type="date"  name="payment_date" required="" placeholder="تاريخ الدفع بالبنك"
+                    class="form-control" id="id_payment_date">
+                  {% comment %} <input type="text"  name="payment_date" required="" placeholder="تاريخ الدفع بالبنك" onfocus="(this.type='date')"
+                  onblur="(this.type='text')" class="form-control" id="id_payment_date"> {% endcomment %}
               <!-- </div> -->
               <br>
               <button type="submit" class="btn btn-primary btn-block cib">تسجيل ايصال الدفع</button>
