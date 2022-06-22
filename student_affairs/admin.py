@@ -1,8 +1,9 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from .models import Student, School,Governorate, Nationality, Class, Class_group
 from import_export.admin import ImportExportModelAdmin
 from student.resources import StudentAffResource
+from django.utils.translation import ngettext
 
 class GovernorateAdmin(ImportExportModelAdmin):
     list_display = ('name',)
@@ -82,6 +83,84 @@ class StudentAdmin(ImportExportModelAdmin):
             return self.readonly_fields
         return self.readonly_fields
 
+    def Transfer(self, request, queryset):
+        # updated = queryset.update(verified=True)
+        transferdgb = 0
+        transferdbg = 0
+        Passed = 0
+
+        for obj in queryset:
+            if obj.code[0] == str(3):
+                NewCode = 'C'+obj.code[1:7]
+
+                if obj.school == 'بنات':
+                    obj.school = '.بنات.'
+                    obj.status = "محول من"
+                    obj.from_to = "من المنارة بنات"
+                    # self.log_change(request, obj, 'Transferd from Girls To Boys')
+                    self.log_change(request, obj, 'تم التحويل من البنات الى البنين')
+                    obj.save()
+                    try:
+                        CopyRecord = Student.objects.get(code=NewCode)
+                        CopyRecord.delete()
+                    except Student.DoesNotExist:
+                        NewRecord = obj
+                        NewRecord.code = NewCode
+                        NewRecord.school = "بنات"
+                        NewRecord.status = "محول"
+                        NewRecord.from_to = "الى المنارة بنين"
+                        NewRecord.pk = None
+                        NewRecord.save()
+                        
+                    transferdgb +=1
+               
+                elif obj.school == ".بنات.":
+                    obj.school = 'بنات'
+                    obj.status = "محول من"
+                    obj.from_to = "من المنارة بنين"
+                    self.log_change(request, obj, 'تم التحويل من البنين الى البنات')
+                    obj.save() 
+                    try:
+                        CopyRecord = Student.objects.get(code=NewCode)
+                        CopyRecord.delete()
+                        obj.status = "مستجد"
+                        obj.from_to = ""
+                        obj.save() 
+                    except Student.DoesNotExist:
+                        NewRecord = obj
+                        NewRecord.code = NewCode
+                        NewRecord.school = ".بنات."
+                        NewRecord.status = "محول"
+                        NewRecord.from_to = "الى المنارة بنات"
+                        NewRecord.pk = None
+                        NewRecord.save()
+                    
+                    transferdbg +=1
+                            
+            else:
+                Passed +=1
+        if transferdgb != 0:
+            self.message_user(request, ngettext(
+            'تم تحويل عدد %d طالب من البنات الى البنين',
+            'تم تحويل عدد %d طالب من البنات الى البنين',
+            transferdgb,
+            ) % transferdgb, messages.SUCCESS)
+        if transferdbg != 0:
+            self.message_user(request, ngettext(
+            'تم تحويل عدد %d طالب من البنين الى البنات',
+            'تم تحويل عدد %d طالب من البنين الى البنات',
+            transferdbg,
+            ) % transferdbg, messages.SUCCESS)
+        if Passed != 0:
+            self.message_user(request, ngettext(
+            'لا يمكن تحويل عدد %d طالب',
+            'لا يمكن تحويل عدد %d طالب',
+            transferdbg,
+            ) % Passed, messages.ERROR)
+        
+    Transfer.short_description = "تحويل منارة داخلي"
+
+    actions = ['Transfer',]
     # def has_delete_permission(self, request, obj=None):
     #     if request.user.code in ('mosaad','mosaad2'):
     #         return True

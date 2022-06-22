@@ -205,27 +205,28 @@ class Student(models.Model):
 
 def create_student(sender, instance, created, **kwargs):
     if created:
-        if instance.school == ".بنات.":
-            GradeFee = SchoolFee.objects.get(school="بنات",grade=instance.grade)
-        else:
-            GradeFee = SchoolFee.objects.get(school=instance.school,grade=instance.grade)
-        StudentAcc.objects.create(
-            code=instance.code,
-            username=instance.name,
-            password=make_password(instance.code),
-            school=instance.school,
-            grade=instance.grade,
-            year=instance.study_year,
-            father_mobile=instance.father_mobile,
-            mother_mobile=instance.mother_mobile,
-            phone_number=instance.phone_number,
-            email=instance.email,
-            study_payment1=GradeFee.study_payment1,
-            study_payment2=GradeFee.study_payment2,
-            study_payment3=GradeFee.study_payment3,
-            bus_payment1=GradeFee.bus_payment1,
-            bus_payment2=GradeFee.bus_payment2,
-            )
+        if instance.code[0] != "C":
+            if instance.school == ".بنات.":
+                GradeFee = SchoolFee.objects.get(school="بنات",grade=instance.grade)
+            else:
+                GradeFee = SchoolFee.objects.get(school=instance.school,grade=instance.grade)
+            StudentAcc.objects.create(
+                code=instance.code,
+                username=instance.name,
+                password=make_password(instance.code),
+                school=instance.school,
+                grade=instance.grade,
+                year=instance.study_year,
+                father_mobile=instance.father_mobile,
+                mother_mobile=instance.mother_mobile,
+                phone_number=instance.phone_number,
+                email=instance.email,
+                study_payment1=GradeFee.study_payment1,
+                study_payment2=GradeFee.study_payment2,
+                study_payment3=GradeFee.study_payment3,
+                bus_payment1=GradeFee.bus_payment1,
+                bus_payment2=GradeFee.bus_payment2,
+                )
 post_save.connect(create_student, sender=Student)
 
 
