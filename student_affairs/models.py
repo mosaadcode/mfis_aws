@@ -5,7 +5,7 @@ from student.models import Student as StudentAcc, SchoolFee
 from datetime import date,timedelta
 from django.contrib.auth.hashers import make_password
 
-current_year = '22-21'
+current_year = '23-22'
 
 class School(models.Model):
     school = models.CharField(max_length=5)
