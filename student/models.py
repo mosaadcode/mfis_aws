@@ -161,7 +161,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
     study_payment2 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 2')
     study_payment3 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 3')
     discount = models.PositiveSmallIntegerField(default=0)
-    old_fee = models.SmallIntegerField(default=0)
+    old_fee = models.IntegerField(default=0)
     bus_active = models.BooleanField( default=False)
     bus_payment1 = models.PositiveSmallIntegerField( default=10000,verbose_name='Bus 1')
     bus_payment2 = models.PositiveSmallIntegerField( default=0,verbose_name='Bus 2')
