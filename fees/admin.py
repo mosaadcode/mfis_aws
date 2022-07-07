@@ -17,6 +17,7 @@ class FeesInline(admin.TabularInline):
         'verified'
     ]
     extra = 0
+    ordering = ('-year','-created')
     def has_change_permission(self, request, obj=None):
         return False
     # def has_add_permission(self, request, obj=None):
