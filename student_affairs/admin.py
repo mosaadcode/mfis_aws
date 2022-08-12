@@ -50,14 +50,14 @@ class ClassAdmin(ImportExportModelAdmin):
             return False
 
 class StudentAdmin(ImportExportModelAdmin):
-    list_display = ('code', 'name','grade','status','age1oct','father_mobile','mother_mobile','phone_number','payment_status')
+    list_display = ('code', 'name','grade','Class','status','age1oct','father_mobile','mother_mobile','payment_status')
     ordering = ('name',)
     autocomplete_fields = ['birth_gov','nationality']
     search_fields = ('code','name','student_id','father_id','notes')
     readonly_fields = ('payment_status',)
 
     filter_horizontal = ()
-    list_filter = ('study_year','school','grade','status','is_over','payment_status')
+    list_filter = ('study_year','school','grade','Class','status','is_over','payment_status')
 
     fieldsets = (
         ('بيانات الطالب', { 'fields': ('name','en_name',('student_id','kind'),('birth_date', 'age1oct'),'birth_gov',('nationality','religion'))}),

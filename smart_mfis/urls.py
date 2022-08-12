@@ -40,3 +40,7 @@ urlpatterns = [
     # path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='registration/password_reset_complete.html'),
     #  name='password_reset_complete'),
 ]
+
+admin.site.index_title = "MFIS Administration"
+admin.site.site_header = "Manarat Al Farouk Islamic Language School"
+admin.site.site_title = "Onecode"

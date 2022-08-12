@@ -227,5 +227,3 @@ admin.site.register(Bus,BusAdmin)
 admin.site.register(BusStudent,BusStudentAdmin)
 admin.site.register(Teacher,TeacherAdmin)
 admin.site.register(SchoolFee,SchoolFeeAdmin)
-
-admin.site.site_header = "Manarat Al Farouk Islamic Language School"
