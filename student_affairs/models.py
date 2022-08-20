@@ -52,6 +52,8 @@ class Student(models.Model):
         ('بنين', 'بنين'),
         ('بنات', 'بنات'),
         ('.بنات.', '.بنات.'),
+        ('Out-b','Out-b'),
+        ('Out-g','Out-g'),
     )
     STATUS_CHOICES = (
         # (None, ""),
@@ -234,17 +236,30 @@ def update_student(sender, instance, created, **kwargs):
     if created ==False:
         if instance.school == ".بنات.":
             GradeFee = SchoolFee.objects.get(school="بنات",grade=instance.grade)
-        else:
+        elif instance.school[0] != 'O':
             GradeFee = SchoolFee.objects.get(school=instance.school,grade=instance.grade)
-        StudentAcc.objects.filter(code=instance.code).update(
-            username=instance.name,
-            school=instance.school,
-            grade=instance.grade,
-            year=instance.study_year,
-            study_payment1=GradeFee.study_payment1,
-            study_payment2=GradeFee.study_payment2,
-            study_payment3=GradeFee.study_payment3,
-            bus_payment1=GradeFee.bus_payment1,
-            bus_payment2=GradeFee.bus_payment2,
-        )
+        if instance.school[0] != 'O':    
+            StudentAcc.objects.filter(code=instance.code).update(
+                username=instance.name,
+                school=instance.school,
+                grade=instance.grade,
+                year=instance.study_year,
+                study_payment1=GradeFee.study_payment1,
+                study_payment2=GradeFee.study_payment2,
+                study_payment3=GradeFee.study_payment3,
+                bus_payment1=GradeFee.bus_payment1,
+                bus_payment2=GradeFee.bus_payment2,
+            )
+        else:
+            StudentAcc.objects.filter(code=instance.code).update(
+                username=instance.name,
+                school=instance.school,
+                grade=instance.grade,
+                year=instance.study_year,
+                study_payment1=0,
+                study_payment2=0,
+                study_payment3=0,
+                bus_payment1=0,
+                bus_payment2=0,
+            )
 post_save.connect(update_student, Student)

@@ -34,6 +34,8 @@ class Fee(models.Model):
         ('بنين', 'بنين'),
         ('بنات', 'بنات'),
         ('.بنات.', '.بنات.'),
+        ('Out-b','Out-b'),
+        ('Out-g','Out-g'),
     )
 
     YEAR_CHOICES = (
@@ -54,6 +56,5 @@ class Fee(models.Model):
     # class Meta:
     #     verbose_name='fee'
     #     verbose_name_plural ='عمليات السداد '
-
     def __str__(self):
         return self.student.username
