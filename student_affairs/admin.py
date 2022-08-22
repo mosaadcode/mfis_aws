@@ -74,9 +74,9 @@ class StudentAdmin(ImportExportModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.code == "affg":
-            return qs.filter(school__in = ('.بنات.', 'بنات'))
+            return qs.filter(school__in = ('.بنات.', 'بنات','Out-g'))
         elif request.user.code =="affb":
-            return qs.filter(school="بنين")
+            return qs.filter(school__in = ('بنين','Out-b'))
         return qs
         
     def get_readonly_fields(self, request, obj=None):
