@@ -9,7 +9,8 @@
         <ul class="navbar-nav ml-auto mr-2">
                 {% url 'profile' as profile_url1 %}
                 {% if user.is_authenticated %}
-                {% if request.get_full_path != profile_url1 or  request.get_full_path == profile_url1 and user.father_mobile != "" %}
+                {% if user.father_mobile != ""  and user.father_mobile != None %}
+                {% if request.get_full_path != profile_url1 or  request.get_full_path == profile_url1 %}
                 <li class="nav-item">
                   <li class="nav-item active">
                     <a class="nav-link" href="{% url 'dashboard' %}">إستعلام مصروفات</a>
@@ -30,6 +31,7 @@
                           <button id="signOutBtn" type="submit">  تسجيل خروج  </button>
                       </form>
                   </li>
+                  {% endif %}
                   {% endif %}
                   {% endif %}
         </ul>

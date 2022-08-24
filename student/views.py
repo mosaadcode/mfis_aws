@@ -29,10 +29,7 @@ def logoutuser(request):
 
 def profile(request):
         if request.method == 'GET':
-            if request.user.father_mobile == "":
-                return render(request, 'student/profile.html', {'form':StudentProfile(), 'error':'برجاء تحديث بيانات التواصل'})
-            else:
-                return render(request, 'student/profile.html', {'form':StudentProfile()})
+            return render(request, 'student/profile.html', {'form':StudentProfile()})
 
         else:
             # add try: except to solve value Error
@@ -54,7 +51,8 @@ def profile(request):
                 request.user.email = request.POST['email']
                 request.user.save(update_fields=["father_mobile", "mother_mobile", "phone_number", "email"])
                 # redirect user to currenttodos page
-                return redirect('dashboard')
+                # return redirect('dashboard')
+                return render(request, 'student/profile.html', {'updated':'.تم حفظ البيانات بنجاح'})
             except ValueError:
                     # tell user when error hapen
                     return render(request, 'student/profile.html', {'form':StudentProfile(),'error':'برجاء مراجعة البيانات'})
