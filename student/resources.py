@@ -7,7 +7,7 @@ from django.contrib.auth.hashers import make_password
 from django.utils.encoding import force_text
 from import_export.results import RowResult
 from django.db.models import F
-from student_affairs.models import School, Student as StudentAff
+from student_affairs.models import School, Class, Student as StudentAff
 
 class FeesResource(resources.ModelResource):
     student = fields.Field(column_name='student',
@@ -87,6 +87,10 @@ class StudentResource(resources.ModelResource):
         export_order = ('year','code','username', 'password','school','grade','study_payment1','study_payment2','study_payment3','bus_payment1', 'bus_payment2','old_fee', 'old_paid', 'discount','total_paid','message','is_active', 'can_pay', 'bus_active', 'father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus','books','total_books')
 
 class StudentAffResource(resources.ModelResource):
+    Class = fields.Field(column_name='Class',
+                      attribute='Class',
+                      widget=ForeignKeyWidget(Class, 'name'))
+
     # if 'password' in self.fields.keys():
     def get_row_result_class(self):
         """
@@ -124,9 +128,9 @@ class StudentAffResource(resources.ModelResource):
     class Meta:
         model = StudentAff
         import_id_fields = ('code',)
-        fields = ('code','study_year','school','grade','status','name','en_name','student_id','birth_date','age1oct','kind','nationality','address_1','phone_number','phone_number2',
+        fields = ('code','study_year','school','grade','Class','status','name','en_name','student_id','birth_date','age1oct','kind','nationality','address_1','phone_number','phone_number2',
         'mother_mobile','father_mobile','email','father_id','father_name','father_job','mother_name','mother_job')
-        export_order = ('code','study_year','school','grade','status','name','en_name','student_id','birth_date','age1oct','kind','nationality','address_1','phone_number','phone_number2',
+        export_order = ('code','study_year','school','grade','Class','status','name','en_name','student_id','birth_date','age1oct','kind','nationality','address_1','phone_number','phone_number2',
         'mother_mobile','father_mobile','email','father_id','father_name','father_job','mother_name','mother_job')
 
 class BusStudentResource(resources.ModelResource):
