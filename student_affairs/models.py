@@ -30,7 +30,7 @@ class Nationality(models.Model):
         return self.name
 
 class Class(models.Model):
-    name = models.CharField(max_length=6)
+    name = models.CharField(max_length=11)
     class Meta:
         verbose_name='class'
         verbose_name_plural =' B -  الفصول الدراسية'
