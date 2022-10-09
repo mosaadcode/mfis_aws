@@ -4,6 +4,12 @@
 {% load static %}
 <link rel="stylesheet" href="{% static '/css/base.css' %}">
 
+{% if msg %}
+<div class="alert alert-info text-center" role="alert">
+	{{ msg }}
+</div>
+{% endif %}
+
 <div class="container-fluid text-right  ">
 	<br>
 		<div class="row">

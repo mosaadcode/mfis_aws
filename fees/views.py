@@ -2,20 +2,23 @@ from django.shortcuts import render, redirect
 from .forms import FeesForm
 from .models import Fee
 from student.forms import StudentForm, StudentArea
+from student_affairs.models import Student as StudentAff
 
 def dashboard(request):
-    # ddate1=DueDates.objects.get(pk=1)
-    # ddate2=DueDates.objects.get(pk=2)
-    # feess = Fees.objects.filter(student=request.user)
-    student=request.user
-    # fees = student.fee_set.all()
-    #totalfees = feess.aggregate(Sum('value'))
-    oldfee = student.old_fee - student.old_paid
-    if len(str(request.user.living_area)) > 4 :
-        bus = True
-    else :
-        bus = False
-    return render(request, 'fees/dashboard.html',{'oldfee':oldfee,'bus':bus})
+    studentaff = StudentAff.objects.get(code=request.user.code)
+    if studentaff.contact_status == False:
+        request.session['error'] ='برجاء تحديث بيانات التواصل'
+        return redirect('contact')
+    else:
+        student=request.user
+        oldfee = student.old_fee - student.old_paid
+        if len(str(request.user.living_area)) > 4 :
+            bus = True
+        else :
+            bus = False
+        msg = request.session.get('msg')
+        request.session['msg'] = ''
+        return render(request, 'fees/dashboard.html',{'oldfee':oldfee,'bus':bus,'msg':msg})
 
 def addfees(request):
     if request.method == 'GET':

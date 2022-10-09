@@ -9,7 +9,6 @@
         <ul class="navbar-nav ml-auto mr-2">
                 {% url 'profile' as profile_url1 %}
                 {% if user.is_authenticated %}
-                {% if user.father_mobile != ""  and user.father_mobile != None %}
                 {% if request.get_full_path != profile_url1 or  request.get_full_path == profile_url1 %}
                 <li class="nav-item">
                   <li class="nav-item active">
@@ -22,7 +21,7 @@
                     <a class="nav-link" href="{% url 'agreement' %}">إشتراك السيارة</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'profile' %}">الملف الشخصي</a>
+                    <a class="nav-link" href="{% url 'contact' %}">بيانات التواصل</a>
                   </li>
                   <li class="nav-item">
                       <a href="#" onclick="$('#signOutBtn').click()" class="nav-link"><i class="fa fa-sign-out mr-2"></i>خروج</a>
@@ -31,7 +30,6 @@
                           <button id="signOutBtn" type="submit">  تسجيل خروج  </button>
                       </form>
                   </li>
-                  {% endif %}
                   {% endif %}
                   {% endif %}
         </ul>

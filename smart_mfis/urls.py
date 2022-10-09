@@ -26,6 +26,7 @@ urlpatterns = [
     path('logout/', views.logoutuser, name='logoutuser'),
     path('profile/', views.profile, name='profile'),
     path('fee/', include('fees.urls')),
+    path('affairs/', include('student_affairs.urls')),
 
     # Password reset links (ref: https://github.com/django/django/blob/master/django/contrib/auth/views.py)
     path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='student/password_change_done.html'),

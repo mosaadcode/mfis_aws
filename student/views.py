@@ -14,10 +14,7 @@ def loginuser(request):
             return render(request, 'student/home.html', {'form':AuthenticationForm, 'error':'برجاء التأكد من الكود وكلمة المرور'})
         else:
             login(request, user)
-            if user.father_mobile == "" or user.father_mobile == None:
-                return redirect('profile')
-            else:
-                return redirect('dashboard')
+            return redirect('dashboard')
 
 # def home(request):
 #     return render(request, 'student/home.html')
