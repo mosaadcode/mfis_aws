@@ -144,6 +144,7 @@ class Student(models.Model):
     notes = models.TextField( max_length=250,null=True,blank=True,verbose_name='ملاحظات ')
     payment_status = models.BooleanField(default=False,verbose_name='حالة السداد ')
     document_status = models.BooleanField(default=True,verbose_name=' تم تقديم الأوراق   ')
+    contact_status = models.BooleanField(default=False,verbose_name='   تم تحديث بيانات التواصل ')
 
 
     def __str__(self):
@@ -203,8 +204,29 @@ class Student(models.Model):
         verbose_name='student'
         verbose_name_plural =' A -  سجلات الطلاب'
 
+class Contact(models.Model):
+    SCHOOL1_CHOICES = (
+        ('بنين', 'بنين'),
+        ('بنات', 'بنات'),
+        ('.بنات.', '.بنات.'),
+    )
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    father_mobile = models.CharField(max_length=14, null=True,blank=True,verbose_name='هاتف الاب ')
+    mother_mobile = models.CharField(max_length=13, null=True,blank=True,verbose_name='هاتف الام ')
+    phone_number = models.CharField(max_length=13, null=True,blank=True,verbose_name='هاتف المنزل ')
+    email = models.EmailField(max_length=60, blank=True,null=True)
+    address_1 = models.CharField( max_length=86,null=True,blank=True,verbose_name='العنوان ')
+    school = models.CharField( max_length=6, choices=SCHOOL1_CHOICES, blank=True)
+    phone_update = models.BooleanField(default=False,verbose_name='تحديث الهاتف')
+    address_update = models.BooleanField(default=False,verbose_name='تحديث العنوان')
 
+    def __str__(self):
+        return self.student.name
 
+    class Meta:
+        verbose_name='contact'
+        verbose_name_plural =' D -  بيانات التواصل'
+        
 def create_student(sender, instance, created, **kwargs):
     if created:
         if instance.code[0] != "C":
@@ -222,6 +244,7 @@ def create_student(sender, instance, created, **kwargs):
                 father_mobile=instance.father_mobile,
                 mother_mobile=instance.mother_mobile,
                 phone_number=instance.phone_number,
+                address=instance.address_1,
                 email=instance.email,
                 study_payment1=GradeFee.study_payment1,
                 study_payment2=GradeFee.study_payment2,
@@ -230,7 +253,6 @@ def create_student(sender, instance, created, **kwargs):
                 bus_payment2=GradeFee.bus_payment2,
                 )
 post_save.connect(create_student, sender=Student)
-
 
 def update_student(sender, instance, created, **kwargs):
     if created ==False:
@@ -244,6 +266,10 @@ def update_student(sender, instance, created, **kwargs):
                 school=instance.school,
                 grade=instance.grade,
                 year=instance.study_year,
+                father_mobile=instance.father_mobile,
+                mother_mobile=instance.mother_mobile,
+                phone_number=instance.phone_number,
+                email=instance.email,
                 study_payment1=GradeFee.study_payment1,
                 study_payment2=GradeFee.study_payment2,
                 study_payment3=GradeFee.study_payment3,

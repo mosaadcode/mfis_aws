@@ -196,7 +196,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
     payment_status
 
     living_area = models.CharField( max_length=16, choices=AREA_CHOICES,null=True,blank=True,verbose_name='المنطقة السكنية ')
-    address = models.CharField( max_length=50,null=True,blank=True,verbose_name='العنوان ')
+    address = models.CharField( max_length=86,null=True,blank=True,verbose_name='العنوان ')
     old_bus = models.CharField( max_length=4,null=True,blank=True,verbose_name='رقم سيارة العام السابق ')
     bus_number = models.ForeignKey(Bus, on_delete=SET_NULL,null=True, blank=True,verbose_name='رقم السيارة ')
     bus_order = models.CharField(max_length=5,null=True,blank=True,verbose_name='موعد الركوب ')
