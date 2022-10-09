@@ -14,7 +14,7 @@ admin.site.unregister(Group)
 class StudentAdmin(ImportExportMixin, UserAdmin):
     list_display = ('code', 'username', 'total_paid', 'payment_status','total_books')
     search_fields = ('code', 'username')
-    readonly_fields = ('code','username','year','school','grade','living_area', 'address','bus_number','old_bus','total_paid', 'old_fee', 'old_paid','study_payment3', 'bus_payment2', 'payment_status','last_login','bus_order','books','total_books')
+    readonly_fields = ('code','username','year','school','grade','living_area', 'address','bus_number','old_bus','total_paid', 'old_fee', 'old_paid','study_payment3', 'bus_payment2', 'payment_status','last_login','bus_order','books','total_books','father_mobile','mother_mobile','phone_number', 'email')
 
     # filter_horizontal = ()
     list_filter = ('school','year','grade','bus_active','books','is_active','can_pay')
