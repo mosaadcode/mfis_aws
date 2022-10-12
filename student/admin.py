@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from .models import Student,Bus,BusStudent,Teacher,SchoolFee
 from fees.admin import FeesInline
@@ -7,9 +7,12 @@ from fees.admin import FeesInline
 from import_export.admin import ImportExportMixin, ImportExportModelAdmin
 from .resources import StudentResource,BusStudentResource
 from django.contrib.auth.models import Group
+from django.utils.translation import ngettext
 # from django.db.models import Q
 
 admin.site.unregister(Group)
+
+current_year = '23-22'
 
 class StudentAdmin(ImportExportMixin, UserAdmin):
     list_display = ('code', 'username', 'total_paid', 'payment_status','total_books')
@@ -221,6 +224,39 @@ class SchoolFeeAdmin(ImportExportMixin, admin.ModelAdmin):
         if request.user.code == "mosaad":
             return True
         return False
+
+    def update(self, request, queryset):
+        count = 0
+        for obj in queryset:
+            count +=1
+        if count > 1 :
+            self.message_user(request,'لا يمكن تحديث اكثر من مرحلة في نفس الوقت', messages.ERROR)
+        else:
+            school = obj.school
+            grade = obj.grade
+            study1 = obj.study_payment1
+            study2 = obj.study_payment2
+            study3 = obj.study_payment3
+            bus1 = obj.bus_payment1
+            bus2 = obj.bus_payment2
+            students = Student.objects.filter(year=current_year,school=school,grade=grade)
+            students.update(
+                study_payment1 = study1,
+                study_payment2 = study2,
+                study_payment3 = study3,
+                bus_payment1 = bus1,
+                bus_payment2 = bus2,
+            )
+            self.log_change(request, obj, 'تم تحديث مصروفات جميع الطلاب')
+            count = students.count()
+            if count != 0:
+                self.message_user(request, ngettext(
+                'تم تحديث مصروفات %d طالب ',
+                'تم تحديث مصروفات %d طالب ',
+                count,
+                ) % count, messages.SUCCESS)
+    update.short_description='تحديث مصروفات المرحلة'
+    actions = ['update']
 
 admin.site.register(Student, StudentAdmin)
 admin.site.register(Bus,BusAdmin)

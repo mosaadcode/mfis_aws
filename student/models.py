@@ -259,3 +259,10 @@ class SchoolFee(models.Model):
     books_a_level = models.PositiveSmallIntegerField(default=0)
     books_fee = models.PositiveSmallIntegerField(default=0)
     bus_fee = models.PositiveSmallIntegerField(default=0)
+
+    def __str__(self):
+        return self.grade
+        
+    class Meta:
+        verbose_name='Fee'
+        verbose_name_plural ='School Fees  '
