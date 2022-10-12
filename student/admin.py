@@ -192,7 +192,7 @@ class TeacherAdmin(ImportExportMixin, admin.ModelAdmin):
             return False
 
 class SchoolFeeAdmin(ImportExportMixin, admin.ModelAdmin):
-    list_display = ('grade' , 'study_fee', 'activity_fee', 'computer_fee','study_payment1','study_payment2','study_payment3','bus_payment1','bus_payment1')
+    list_display = ('grade' , 'study_fee', 'activity_fee', 'computer_fee','study_payment1','study_payment2','study_payment3','bus_payment1','bus_payment2')
     ordering = ('id',)
     readonly_fields = ('school', 'grade',)
 
@@ -239,7 +239,10 @@ class SchoolFeeAdmin(ImportExportMixin, admin.ModelAdmin):
             study3 = obj.study_payment3
             bus1 = obj.bus_payment1
             bus2 = obj.bus_payment2
-            students = Student.objects.filter(year=current_year,school=school,grade=grade)
+            if school == 'بنين':
+                students = Student.objects.filter(year=current_year,school=school,grade=grade)
+            else:
+                students = Student.objects.filter(year=current_year,school__in = ('.بنات.', 'بنات'),grade=grade)
             students.update(
                 study_payment1 = study1,
                 study_payment2 = study2,
