@@ -1,6 +1,6 @@
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
-from .models import Student,Bus,BusStudent,Teacher,SchoolFee
+from .models import Student,Bus,BusStudent,Teacher,SchoolFee,Manager,Program
 from fees.admin import FeesInline
 # from django.http import HttpResponse
 # import csv
@@ -261,8 +261,59 @@ class SchoolFeeAdmin(ImportExportMixin, admin.ModelAdmin):
     update.short_description='تحديث مصروفات المرحلة'
     actions = ['update']
 
+class ProgramAdmin(ImportExportModelAdmin):
+    # list_display = ('app', 'model')
+    filter_horizontal = ()
+    list_filter = ('app',)
+    fieldsets = ((None, {'fields':('app','model'),}),)
+
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad',):
+                return True
+            return False
+
+class ManagerAdmin(ImportExportModelAdmin):
+    list_display = ('user', 'program','level')
+    autocomplete_fields = ['user']
+    raw_id_fields = ('program',)
+    search_fields = ('user__username','user__code')
+    readonly_fields = ()
+    filter_horizontal = ()
+    list_filter = ('program__app',)
+    fieldsets = ((None, {'fields': ('user', ('program','level'))}),)
+
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad',):
+                return True
+            return False
+
+    def delete_queryset(self, request, queryset):
+            print('==========================delete_queryset==========================')
+            print(queryset)
+
+            """
+            you can do anything here BEFORE deleting the object(s)
+            """
+            for obj in queryset:
+                employee = Student.objects.get(id=obj.user.id)
+                employee.is_admin = False
+                employee.is_staff = False
+                employee.save(update_fields=["is_admin", "is_staff"])
+                obj.delete()
+            # queryset.delete()
+
+            """
+            you can do anything here AFTER deleting the object(s)
+            """
+
+            print('==========================delete_queryset==========================')
+
 admin.site.register(Student, StudentAdmin)
 admin.site.register(Bus,BusAdmin)
 admin.site.register(BusStudent,BusStudentAdmin)
 admin.site.register(Teacher,TeacherAdmin)
 admin.site.register(SchoolFee,SchoolFeeAdmin)
+admin.site.register(Manager,ManagerAdmin)
+admin.site.register(Program,ProgramAdmin)
