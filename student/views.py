@@ -14,7 +14,9 @@ def loginuser(request):
             return render(request, 'student/home.html', {'form':AuthenticationForm, 'error':'برجاء التأكد من الكود وكلمة المرور'})
         else:
             login(request, user)
-            return redirect('dashboard')
+            if user.is_employ == False:
+                return redirect('dashboard')
+            return redirect('home2')
 
 # def home(request):
 #     return render(request, 'student/home.html')
