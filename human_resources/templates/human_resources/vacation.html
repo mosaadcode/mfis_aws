@@ -1,0 +1,106 @@
+{% extends 'student/base.html' %}
+
+{% block content %}
+    <br>
+    {% if error %}
+    <div class="alert alert-danger text-center"  role="alert" >
+        {{ error }}
+    </div>
+    {% endif %}
+    {% if msg %}
+    <div class="alert alert-info text-center" role="alert">
+        {{ msg }}
+    </div>
+    {% endif %}
+
+
+
+    <div class="container-fluid">
+
+
+        <br>
+        <div class="row ">
+          <div class="col-md-8  ">
+          </div>
+          <div class="col-md-4  mb-3 text-right">
+            <h6><b>اجازات العام الحالي</b></h6>
+          </div>
+        </div>
+      
+        <div class="row">
+        <div class="col-md-5 ">
+        </div>
+          <div class="col-md-7 ml-auto text-center">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                  <th scope="col"><i class="fa fa-edit" aria-hidden="true" ></th>
+                  <th scope="col"><i class="fa fa-edit" aria-hidden="true" ></th>
+                  <th scope="col">إلى</th>
+                  <th scope="col">من</th>
+                  <th scope="col">اجازة</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                 {% for vacation in vacations %}
+                 <tr>
+                    {% if vacation.ok2 == True %}
+                    <td class="align-middle"><i class="fa fa-check" aria-hidden="true" style="color:green"></i></td>
+                    {% else %}
+                    <td class="align-middle"><i class="fa fa-minus" aria-hidden="true" style="color:red"></i></td>
+                    {% endif %}
+                    {% if vacation.ok1 == True %}
+                    <td class="align-middle"><i class="fa fa-check" aria-hidden="true" style="color:green"></i></td>
+                    {% else %}
+                    <td class="align-middle"><i class="fa fa-minus" aria-hidden="true" style="color:red"></i></td>
+                    {% endif %}
+                    <td>{{ vacation.date_to|date:'M d'}}</td>
+                    <td>{{ vacation.date_from|date:'M d'}}</td>
+                    <td>{{ vacation.type}}</td>
+                 {% endfor %}
+                  </tbody>
+                </table>
+          </div>
+          <br>
+      </div> 
+      <br>
+      <br>
+      <form  method="POST">
+        {% csrf_token %}
+        <div class="row">
+            {% comment %} <div class="col-1 ">
+              </div> {% endcomment %}
+          <div class="col-5">
+            <input type="date" name="date_to" required="" class="form-control" >
+           </div>
+          <div class="col-1 ">
+            <span class=" align-middle text-left">إلى</span>
+          </div>
+          <div class="col-5">
+            <input type="date" name="date_from" required="" class="form-control" >
+          </div>
+          <div class="col-1">
+            <span  class=" align-middle text-left">من</span>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-6">
+            <input type="text" name="reason" required="" class="form-control" placeholder="سبب الاجازة">
+          </div>
+          <div class="col-5">
+            <select type="text" required="" name="type" class="form-control">
+              <option value="إذن" selected="">إذن</option>
+              <option value="مرضي">مرضي</option>
+              <option value="من الرصيد">من الرصيد</option>
+            </select>
+          </div>
+        </div>
+          <br>
+          <div class="row justify-content-center">
+          </div class="col-8">
+            <input type="submit" value = "طلب إجازة" class="btn btn-block btn-secondary">
+          </div>
+        </div>
+      </form>
+{% endblock %}
