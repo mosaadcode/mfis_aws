@@ -209,6 +209,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
     can_pay = models.BooleanField(default=True)
     is_admin  = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
+    is_employ = models.BooleanField(default=False)
     # is_superuser = models.BooleanField(default=False)
     # is_superuser field provided by PermissionsMixin
     # groups field provided by PermissionsMixin
@@ -266,3 +267,26 @@ class SchoolFee(models.Model):
     class Meta:
         verbose_name='Fee'
         verbose_name_plural ='School Fees  '
+
+class Program(models.Model):
+    app = models.CharField(max_length=16)
+    model = models.CharField(max_length=16)
+    
+    def __str__(self):
+        return self.app+ ' - ' + self.model
+
+class Manager(models.Model):
+    user = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
+    program = models.ForeignKey(Program, on_delete=models.CASCADE, null=True)
+    level = models.PositiveSmallIntegerField(default=0)
+
+
+    def save(self, *args, **kwargs):
+        employee = Student.objects.get(id=self.user.id)
+        employee.is_admin = True
+        employee.is_staff = True
+        employee.save(update_fields=["is_admin", "is_staff"])
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.user.code
