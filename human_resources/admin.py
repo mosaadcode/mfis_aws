@@ -23,11 +23,21 @@ class JobAdmin(ImportExportModelAdmin):
     filter_horizontal = ()
     search_fields = ('title',)
     list_filter = ('type','grade','department')
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls'):
+                return True
+            return False
 
 class DepartmentAdmin(ImportExportModelAdmin):
     list_display = ('name',)
     filter_horizontal = ()
     search_fields = ('name',)
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls'):
+                return True
+            return False
 
 class SalaryItemAdmin(ImportExportModelAdmin):
     list_display = ('employee','item','value', 'month')
@@ -44,6 +54,12 @@ class SalaryItemAdmin(ImportExportModelAdmin):
 
     resource_class = SalaryItemResource
 
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls'):
+                return True
+            return False
+
 
 class PermissionAdmin(ImportExportModelAdmin):
     list_display = ('employee','type', 'date','reason', 'month','ok1','ok2')
@@ -55,8 +71,10 @@ class PermissionAdmin(ImportExportModelAdmin):
     list_filter = ('school','month','type')
 
     def get_readonly_fields(self, request, obj=None):
-        if obj.ok2==True:
-            return ('employee','type', 'date','month') + self.readonly_fields
+        if obj:
+            if obj.ok2==True:
+                return ('employee','type', 'date','month') + self.readonly_fields
+            return self.readonly_fields
         return self.readonly_fields
     
     # def get_list_display_links(self, request, obj=None):
@@ -144,6 +162,12 @@ class PermissionAdmin(ImportExportModelAdmin):
     actions = ['ok1','ok2','ok']
     resource_class = PermResource
 
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls'):
+                return True
+            return False
+
 class VacationAdmin(ImportExportModelAdmin):
     list_display = ('employee','date_from','date_to','reason', 'month','ok1','ok2')
     # list_display_links = None
@@ -158,8 +182,10 @@ class VacationAdmin(ImportExportModelAdmin):
     )
 
     def get_readonly_fields(self, request, obj=None):
-        if obj.ok2==True:
-            return ('employee','date_from','date_to','type','month') + self.readonly_fields
+        if obj:
+            if obj.ok2==True:
+                return ('employee','date_from','date_to','type','month') + self.readonly_fields
+            return self.readonly_fields
         return self.readonly_fields
 
 
@@ -239,7 +265,11 @@ class VacationAdmin(ImportExportModelAdmin):
     ok2.short_description = "موافقة الرئيس الأعلى"
     ok.short_description = "موافقة مباشرة"
     actions = ['ok1','ok2','ok']
-
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls'):
+                return True
+            return False
 
 class SalaryItemInline(admin.TabularInline):
     model = SalaryItem
@@ -249,12 +279,26 @@ class SalaryItemInline(admin.TabularInline):
     #     'month'
     # ]
     extra = 0
-    ordering = ('-month',)
+    # ordering = ('-month',)
     
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         try:
-            active_month = Month.objects.get(active=True)
+            return qs.filter(month=active_month)
+        except Month.DoesNotExist:
+            return qs
+
+class PermissionInline(admin.TabularInline):
+    model = Permission
+    can_delete = False
+    # exclude = ('month',)
+    readonly_fields = ['ok1','ok2']
+    extra = 0
+    ordering = ('-date',)
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        try:
             return qs.filter(month=active_month)
         except Month.DoesNotExist:
             return qs
@@ -262,6 +306,8 @@ class SalaryItemInline(admin.TabularInline):
 
     def has_change_permission(self, request, obj=None):
         return False
+
+
 
 class EmployeeAdmin(ImportExportModelAdmin):
     list_display = ('name','mobile_number' ,'participation_date','is_educational','is_active'   )
@@ -281,8 +327,13 @@ class EmployeeAdmin(ImportExportModelAdmin):
             return ('code','na_id','school') + self.readonly_fields
         return self.readonly_fields
 
-    inlines = [SalaryItemInline]
+    inlines = [PermissionInline,SalaryItemInline]
     resource_class = EmployeeResource
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls'):
+                return True
+            return False
 
 class MonthAdmin(ImportExportModelAdmin):
     list_display = ('code','perms','active','published','status')
@@ -361,6 +412,11 @@ class MonthAdmin(ImportExportModelAdmin):
     activate.short_description = 'إعداد الشهر لبداية التسجيل'
     publish.short_description = 'عرض بيانات شهر للموظفين'
     actions = ['activate','publish']
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls'):
+                return True
+            return False
 
 admin.site.register(School,SchoolAdmin)
 admin.site.register(Department, DepartmentAdmin)
