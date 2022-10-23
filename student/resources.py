@@ -129,9 +129,9 @@ class StudentAffResource(resources.ModelResource):
         model = StudentAff
         import_id_fields = ('code',)
         fields = ('code','study_year','school','grade','Class','status','name','en_name','student_id','birth_date','age1oct','kind','nationality','address_1','phone_number','phone_number2',
-        'mother_mobile','father_mobile','email','father_id','father_name','father_job','mother_name','mother_job','payment_status')
+        'mother_mobile','father_mobile','email','father_id','father_name','father_job','mother_name','mother_job','payment_status','global_code','document_status','contact_status')
         export_order = ('code','study_year','school','grade','Class','status','name','en_name','student_id','birth_date','age1oct','kind','nationality','address_1','phone_number','phone_number2',
-        'mother_mobile','father_mobile','email','father_id','father_name','father_job','mother_name','mother_job','payment_status')
+        'mother_mobile','father_mobile','email','father_id','father_name','father_job','mother_name','mother_job','payment_status','global_code','document_status','contact_status')
 
 class BusStudentResource(resources.ModelResource):
 
