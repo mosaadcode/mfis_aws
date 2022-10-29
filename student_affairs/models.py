@@ -260,7 +260,7 @@ def update_student(sender, instance, created, **kwargs):
             GradeFee = SchoolFee.objects.get(school="بنات",grade=instance.grade)
         elif instance.school[0] != 'O':
             GradeFee = SchoolFee.objects.get(school=instance.school,grade=instance.grade)
-        if instance.school[0] != 'O':    
+        if instance.school[0] != 'O' and instance.status != 'محول من':    
             StudentAcc.objects.filter(code=instance.code).update(
                 username=instance.name,
                 school=instance.school,
@@ -275,17 +275,5 @@ def update_student(sender, instance, created, **kwargs):
                 study_payment3=GradeFee.study_payment3,
                 bus_payment1=GradeFee.bus_payment1,
                 bus_payment2=GradeFee.bus_payment2,
-            )
-        else:
-            StudentAcc.objects.filter(code=instance.code).update(
-                username=instance.name,
-                school=instance.school,
-                grade=instance.grade,
-                year=instance.study_year,
-                study_payment1=0,
-                study_payment2=0,
-                study_payment3=0,
-                bus_payment1=0,
-                bus_payment2=0,
             )
 post_save.connect(update_student, Student)

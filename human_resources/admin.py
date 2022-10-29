@@ -4,7 +4,7 @@ from import_export.admin import ImportExportModelAdmin
 from .resources import SalaryItemResource,PermResource,EmployeeResource
 from django.utils.translation import ngettext
 from django.contrib import admin, messages
-from student.models import Manager
+from student.models import Student,Manager
 
 try:
     active_month = Month.objects.get(active=True)
@@ -334,6 +334,28 @@ class EmployeeAdmin(ImportExportModelAdmin):
             if request.user.code in ('mosaad','hrboys','hrgirls'):
                 return True
             return False
+
+    def delete_queryset(self, request, queryset):
+            print('==========================delete_queryset==========================')
+            print(queryset)
+
+            """
+            you can do anything here BEFORE deleting the object(s)
+            """
+            for obj in queryset:
+                try:
+                    employee = Student.objects.get(code=obj.code)
+                    employee.delete()
+                except Student.DoesNotExist:
+                    pass
+                obj.delete()
+            # queryset.delete()
+
+            """
+            you can do anything here AFTER deleting the object(s)
+            """
+
+            print('==========================delete_queryset==========================')
 
 class MonthAdmin(ImportExportModelAdmin):
     list_display = ('code','perms','active','published','status')

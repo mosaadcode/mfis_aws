@@ -220,8 +220,9 @@ class StudentAdmin(ImportExportModelAdmin):
                                 obj.save()
 
                                 StudentAcc.objects.filter(code=obj.code).update(
-                                bus_active=False,)
-
+                                school=NewSchool,bus_active=False,study_payment1=0,
+                                study_payment2=0,study_payment3=0,bus_payment1=0,bus_payment2=0,)
+                                
                                 try:
                                     StudentFees = Fee.objects.filter(student__code=StudentCode)
                                     StudentFees.update(school = NewSchool)
@@ -242,9 +243,122 @@ class StudentAdmin(ImportExportModelAdmin):
             passed,
             ) % passed, messages.ERROR)
 
-    TransferOut.short_description = "تحويل من المدرسة"  
+    TransferOut.short_description = " تحويل من المدرسة وحذف السجل"  
 
-    actions = ['TransferOut','Transfer']
+    def TransferOut2(self, request, queryset):
+        transferd = 0
+        passed = 0
+
+        for obj in queryset:
+            if obj.code[0] == 'C':
+                passed +=1
+            else:
+                if obj.study_year != current_year :
+                    passed =+1
+                else:
+                    if obj.school[0]=='O':
+                        passed +=1
+                    else:
+                        if obj.status == "محول من":
+                            passed +=1
+                        else:
+                            StudentPayments = StudentAcc.objects.get(code=obj.code)
+                            if StudentPayments.total_paid > 0:
+                                passed +=1
+                            else:    
+                                StudentCode = obj.code
+                                NewSchool = None
+                                obj.status = "محول من"
+                                if obj.code[0] == str(3):
+                                    NewSchool = 'Out-g'
+
+                                else:
+                                    NewSchool = 'Out-b'
+
+                                self.log_change(request, obj, 'تم التحويل من المدرسة')
+                                transferd +=1
+                                obj.save(update_fields=['status'])
+
+                                StudentAcc.objects.filter(code=obj.code).update(
+                                school=NewSchool,bus_active=False,study_payment1=0,
+                                study_payment2=0,study_payment3=0,bus_payment1=0,bus_payment2=0,)
+                                
+                                try:
+                                    StudentFees = Fee.objects.filter(student__code=StudentCode)
+                                    StudentFees.update(school = NewSchool)
+                                except Student.DoesNotExist:
+                                    pass
+
+        if transferd != 0:
+            self.message_user(request, ngettext(
+            'تم تحويل عدد %d طالب من المدرسة',
+            'تم تحويل عدد %d طالب من المدرسة',
+            transferd,
+            ) % transferd, messages.SUCCESS)
+
+        if passed != 0:
+            self.message_user(request, ngettext(
+            'لا يمكن تحويل عدد %d طالب',
+            'لا يمكن تحويل عدد %d طالب',
+            passed,
+            ) % passed, messages.ERROR)
+
+    TransferOut2.short_description = " تحويل من المدرسة"  
+
+    def TransferBack(self, request, queryset):
+        transferd = 0
+        passed = 0
+
+        for obj in queryset:
+            if obj.code[0] == 'C':
+                passed +=1
+            else:
+                if obj.study_year != current_year :
+                    passed =+1
+                else:
+                    if obj.status != "محول من":
+                        passed +=1
+                    else:
+                        StudentCode = obj.code
+                        NewSchool = None
+                        obj.status = "مستجد"
+                        if obj.code[0] == str(3):
+                            NewSchool = 'بنات'
+                        else:
+                            NewSchool = 'بنين'
+
+                        self.log_change(request, obj, 'إعادة إلتحاق بالمدرسة')
+                        transferd +=1
+                        obj.school = NewSchool
+                        obj.save()
+
+                        # StudentAcc.objects.filter(code=obj.code).update(
+                        # school=NewSchool,bus_active=False,study_payment1=0,
+                        # study_payment2=0,study_payment3=0,bus_payment1=0,bus_payment2=0,)
+                        
+                        try:
+                            StudentFees = Fee.objects.filter(student__code=StudentCode)
+                            StudentFees.update(school = NewSchool)
+                        except Student.DoesNotExist:
+                            pass
+
+        if transferd != 0:
+            self.message_user(request, ngettext(
+            'تم إعادة عدد %d طالب إلى المدرسة',
+            'تم إعادة عدد %d طالب إلى المدرسة',
+            transferd,
+            ) % transferd, messages.SUCCESS)
+
+        if passed != 0:
+            self.message_user(request, ngettext(
+            'لا يمكن إعادة عدد %d طالب',
+            'لا يمكن إعادة عدد %d طالب',
+            passed,
+            ) % passed, messages.ERROR)
+
+    TransferBack.short_description = " إعادة التحاق بالمدرسة"  
+
+    actions = ['Transfer','TransferOut2','TransferOut','TransferBack']
     def get_actions(self, request):
         actions= super().get_actions(request)
         if request.user.is_authenticated:
@@ -253,6 +367,28 @@ class StudentAdmin(ImportExportModelAdmin):
             else:
                 del actions['Transfer']
                 return actions
+
+    def delete_queryset(self, request, queryset):
+            print('==========================delete_queryset==========================')
+            print(queryset)
+
+            """
+            you can do anything here BEFORE deleting the object(s)
+            """
+            for obj in queryset:
+                try:
+                    student = StudentAcc.objects.get(code=obj.code)
+                    student.delete()
+                except Student.DoesNotExist:
+                    pass
+                obj.delete()
+            # queryset.delete()
+
+            """
+            you can do anything here AFTER deleting the object(s)
+            """
+
+            print('==========================delete_queryset==========================')
 
     # def has_delete_permission(self, request, obj=None):
     #     if request.user.code in ('mosaad','mosaad2'):

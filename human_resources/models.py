@@ -276,6 +276,7 @@ def create_employ(sender, instance, created, **kwargs):
             username=instance.name,
             password=make_password(instance.code),
             school=instance.school,
+            year='emp22',
             is_employ=True,
             )
 post_save.connect(create_employ, sender=Employee)
