@@ -1,6 +1,7 @@
 from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget, BooleanWidget
-from .models import Month,SalaryItem,Employee,Permission,Job
+from .models import Month,SalaryItem,Employee,Permission,School,Job
+from import_export.results import RowResult
 
 try:
     active_month = Month.objects.get(active=True)
@@ -29,10 +30,25 @@ class EmployeeResource(resources.ModelResource):
     #                   attribute='job',
     #                   widget=ForeignKeyWidget(Job, 'title'))
 
-    # def before_import_row(self,row, **kwargs):
-    #     if row['month']==None:
-    #         row['month'] = active_month
-    #     return row
+    def get_row_result_class(self):
+        """
+        Returns the class used to store the result of a row import.
+        """
+        return RowResult
+
+    def before_import_row(self,row, **kwargs):
+        if not row['code']:
+            code_gen = []
+            if row['school'] == "بنين":
+                code_gen.append('6')
+            else:
+                code_gen.append('8')
+            code_gen.append(row['na_id'][1:3])
+            myschool = School.objects.get(school=row['school'])
+            myschool.count +=1
+            code_gen.append(format(myschool.count,'04'))
+            myschool.save()
+            row['code'] = ''.join(code_gen)
 
     class Meta:
         model = Employee

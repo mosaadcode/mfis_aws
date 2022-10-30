@@ -90,9 +90,9 @@ class Employee(models.Model):
         if self.code == "":
             code_gen = []
             if self.school == "بنين":
-                code_gen.append('5')
-            else:
                 code_gen.append('6')
+            else:
+                code_gen.append('8')
             code_gen.append(self.na_id[1:3])
             myschool = School.objects.get(school=self.school)
             myschool.count +=1
