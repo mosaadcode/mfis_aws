@@ -129,9 +129,9 @@ class StudentAffResource(resources.ModelResource):
         model = StudentAff
         import_id_fields = ('code',)
         fields = ('code','study_year','school','grade','Class','status','status_no','name','en_name','student_id','birth_date','age1oct','birth_gov','kind','nationality','address_1','phone_number','phone_number2',
-        'mother_mobile','father_mobile','email','father_id','father_name','father_job','mother_name','mother_job','payment_status','global_code','document_status','contact_status','is_over')
+        'mother_mobile','father_mobile','email','father_id','father_name','father_job','mother_name','mother_job','payment_status','global_code','document_status','contact_status','is_over','notes')
         export_order = ('code','study_year','school','grade','Class','status','status_no','name','en_name','student_id','birth_date','age1oct','birth_gov','kind','nationality','address_1','phone_number','phone_number2',
-        'mother_mobile','father_mobile','email','father_id','father_name','father_job','mother_name','mother_job','payment_status','global_code','document_status','contact_status','is_over')
+        'mother_mobile','father_mobile','email','father_id','father_name','father_job','mother_name','mother_job','payment_status','global_code','document_status','contact_status','is_over','notes')
 
 class BusStudentResource(resources.ModelResource):
 
