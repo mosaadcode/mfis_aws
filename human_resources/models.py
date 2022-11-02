@@ -89,11 +89,11 @@ class Employee(models.Model):
     def get_code(self):
         if self.code == "":
             code_gen = []
-            if self.school == "بنين":
-                code_gen.append('6')
-            else:
-                code_gen.append('8')
             code_gen.append(self.na_id[1:3])
+            if self.school == "بنين":
+                code_gen.append('b')
+            else:
+                code_gen.append('g')
             myschool = School.objects.get(school=self.school)
             myschool.count +=1
             code_gen.append(format(myschool.count,'04'))

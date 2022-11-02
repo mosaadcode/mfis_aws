@@ -39,11 +39,11 @@ class EmployeeResource(resources.ModelResource):
     def before_import_row(self,row, **kwargs):
         if not row['code']:
             code_gen = []
-            if row['school'] == "بنين":
-                code_gen.append('6')
-            else:
-                code_gen.append('8')
             code_gen.append(row['na_id'][1:3])
+            if row['school'] == "بنين":
+                code_gen.append('b')
+            else:
+                code_gen.append('g')
             myschool = School.objects.get(school=row['school'])
             myschool.count +=1
             code_gen.append(format(myschool.count,'04'))
