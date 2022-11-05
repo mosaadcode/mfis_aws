@@ -10,6 +10,8 @@ except Month.DoesNotExist:
     published_month = None
 try:
     active_month = Month.objects.get(active=True)
+    month_start = date(2022,int(active_month.code[5:])-1,16)
+    month_end = date(2022,int(active_month.code[5:]),15)
 except Month.DoesNotExist:
     active_month = None
 
@@ -40,6 +42,8 @@ def perm(request):
             'msg':msg,
             'error':error,
             'month':active_month,
+            'month_start':month_start,
+            'month_end':month_end,
             'perms':Permission.objects.filter(employee__code=request.user.code,month=active_month).order_by('-date'),
         }        
         return render( request, "human_resources/perm.html", context)
@@ -49,19 +53,17 @@ def perm(request):
                 request.session['error'] = 'يرجى تحديد تاريخ إذن صحيح'
                 return redirect('perm')
             else:
+                form = PermForm(request.POST)
+                permission = form.save(commit=False)
+                permission.employee = Employee.objects.get(code=request.user.code)
+                permission.school = request.user.school
+                permission.month=active_month
+                permission.save()
                 if Permission.objects.filter(employee__code=request.user.code,month=active_month,ok2=True).count() >= active_month.perms:
-                    request.session['error'] = 'تم استخدام جميع اُذون هذا الشهر'
-                    return redirect('perm')
+                    request.session['msg'] = ' ( تم تسجيل الإذن زائد ( سيتم الخصم من الراتب'
                 else:
-                    form = PermForm(request.POST)
-                    permission = form.save(commit=False)
-                    permission.employee = Employee.objects.get(code=request.user.code)
-                    permission.school = request.user.school
-                    permission.month=active_month
-                    permission.save()
-
                     request.session['msg'] = '( تم تسجيل الإذن ( قيد الموافقة'
-                    return redirect('perm')
+                return redirect('perm')
         else:
             request.session['error'] = 'لا توجد شهور مفعلة'
             return redirect('perm')
