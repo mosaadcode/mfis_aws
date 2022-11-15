@@ -260,20 +260,31 @@ def update_student(sender, instance, created, **kwargs):
             GradeFee = SchoolFee.objects.get(school="بنات",grade=instance.grade)
         elif instance.school[0] != 'O':
             GradeFee = SchoolFee.objects.get(school=instance.school,grade=instance.grade)
-        if instance.school[0] != 'O' and instance.status != 'محول من':    
-            StudentAcc.objects.filter(code=instance.code).update(
-                username=instance.name,
-                school=instance.school,
-                grade=instance.grade,
-                year=instance.study_year,
-                father_mobile=instance.father_mobile,
-                mother_mobile=instance.mother_mobile,
-                phone_number=instance.phone_number,
-                email=instance.email,
-                study_payment1=GradeFee.study_payment1,
-                study_payment2=GradeFee.study_payment2,
-                study_payment3=GradeFee.study_payment3,
-                bus_payment1=GradeFee.bus_payment1,
-                bus_payment2=GradeFee.bus_payment2,
-            )
+        if instance.school[0] != 'O' and instance.status != 'محول من':
+            studentacc = StudentAcc.objects.get(code=instance.code)
+            studentacc.username=instance.name
+            studentacc.school=instance.school
+            studentacc.grade=instance.grade
+            studentacc.year=instance.study_year
+            studentacc.father_mobile=instance.father_mobile
+            studentacc.mother_mobile=instance.mother_mobile
+            studentacc.phone_number=instance.phone_number
+            studentacc.email=instance.email
+            studentacc.living_area=""
+            studentacc.address=instance.address_1
+            studentacc.study_payment1=GradeFee.study_payment1
+            studentacc.study_payment2=GradeFee.study_payment2
+            studentacc.study_payment3=GradeFee.study_payment3
+            studentacc.bus_payment1=GradeFee.bus_payment1
+            studentacc.bus_payment2=GradeFee.bus_payment2
+
+            if studentacc.bus_active == True:
+                studentacc.save(update_fields=["username", "school", "grade", "year","father_mobile", 
+                "mother_mobile", "phone_number", "email","living_area", "address", "study_payment1",
+                "study_payment2", "study_payment3","bus_payment1", "bus_payment2"])
+            else:
+                studentacc.save(update_fields=["username", "school", "grade", "year","father_mobile", 
+                "mother_mobile", "phone_number", "email","study_payment1",
+                "study_payment2", "study_payment3","bus_payment1", "bus_payment2"])
+
 post_save.connect(update_student, Student)
