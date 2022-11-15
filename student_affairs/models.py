@@ -278,7 +278,7 @@ def update_student(sender, instance, created, **kwargs):
             studentacc.bus_payment1=GradeFee.bus_payment1
             studentacc.bus_payment2=GradeFee.bus_payment2
 
-            if studentacc.bus_active == True:
+            if studentacc.bus_active == False:
                 studentacc.save(update_fields=["username", "school", "grade", "year","father_mobile", 
                 "mother_mobile", "phone_number", "email","living_area", "address", "study_payment1",
                 "study_payment2", "study_payment3","bus_payment1", "bus_payment2"])
