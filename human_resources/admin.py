@@ -316,7 +316,7 @@ class EmployeeAdmin(ImportExportModelAdmin):
     readonly_fields = ('birth_date','job_code')
     search_fields = ('code','name','na_id')
     filter_horizontal = ()
-    list_filter = ('school','is_educational')
+    list_filter = ('school','job__type','job__grade','is_educational','job__department')
     fieldsets = (
     ('بيانات الموظف', { 'fields': ('name',('code','birth_date'),('na_id','school'),('mobile_number','phone_number'),('emergency_phone','email'),'address',('basic_certificate','is_educational'),('notes','is_active'))}),
     ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('job','job_code'),'salary_parameter','salary','message')}),
