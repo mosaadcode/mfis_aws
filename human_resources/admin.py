@@ -162,7 +162,35 @@ class PermissionAdmin(ImportExportModelAdmin):
     actions = ['ok1','ok2','ok']
     resource_class = PermResource
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.code !="mosaad":
+            qs.filter(school=request.user.school)
+            if request.user.id in Manager.objects.filter(level=1).values_list('user',flat=True):
+                employee = Employee.objects.get(code=request.user.code)
+                return qs.filter(employee__job_code=employee.job_code,ok1=False,ok2=False)
+            elif request.user.id in Manager.objects.filter(level=2).values_list('user',flat=True):
+                employee = Employee.objects.get(code=request.user.code)
+                return qs.filter(employee__job_code__startswith=employee.job_code[:2],ok2=False)
+        return qs
+
     def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls'):
+                return True
+            elif request.user.id in Manager.objects.filter(level__in=(1,2)).values_list('user',flat=True):
+                return True
+            return False
+
+    def get_list_display_links(self, request, obj=None):
+        if request.user.code in ('mosaad','hrboys','hrgirls'):
+            self.list_display_links = ('employee',)
+            return self.list_display_links
+        else:
+            self.list_display_links = None
+            return self.list_display_links
+
+    def has_delete_permission(self, request, obj=None):
         if request.user.is_authenticated:
             if request.user.code in ('mosaad','hrboys','hrgirls'):
                 return True
@@ -265,7 +293,35 @@ class VacationAdmin(ImportExportModelAdmin):
     ok2.short_description = "موافقة الرئيس الأعلى"
     ok.short_description = "موافقة مباشرة"
     actions = ['ok1','ok2','ok']
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.code !="mosaad":
+            qs.filter(school=request.user.school)
+            if request.user.id in Manager.objects.filter(level=1).values_list('user',flat=True):
+                employee = Employee.objects.get(code=request.user.code)
+                return qs.filter(employee__job_code=employee.job_code,ok1=False,ok2=False)
+            elif request.user.id in Manager.objects.filter(level=2).values_list('user',flat=True):
+                employee = Employee.objects.get(code=request.user.code)
+                return qs.filter(employee__job_code__startswith=employee.job_code[:2],ok2=False)
+        return qs
+
     def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls'):
+                return True
+            elif request.user.id in Manager.objects.filter(level__in=(1,2)).values_list('user',flat=True):
+                return True
+            return False
+
+    def get_list_display_links(self, request, obj=None):
+        if request.user.code in ('mosaad','hrboys','hrgirls'):
+            self.list_display_links = ('employee',)
+            return self.list_display_links
+        else:
+            self.list_display_links = None
+            return self.list_display_links
+
+    def has_delete_permission(self, request, obj=None):
         if request.user.is_authenticated:
             if request.user.code in ('mosaad','hrboys','hrgirls'):
                 return True
