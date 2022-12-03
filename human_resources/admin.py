@@ -319,7 +319,7 @@ class EmployeeAdmin(ImportExportModelAdmin):
     list_filter = ('school','is_educational')
     fieldsets = (
     ('بيانات الموظف', { 'fields': ('name',('code','birth_date'),('na_id','school'),('mobile_number','phone_number'),('emergency_phone','email'),'address',('basic_certificate','is_educational'),('notes','is_active'))}),
-    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('job', 'salary'),('salary_parameter'),'message')}),
+    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('job','job_code'),'salary_parameter','salary','message')}),
                 )
 
     def get_readonly_fields(self, request, obj=None):

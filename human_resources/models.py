@@ -35,10 +35,10 @@ class Job(models.Model):
         ('خدمية','خدمية'),
     )
     GRADE_CHOICES = (
-        ('KG','KG'),
-        ('ابتدائى','ابتدائى'),
-        ('اعدادى','اعدادى'),
-        ('ثانوى','ثانوى'),
+        ('10','رياض أطفال'),
+        ('20','ابتدائى'),
+        ('30','اعدادى'),
+        ('40','ثانوى'),
     )
     type = models.CharField(max_length=7, choices=TYPES_CHOICES, verbose_name='نوع الوظيفة')
     title = models.CharField(max_length=20 ,verbose_name='المسمى الوظيفي')
@@ -48,12 +48,12 @@ class Job(models.Model):
     def __str__(self):
         if self.department!=None:
             if self.grade != None:
-                return  self.title + " " + self.department.name + ' ( ' + self.grade + ' )'
+                return  self.title + " " + self.department.name + ' ( ' + self.get_grade_display() + ' )'
             else:
                 return  self.title + " " + self.department.name
         else:
             if self.grade != None:
-                return self.title + ' ( ' + self.grade + ' )'
+                return self.title + ' ( ' + self.get_grade_display() + ' )'
             else:
                 return self.title
 
@@ -81,6 +81,7 @@ class Employee(models.Model):
     insurance_no = models.CharField(max_length=10, unique=True,null=True,blank=True,verbose_name='الرقم التأميني')
     notes = models.TextField( max_length=100,null=True,blank=True,verbose_name='ملاحظات ')
     job = models.ForeignKey(Job, on_delete=SET_NULL,null=True, blank=True,verbose_name='الوظيفة')
+    job_code = models.CharField(max_length=4,blank=True,null=True,verbose_name='')
     is_active = models.BooleanField(default=True,verbose_name='الحالة')
     salary_parameter = models.TextField( max_length=120,blank=True,null=True,verbose_name='عوامل تحديد الراتب ')
     salary = models.PositiveSmallIntegerField(null=True,blank=True,verbose_name='قيمة الراتب')

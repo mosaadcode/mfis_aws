@@ -53,8 +53,8 @@ class EmployeeResource(resources.ModelResource):
     class Meta:
         model = Employee
         import_id_fields = ('code',)
-        fields = ('code','school','name','na_id','birth_date','mobile_number','phone_number','emergency_phone','email','address','basic_certificate','is_educational','attendance_date','insurance_date','participation_date','contract_date','insurance_no','notes','job','is_active','salary_parameter','salary','message')
-        export_order = ('code','school','name','na_id','birth_date','mobile_number','phone_number','emergency_phone','email','address','basic_certificate','is_educational','attendance_date','insurance_date','participation_date','contract_date','insurance_no','notes','job','is_active','salary_parameter','salary','message')
+        fields = ('code','school','name','na_id','birth_date','mobile_number','phone_number','emergency_phone','email','address','basic_certificate','is_educational','attendance_date','insurance_date','participation_date','contract_date','insurance_no','notes','job','job_code','is_active','salary_parameter','salary','message')
+        export_order = ('code','school','name','na_id','birth_date','mobile_number','phone_number','emergency_phone','email','address','basic_certificate','is_educational','attendance_date','insurance_date','participation_date','contract_date','insurance_no','notes','job','job_code','is_active','salary_parameter','salary','message')
 
 
 class PermResource(resources.ModelResource):
@@ -70,5 +70,5 @@ class PermResource(resources.ModelResource):
     class Meta:
         model = Permission
         import_id_fields = ('id',)
-        fields = ('id','school','employee','date','type','verified','month')
-        export_order = ('id','school','employee','date','type','verified','month')
+        fields = ('id','school','employee','date','type','ok1','ok2','month')
+        export_order = ('id','school','employee','date','type','ok1','ok2','month')
