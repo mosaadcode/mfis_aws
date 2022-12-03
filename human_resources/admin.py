@@ -310,7 +310,7 @@ class PermissionInline(admin.TabularInline):
 
 
 class EmployeeAdmin(ImportExportModelAdmin):
-    list_display = ('name','mobile_number' ,'participation_date','is_educational','is_active'   )
+    list_display = ('name','mobile_number' ,'participation_date','job','is_educational','is_active'   )
     # autocomplete_fields = ['job']
     raw_id_fields = ('job',)
     readonly_fields = ('birth_date','job_code')
