@@ -159,7 +159,20 @@ class PermissionAdmin(ImportExportModelAdmin):
     ok1.short_description = "موافقة الرئيس المباشر"
     ok2.short_description = "موافقة الرئيس الأعلى"
     ok.short_description = "موافقة مباشرة"
+
     actions = ['ok1','ok2','ok']
+    def get_actions(self, request):
+        actions= super().get_actions(request)
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls'):
+                return actions
+            elif request.user.id in Manager.objects.filter(level=2).values_list('user',flat=True):
+                del actions['ok']
+                return actions
+            else:          
+                del actions['ok','ok2']
+                return actions
+
     resource_class = PermResource
 
     def get_queryset(self, request):
@@ -292,7 +305,20 @@ class VacationAdmin(ImportExportModelAdmin):
     ok1.short_description = "موافقة الرئيس المباشر"
     ok2.short_description = "موافقة الرئيس الأعلى"
     ok.short_description = "موافقة مباشرة"
+
     actions = ['ok1','ok2','ok']
+    def get_actions(self, request):
+        actions= super().get_actions(request)
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls'):
+                return actions
+            elif request.user.id in Manager.objects.filter(level=2).values_list('user',flat=True):
+                del actions['ok']
+                return actions
+            else:          
+                del actions['ok','ok2']
+                return actions
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.code !="mosaad":
