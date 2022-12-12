@@ -219,7 +219,6 @@ class VacationAdmin(ImportExportModelAdmin):
     list_filter = ('school','month','type')
     fieldsets =(
         ('-----------', { 'fields': (('employee','month'),'type',('date_from','date_to'),'reason',('ok1','ok2'),'created','school')}),
-    
     )
 
     def get_readonly_fields(self, request, obj=None):
@@ -389,19 +388,17 @@ class PermissionInline(admin.TabularInline):
     def has_change_permission(self, request, obj=None):
         return False
 
-
-
 class EmployeeAdmin(ImportExportModelAdmin):
     list_display = ('name','code','mobile_number' ,'participation_date','job','is_active')
     # autocomplete_fields = ['job']
     raw_id_fields = ('job',)
-    readonly_fields = ('birth_date','job_code')
+    readonly_fields = ('birth_date','job_code','time_in','time_in_perm','time_out','time_out_perm')
     search_fields = ('code','name','na_id')
     filter_horizontal = ()
     list_filter = ('school','job__type','job__grade','is_educational','job__department')
     fieldsets = (
-    ('بيانات الموظف', { 'fields': ('name',('code','birth_date'),('na_id','school'),('mobile_number','phone_number'),('emergency_phone','email'),'address',('basic_certificate','is_educational'),('notes','is_active'))}),
-    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('job','job_code'),'salary_parameter','salary','message')}),
+    ('بيانات الموظف', { 'fields': (('name','job'),('code','job_code','birth_date'),('na_id','school'),('mobile_number','phone_number'),('emergency_phone','email'),'address',('basic_certificate','is_educational'),('notes','is_active'))}),
+    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message',('time_in','time_in_perm'),('time_out','time_out_perm'))}),
                 )
 
     def get_readonly_fields(self, request, obj=None):

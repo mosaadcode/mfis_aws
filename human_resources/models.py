@@ -86,7 +86,11 @@ class Employee(models.Model):
     salary_parameter = models.TextField( max_length=120,blank=True,null=True,verbose_name='عوامل تحديد الراتب ')
     salary = models.PositiveSmallIntegerField(null=True,blank=True,verbose_name='قيمة الراتب')
     message = models.CharField(max_length=260, null=True, blank=True) 
-
+    time_in = models.CharField(max_length=5,blank=True,null=True,verbose_name='موعد الحضور')
+    time_in_perm = models.CharField(max_length=5,blank=True,null=True,verbose_name='حضور بإذن')
+    time_out = models.CharField(max_length=5,blank=True,null=True,verbose_name='موعد الإنصراف')
+    time_out_perm = models.CharField(max_length=5,blank=True,null=True,verbose_name='إنصراف بإذن')
+    
     def get_code(self):
         if self.code == "":
             code_gen = []
