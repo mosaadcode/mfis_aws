@@ -15,7 +15,6 @@
 
     <div class="container-fluid">
 
-
         <br>
         <div class="row ">
           <div class="col-md-8  ">
@@ -67,15 +66,34 @@
           <div class="col-1">
           </div>
           <div class="col-5">
+            <label for="date" class="form-label float-right mb-1 text-secondary"> يوم</label>
             <input type="date" name="date" required="" class="form-control" >
           </div>
           <div class="col">
-            <select type="text" required="" name="type" class="form-control">
-              <option value="صباحي" selected="">صباحي</option>
-              <option value="داخلي">داخلي</option>
+            <label for="type" class="form-label float-right mb-1 text-secondary">إذن</label>
+            <select type="text" required="" name="type" id="type101" class="form-control text-right">
+              <option value="صباحي">صباحي</option>
+              <option value="داخلي" selected="">داخلي</option>
               <option value="مسائي">مسائي</option>
             </select>
           </div>
+          <div class="col-1">
+          </div>
+        </div>
+        <br>
+          <div class="row">
+          <div class="col-1">
+          </div>
+          <div class="col-5">
+            <label for="end_time" class="form-label float-right mb-1 text-secondary">حتى الساعة</label>
+          <input type="time" name="end_time" id="end_time" class="form-control" help_text="إلى ساعة" >
+          </div>
+
+          <div class="col-5">
+            <label for="start_time" class="form-label float-right mb-1 text-secondary">من الساعة</label>
+            <input type="time" name="start_time" id="start_time"   class="form-control" placeholder="من ساعة">
+          </div>
+
           <div class="col-1">
           </div>
         </div>

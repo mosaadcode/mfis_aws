@@ -260,6 +260,8 @@ class Permission(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     ok1 = models.BooleanField(default=False,verbose_name='مدير مباشر')
     ok2 = models.BooleanField(default=False,verbose_name='مدير أعلى')
+    start_time = models.CharField(max_length=5,blank=True,null=True,verbose_name='من ساعة')
+    end_time = models.CharField(max_length=5,blank=True,null=True,verbose_name='الى ساعة')
 
     def save(self, *args, **kwargs):
         if self.month == "":

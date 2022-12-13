@@ -13,7 +13,9 @@ class EmployeeContact(forms.ModelForm):
 class PermForm(forms.ModelForm):
     class Meta:
         model = Permission
-        fields = ('date','type','reason')
+        fields = ('date','type','reason','start_time','end_time')
+        start_time = forms.TimeInput(format='%H:%M'),
+        end_time = forms.TimeInput(format='%H:%M'),
         # exclude = ('date','type')
 
     date = forms.DateField(widget=DateInput,)

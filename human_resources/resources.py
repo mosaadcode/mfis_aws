@@ -53,8 +53,8 @@ class EmployeeResource(resources.ModelResource):
     class Meta:
         model = Employee
         import_id_fields = ('code',)
-        fields = ('code','school','name','na_id','birth_date','mobile_number','phone_number','emergency_phone','email','address','basic_certificate','is_educational','attendance_date','insurance_date','participation_date','contract_date','insurance_no','notes','job','job_code','is_active','salary_parameter','salary','message')
-        export_order = ('code','school','name','na_id','birth_date','mobile_number','phone_number','emergency_phone','email','address','basic_certificate','is_educational','attendance_date','insurance_date','participation_date','contract_date','insurance_no','notes','job','job_code','is_active','salary_parameter','salary','message')
+        fields = ('code','school','name','na_id','birth_date','mobile_number','phone_number','emergency_phone','email','address','basic_certificate','is_educational','attendance_date','insurance_date','participation_date','contract_date','insurance_no','notes','job','job_code','is_active','salary_parameter','salary','message','time_in','time_out','time_in_perm','time_out_perm')
+        export_order = ('code','school','name','na_id','birth_date','mobile_number','phone_number','emergency_phone','email','address','basic_certificate','is_educational','attendance_date','insurance_date','participation_date','contract_date','insurance_no','notes','job','job_code','is_active','salary_parameter','salary','message','time_in','time_out','time_in_perm','time_out_perm')
 
 
 class PermResource(resources.ModelResource):

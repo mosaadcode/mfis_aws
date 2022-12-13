@@ -65,7 +65,7 @@ class PermissionAdmin(ImportExportModelAdmin):
     list_display = ('employee','type', 'date','reason', 'month','ok1','ok2')
     # list_display_links = ('employee',)
     autocomplete_fields = ['employee']
-    readonly_fields = ('school','created','reason','ok1','ok2')
+    readonly_fields = ('school','created','reason','ok1','ok2','start_time','end_time')
     filter_horizontal = ()
     search_fields = ('employee__code','employee__name')
     list_filter = ('school','month','type')

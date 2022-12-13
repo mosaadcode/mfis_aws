@@ -2,7 +2,8 @@ from django.shortcuts import render,redirect
 from .models import Employee,SalaryItem,Month,Permission,Vacation
 from .forms import PermForm,VacationForm,EmployeeContact
 from datetime import datetime,date
-
+from django.http import JsonResponse
+import json
 
 try:
     published_month = Month.objects.get(published=True)
@@ -48,26 +49,37 @@ def perm(request):
         }        
         return render( request, "human_resources/perm.html", context)
     else:
-        if active_month != None:
-            if datetime.strptime((request.POST['date']), '%Y-%m-%d').date()<date(2022,int(active_month.code[5:])-1,16) or datetime.strptime((request.POST['date']), '%Y-%m-%d').date()>date(2022,int(active_month.code[5:]),15):
-                request.session['error'] = 'يرجى تحديد تاريخ إذن صحيح'
-                return redirect('perm')
-            else:
-                form = PermForm(request.POST)
-                permission = form.save(commit=False)
-                permission.employee = Employee.objects.get(code=request.user.code)
-                permission.school = request.user.school
-                permission.month=active_month
-                permission.save()
-                if Permission.objects.filter(employee__code=request.user.code,month=active_month,ok2=True).count() >= active_month.perms:
-                    request.session['msg'] = ' ( تم تسجيل الإذن زائد ( سيتم الخصم من الراتب'
-                else:
-                    request.session['msg'] = '( تم تسجيل الإذن ( قيد الموافقة'
-                return redirect('perm')
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            employee = Employee.objects.get(code=request.user.code)
+            data = json.loads(request.body)
+            type = data ['type']
+            if type == 'صباحي':
+                start_time = employee.time_in
+                end_time = employee.time_in_perm
+            elif type == 'مسائي':
+                start_time = employee.time_out_perm
+                end_time = employee.time_out
+            return JsonResponse({'start_time':start_time,'end_time': end_time })
         else:
-            request.session['error'] = 'لا توجد شهور مفعلة'
-            return redirect('perm')
-
+            if active_month != None:
+                if datetime.strptime((request.POST['date']), '%Y-%m-%d').date()<date(2022,int(active_month.code[5:])-1,16) or datetime.strptime((request.POST['date']), '%Y-%m-%d').date()>date(2022,int(active_month.code[5:]),15):
+                    request.session['error'] = 'يرجى تحديد تاريخ إذن صحيح'
+                    return redirect('perm')
+                else:
+                    form = PermForm(request.POST)
+                    permission = form.save(commit=False)
+                    permission.employee = Employee.objects.get(code=request.user.code)
+                    permission.school = request.user.school
+                    permission.month=active_month
+                    permission.save()
+                    if Permission.objects.filter(employee__code=request.user.code,month=active_month,ok2=True).count() >= active_month.perms:
+                        request.session['msg'] = ' ( تم تسجيل الإذن زائد ( سيتم الخصم من الراتب'
+                    else:
+                        request.session['msg'] = '( تم تسجيل الإذن ( قيد الموافقة'
+                    return redirect('perm')
+            else:
+                request.session['error'] = 'لا توجد شهور مفعلة'
+                return redirect('perm')
 
 def vacation(request):
     if request.method == 'GET':
