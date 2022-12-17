@@ -7,12 +7,17 @@ import json
 
 try:
     published_month = Month.objects.get(published=True)
+    pub_month = published_month.code[5:]
+    pub_year = published_month.code[:4]
 except Month.DoesNotExist:
     published_month = None
 try:
     active_month = Month.objects.get(active=True)
-    month_start = date(2022,int(active_month.code[5:])-1,16)
-    month_end = date(2022,int(active_month.code[5:]),15)
+    if int(active_month.code[5:])==1:
+        month_start = date(int(active_month.code[:4])-1,12,16)
+    else:
+        month_start = date(int(active_month.code[:4]),int(active_month.code[5:])-1,16)
+    month_end = date(int(active_month.code[:4]),int(active_month.code[5:]),15)
 except Month.DoesNotExist:
     active_month = None
 
@@ -25,7 +30,8 @@ def home(request):
 def salary(request):
     if published_month != None:
         context = {
-        'cm':published_month,
+        'month':pub_month,
+        'year':pub_year,
         'items':SalaryItem.objects.filter(employee__code=request.user.code,month=published_month).order_by('-value'),
         }
     else:

@@ -515,7 +515,7 @@ class MonthAdmin(ImportExportModelAdmin):
     actions = ['activate','publish']
     def has_module_permission(self, request):
         if request.user.is_authenticated:
-            if request.user.code in ('mosaad','hrboys','hrgirls'):
+            if request.user.code in ('mosaad',):
                 return True
             return False
 
