@@ -68,7 +68,7 @@ def perm(request):
             return JsonResponse({'start_time':start_time,'end_time': end_time })
         else:
             if active_month != None:
-                if datetime.strptime((request.POST['date']), '%Y-%m-%d').date()<date(2022,int(active_month.code[5:])-1,16) or datetime.strptime((request.POST['date']), '%Y-%m-%d').date()>date(2022,int(active_month.code[5:]),15):
+                if datetime.strptime((request.POST['date']), '%Y-%m-%d').date()< month_start or datetime.strptime((request.POST['date']), '%Y-%m-%d').date() > month_end:
                     request.session['error'] = 'يرجى تحديد تاريخ إذن صحيح'
                     return redirect('perm')
                 else:
