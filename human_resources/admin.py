@@ -170,7 +170,8 @@ class PermissionAdmin(ImportExportModelAdmin):
                 del actions['ok']
                 return actions
             else:          
-                del actions['ok','ok2']
+                del actions['ok']
+                del actions['ok2']
                 return actions
 
     resource_class = PermResource
@@ -315,7 +316,8 @@ class VacationAdmin(ImportExportModelAdmin):
                 del actions['ok']
                 return actions
             else:          
-                del actions['ok','ok2']
+                del actions['ok']
+                del actions['ok2']
                 return actions
 
     def get_queryset(self, request):
