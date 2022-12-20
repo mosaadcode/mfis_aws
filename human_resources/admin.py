@@ -400,7 +400,7 @@ class EmployeeAdmin(ImportExportModelAdmin):
     list_filter = ('school','job__type','job__grade','is_educational','job__department')
     fieldsets = (
     ('بيانات الموظف', { 'fields': (('name','job'),('code','job_code','birth_date'),('na_id','school'),('mobile_number','phone_number'),('emergency_phone','email'),'address',('basic_certificate','is_educational'),('notes','is_active'))}),
-    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message',('time_in','time_in_perm'),('time_out','time_out_perm'))}),
+    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code',('time_in','time_in_perm'),('time_out','time_out_perm'))}),
                 )
 
     def get_readonly_fields(self, request, obj=None):

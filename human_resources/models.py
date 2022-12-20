@@ -90,6 +90,7 @@ class Employee(models.Model):
     time_in_perm = models.CharField(max_length=5,blank=True,null=True,verbose_name='حضور بإذن')
     time_out = models.CharField(max_length=5,blank=True,null=True,verbose_name='موعد الإنصراف')
     time_out_perm = models.CharField(max_length=5,blank=True,null=True,verbose_name='إنصراف بإذن')
+    time_code = models.CharField(max_length=6,blank=True,null=True,verbose_name='كود البصمة')
     
     def get_code(self):
         if self.code == "":
