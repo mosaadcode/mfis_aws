@@ -11,6 +11,13 @@ class Grade(models.Model):
     def __str__(self):
         return self.name
 
+YEAR_CHOICES = (
+    ('24-23' , '24-23'),
+    ('23-22' , '23-22'),
+    ('22-21' , '22-21'),
+    ('21-20' , '21-20'),
+)
+
 AREA_CHOICES = (
     (None, ""),
     ('النزهة الجديدة','النزهة الجديدة'),
@@ -142,12 +149,6 @@ class Student(AbstractBaseUser, PermissionsMixin):
         ('خريج','خريج'),
     )
 
-    YEAR_CHOICES = (
-         ('21-20' , '21-20'),
-         ('22-21' , '22-21'),
-         ('23-22' , '23-22'),
-    )
-
     code = models.CharField(max_length=7, unique=True)
     username = models.CharField(max_length=60,verbose_name='Name')
     school = models.CharField( max_length=6, choices=SCHOOL_CHOICES, blank=True)
@@ -156,7 +157,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
     mother_mobile = models.CharField(max_length=13, null=True, blank=True,verbose_name='موبيل الام ')
     phone_number = models.CharField(max_length=13, null=True, blank=True,verbose_name='تليفون المنزل ')
     email = models.EmailField(max_length=60, null=True, blank=True)
-    year = models.CharField( max_length=5,choices=YEAR_CHOICES, default='23-22')
+    year = models.CharField( max_length=5,choices=YEAR_CHOICES, default='24-23')
     study_payment1 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 1')
     study_payment2 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 2')
     study_payment3 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 3')
@@ -260,6 +261,7 @@ class SchoolFee(models.Model):
     books_a_level = models.PositiveSmallIntegerField(default=0)
     books_fee = models.PositiveSmallIntegerField(default=0)
     bus_fee = models.PositiveSmallIntegerField(default=0)
+    year = models.CharField( max_length=5,choices=YEAR_CHOICES,default='24-23')
 
     def __str__(self):
         return self.grade
