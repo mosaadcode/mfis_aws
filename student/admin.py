@@ -194,10 +194,10 @@ class TeacherAdmin(ImportExportMixin, admin.ModelAdmin):
 class SchoolFeeAdmin(ImportExportMixin, admin.ModelAdmin):
     list_display = ('grade' , 'study_fee', 'activity_fee', 'computer_fee','study_payment1','study_payment2','study_payment3','bus_payment1','bus_payment2')
     ordering = ('id',)
-    readonly_fields = ('school', 'grade',)
+    readonly_fields = ('school', 'grade','year')
 
     filter_horizontal = ()
-    list_filter = ('school',)
+    list_filter = ('school','year')
     fieldsets = (
         # ('None', {'fields': ('grade',)}),
         ('المصروفات الرسمية ', {'fields': (('grade','year'),'study_fee', 'activity_fee', 'computer_fee','bus_fee','books_fee' )}),
