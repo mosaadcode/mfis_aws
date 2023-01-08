@@ -200,7 +200,7 @@ class SchoolFeeAdmin(ImportExportMixin, admin.ModelAdmin):
     list_filter = ('school',)
     fieldsets = (
         # ('None', {'fields': ('grade',)}),
-        ('المصروفات الرسمية ', {'fields': ('grade','study_fee', 'activity_fee', 'computer_fee','bus_fee','books_fee' )}),
+        ('المصروفات الرسمية ', {'fields': (('grade','year'),'study_fee', 'activity_fee', 'computer_fee','bus_fee','books_fee' )}),
         ('المصروفات', {'fields': (('study_payment1','study_payment2','study_payment3'),('bus_payment1','bus_payment2'),('books_all','books_books','books_booklet','books_a_level'))}),
                  )
 
