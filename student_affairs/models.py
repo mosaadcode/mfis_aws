@@ -231,9 +231,9 @@ def create_student(sender, instance, created, **kwargs):
     if created:
         if instance.code[0] != "C":
             if instance.school == ".بنات.":
-                GradeFee = SchoolFee.objects.get(school="بنات",grade=instance.grade)
+                GradeFee = SchoolFee.objects.get(school="بنات",grade=instance.grade,year=instance.study_year)
             else:
-                GradeFee = SchoolFee.objects.get(school=instance.school,grade=instance.grade)
+                GradeFee = SchoolFee.objects.get(school=instance.school,grade=instance.grade,year=instance.study_year)
             StudentAcc.objects.create(
                 code=instance.code,
                 username=instance.name,
@@ -257,9 +257,9 @@ post_save.connect(create_student, sender=Student)
 def update_student(sender, instance, created, **kwargs):
     if created ==False:
         if instance.school == ".بنات.":
-            GradeFee = SchoolFee.objects.get(school="بنات",grade=instance.grade)
+            GradeFee = SchoolFee.objects.get(school="بنات",grade=instance.grade,year=instance.study_year)
         elif instance.school[0] != 'O':
-            GradeFee = SchoolFee.objects.get(school=instance.school,grade=instance.grade)
+            GradeFee = SchoolFee.objects.get(school=instance.school,grade=instance.grade,year=instance.study_year)
         if instance.school[0] != 'O' and instance.status != 'محول من':
             studentacc = StudentAcc.objects.get(code=instance.code)
             studentacc.username=instance.name
