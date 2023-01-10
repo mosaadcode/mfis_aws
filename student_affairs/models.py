@@ -143,7 +143,7 @@ class Student(models.Model):
     email = models.EmailField(max_length=60, blank=True,null=True)
     notes = models.TextField( max_length=250,null=True,blank=True,verbose_name='ملاحظات ')
     payment_status = models.BooleanField(default=False,verbose_name='حالة السداد ')
-    document_status = models.BooleanField(default=True,verbose_name=' تم تقديم الأوراق   ')
+    document_status = models.BooleanField(default=False,verbose_name=' تم تقديم الأوراق   ')
     contact_status = models.BooleanField(default=False,verbose_name='   تم تحديث بيانات التواصل ')
 
 
