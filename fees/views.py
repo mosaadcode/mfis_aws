@@ -17,13 +17,20 @@ def dashboard(request):
         else :
             bus = False
         msg = request.session.get('msg')
+        error = request.session.get('error')
         request.session['msg'] = ''
-        return render(request, 'fees/dashboard.html',{'oldfee':oldfee,'bus':bus,'msg':msg})
+        request.session['error'] = ''
+        return render(request, 'fees/dashboard.html',{'oldfee':oldfee,'bus':bus,'msg':msg,'error':error})
 
 def addfees(request):
     if request.method == 'GET':
-        msg = request.session.get('msg')
-        return render(request, 'fees/addfees.html', {'form':FeesForm(),'msg':msg})
+        studentaff = StudentAff.objects.get(code=request.user.code)
+        if studentaff.document_status == True :
+            msg = request.session.get('msg')
+            return render(request, 'fees/addfees.html', {'form':FeesForm(),'msg':msg})
+        else:
+            request.session['error'] ='لا يمكن التسجيل قبل إستيفاء كامل الاوراق المطلوبة'
+            return redirect('dashboard')
     else:
         if request.user.can_pay == True:
             if request.POST['kind'] == "دراسية":
@@ -102,7 +109,7 @@ def addfees(request):
         else:
             return render(request, 'fees/addfees.html', {'form':FeesForm(),'error':'لا يمكنك التسجيل الان, برجاء مراجعة قسم الحسابات'})
 def recorded(request):
-    fees = Fee.objects.filter(student=request.user.id,year="23-22")
+    fees = Fee.objects.filter(student=request.user.id,year=request.user.year)
     return render(request, 'fees/recorded.html',{'fees':fees})
 
 
