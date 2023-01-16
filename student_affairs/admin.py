@@ -7,7 +7,7 @@ from django.utils.translation import ngettext
 from student.models import Student as StudentAcc
 from fees.models import Fee
 
-current_year = '23-22'
+current_year = '24-23'
 
 class GovernorateAdmin(ImportExportModelAdmin):
     list_display = ('name',)
