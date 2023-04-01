@@ -395,7 +395,7 @@ class EmployeeAdmin(ImportExportModelAdmin):
     # autocomplete_fields = ['job']
     raw_id_fields = ('job',)
     readonly_fields = ('birth_date','job_code','time_in','time_in_perm','time_out','time_out_perm')
-    search_fields = ('code','name','na_id')
+    search_fields = ('code','name','na_id','insurance_no')
     filter_horizontal = ()
     list_filter = ('school','job__type','job__grade','is_educational','job__department')
     fieldsets = (
