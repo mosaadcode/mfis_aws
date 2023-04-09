@@ -39,6 +39,7 @@ class Job(models.Model):
         ('20','ابتدائى'),
         ('30','اعدادى'),
         ('40','ثانوى'),
+        ('50','اعدادى وثانوى'),
     )
     type = models.CharField(max_length=7, choices=TYPES_CHOICES, verbose_name='نوع الوظيفة')
     title = models.CharField(max_length=20 ,verbose_name='المسمى الوظيفي')
