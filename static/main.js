@@ -20,20 +20,8 @@ async function makeRequest(url,method,body) {
     return await response.json()
 }
 
-// // async function getNumber() {
-
-// //     const data = await makeRequest('/','get')
-
-// //      let ul_left = document.getElementById('left')
-// //      let li = document.createElement('li')
-// //      li.addEventListener('click', getFloatNumber)
-// //      li.innerHTML = await data['number']
-// //      ul_left.appendChild(li)
-    
-// // }
-
 async function getTime(e) {
-    console.log(e.target.value)
+    // console.log(e.target.value)
     
     
     let from_time = document.getElementById('start_time')
@@ -53,3 +41,6 @@ async function getTime(e) {
     end_time.readOnly = true
 
 }}
+
+  
+  

@@ -4,19 +4,33 @@ from django.contrib.auth import login, logout, authenticate
 # from fees.models import Fees
 from django.db.models import Sum
 from .forms import StudentProfile
+from human_resources.models import Employee
+from django.http import JsonResponse
+import json
 
 def loginuser(request):
     if request.method == 'GET':
         return render(request, 'student/home.html', {'form':AuthenticationForm})
     else:
-        user = authenticate(request, code=request.POST['username'],password=request.POST['password'])
-        if user is None:
-            return render(request, 'student/home.html', {'form':AuthenticationForm, 'error':'برجاء التأكد من الكود وكلمة المرور'})
-        else:
-            login(request, user)
-            if user.is_employ == False:
-                return redirect('dashboard')
-            return redirect('home2')
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            data = json.loads(request.body)
+            na_id = data ['na_id']
+            try:
+                employee = Employee.objects.get(na_id=na_id)
+                code = employee.code
+            except Employee.DoesNotExist:
+                 code = 0
+
+            return JsonResponse({'code':code,})
+        else:        
+            user = authenticate(request, code=request.POST['username'],password=request.POST['password'])
+            if user is None:
+                return render(request, 'student/home.html', {'form':AuthenticationForm, 'error':'برجاء التأكد من الكود وكلمة المرور'})
+            else:
+                login(request, user)
+                if user.is_employ == False:
+                    return redirect('dashboard')
+                return redirect('home2')
 
 # def home(request):
 #     return render(request, 'student/home.html')
