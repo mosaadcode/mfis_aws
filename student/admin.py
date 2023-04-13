@@ -17,7 +17,7 @@ current_year = '23-22'
 class StudentAdmin(ImportExportMixin, UserAdmin):
     list_display = ('code', 'username', 'total_paid', 'payment_status','total_books')
     search_fields = ('code', 'username')
-    readonly_fields = ('code','username','year','school','grade','living_area', 'address','bus_number','old_bus','total_paid', 'old_fee', 'old_paid','study_payment3', 'bus_payment2', 'payment_status','last_login','bus_order','books','total_books','father_mobile','mother_mobile','phone_number', 'email')
+    readonly_fields = ('code','username','year','school','grade','living_area', 'address','bus_number','old_bus','total_paid', 'old_fee', 'old_paid','study_payment3', 'bus_payment2', 'payment_status','last_login','bus_order','books','total_books','father_mobile','mother_mobile','phone_number', 'email','lms_code')
 
     # filter_horizontal = ()
     list_filter = ('school','year','grade','bus_active','books','is_active','can_pay')
@@ -26,7 +26,7 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
         # (None, { 'fields': (('is_staff','is_admin'),)}),
         ('الأقساط والسداد', {'fields': (('study_payment1', 'study_payment2', 'study_payment3'),('bus_payment1', 'bus_payment2'), ('old_fee','old_paid'),'discount', ('total_paid','payment_status'))}),
         ('الكتب الدراسية', {'fields': (('books','total_books'),)}),
-        ('التواصل', {'fields': ('message', ('father_mobile','mother_mobile'),('phone_number', 'email'),'last_login')}),
+        ('التواصل', {'fields': ('message', ('father_mobile','mother_mobile'),('phone_number', 'email'),'lms_code','last_login')}),
         ('السيارة', {'fields': ('bus_notes','living_area', 'address','bus_number','old_bus','bus_order')}),
         # ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'is_admin', 'groups', 'user_permissions')}),
                  )

@@ -83,8 +83,8 @@ class StudentResource(resources.ModelResource):
     class Meta:
         model = Student
         import_id_fields = ('code',)
-        fields = ('year','code','username', 'password','school','grade','study_payment1','study_payment2','study_payment3','bus_payment1', 'bus_payment2','old_fee', 'old_paid', 'discount','total_paid','message','is_active', 'can_pay', 'bus_active', 'father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus','books','total_books')
-        export_order = ('year','code','username', 'password','school','grade','study_payment1','study_payment2','study_payment3','bus_payment1', 'bus_payment2','old_fee', 'old_paid', 'discount','total_paid','message','is_active', 'can_pay', 'bus_active', 'father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus','books','total_books')
+        fields = ('year','code','username', 'password','school','grade','study_payment1','study_payment2','study_payment3','bus_payment1', 'bus_payment2','old_fee', 'old_paid', 'discount','total_paid','message','is_active', 'can_pay', 'bus_active', 'father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus','books','total_books','lms_code')
+        export_order = ('year','code','username', 'password','school','grade','study_payment1','study_payment2','study_payment3','bus_payment1', 'bus_payment2','old_fee', 'old_paid', 'discount','total_paid','message','is_active', 'can_pay', 'bus_active', 'father_mobile', 'mother_mobile', 'phone_number', 'email', 'living_area', 'address', 'old_bus','books','total_books','lms_code')
 
 class StudentAffResource(resources.ModelResource):
     Class = fields.Field(column_name='Class',

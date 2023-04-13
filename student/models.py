@@ -211,6 +211,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
     is_admin  = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_employ = models.BooleanField(default=False)
+    lms_code = models.CharField(max_length=9,null=True,blank=True)
     # is_superuser = models.BooleanField(default=False)
     # is_superuser field provided by PermissionsMixin
     # groups field provided by PermissionsMixin
