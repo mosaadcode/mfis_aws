@@ -1,6 +1,6 @@
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
-from .models import Student, School,Governorate, Nationality, Class, Class_group, Contact
+from .models import Student, School,Governorate, Nationality, Class, Class_group, Contact, Application, Archive
 from import_export.admin import ImportExportModelAdmin
 from student.resources import StudentAffResource
 from django.utils.translation import ngettext
@@ -53,6 +53,20 @@ class ClassAdmin(ImportExportModelAdmin):
                 return True
             return False
 
+class ArchivesInline(admin.TabularInline):
+    model = Archive
+    can_delete = False
+    exclude = ('code','school')
+    readonly_fields = [
+        'study_year','grade', 'status',
+    ]
+    extra = 0
+    ordering = ('-study_year',)
+    def has_change_permission(self, request, obj=None):
+        return False
+    def has_add_permission(self, request, obj=None):
+        return False
+    
 class StudentAdmin(ImportExportModelAdmin):
     list_display = ('code', 'name','grade','Class','status','age1oct','father_mobile','mother_mobile','payment_status')
     ordering = ('name',)
@@ -70,6 +84,8 @@ class StudentAdmin(ImportExportModelAdmin):
 
                  )
     resource_class = StudentAffResource
+
+    inlines = [ArchivesInline]
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -517,6 +533,64 @@ class ContactAdmin(ImportExportModelAdmin):
     PhoneUpdate.short_description = 'تحديث ارقام الهاتف'
     actions = ['PhoneUpdate','AddressUpdate']
 
+class ArchiveAdmin(ImportExportModelAdmin):
+    list_display = ('student','study_year','grade', 'status')
+    # autocomplete_fields = ['student']
+    search_fields = ('code','student__name')
+    readonly_fields = ('student','school','study_year','student', 'code', 'grade', 'status')
+    filter_horizontal = ()
+    list_filter = ('school','study_year','status', 'grade' )
+    fieldsets = ()
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.code == "affg":
+            return qs.filter(school__in = ('.بنات.', 'بنات'))
+        elif request.user.code =="affb":
+            return qs.filter(school__in = ('بنين',))
+        return qs
+
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','affb','affg'):
+                return True
+            return False
+    def has_delete_permission(self, request, obj=None):
+        if request.user.code == "mosaad":
+            return True
+        return False
+
+class ApplicationAdmin(ImportExportModelAdmin):
+    list_display = ('student','father_mobile', 'mother_mobile', 'phone_number')
+    autocomplete_fields = ['student']
+    search_fields = ('student__code','student__name')
+    readonly_fields = ('student',)
+    filter_horizontal = ()
+    list_filter = ('school','parents_status' ,'student__grade')
+    fieldsets = (
+        ('بيانات الطالب', { 'fields': (('student'),('father_mobile','father_job'),('father_id', 'email'),('mother_mobile','mother_job'),('email2',),('phone_number','phone_number2'),('parents_status','student_order'),'student_with','address_1')}),
+        ('بيانات التواصل الطارئ', { 'fields': (('sos_name1','sos_phone1'),('sos_name2','sos_phone2'))}),
+        ('بيانات الإخوة', { 'fields': (('brother1_name','brother1_grade'),('brother2_name','brother2_grade'),('brother3_name','brother3_grade'),('brother4_name','brother4_grade'))}),
+                 )
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.code == "affg":
+            return qs.filter(school__in = ('.بنات.', 'بنات'))
+        elif request.user.code =="affb":
+            return qs.filter(school__in = ('بنين',))
+        return qs
+
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','affb','affg'):
+                return True
+            return False
+    def has_delete_permission(self, request, obj=None):
+        if request.user.code == "mosaad":
+            return True
+        return False
+
 admin.site.register(Student,StudentAdmin)
 admin.site.register(School,SchoolAdmin)
 admin.site.register(Class,ClassAdmin)
@@ -524,3 +598,5 @@ admin.site.register(Class_group,GroupAdmin)
 admin.site.register(Governorate,GovernorateAdmin)
 admin.site.register(Nationality,NationalityAdmin)
 admin.site.register(Contact,ContactAdmin)
+admin.site.register(Application,ApplicationAdmin)
+admin.site.register(Archive,ArchiveAdmin)

@@ -168,6 +168,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
     bus_payment2 = models.PositiveSmallIntegerField( default=0,verbose_name='Bus 2')
     total_paid = models.IntegerField(default=0)
     old_paid = models.IntegerField( default=0)
+    
     def payment_status(self):
 #due date 1st study and 1st bus
         if date.today() <= date(2020,9,30):
@@ -293,3 +294,22 @@ class Manager(models.Model):
 
     def __str__(self):
         return self.user.code
+    
+class Archive(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True)
+    school = models.CharField( max_length=6)
+    study_year = models.CharField( max_length=5)
+    code = models.CharField(max_length=7, unique=True)
+    grade = models.CharField( max_length=16)
+    study = models.PositiveSmallIntegerField(default=0)
+    bus = models.PositiveSmallIntegerField(default=0)
+    discount = models.PositiveSmallIntegerField(default=0)
+    total = models.IntegerField(default=0)
+    status = models.IntegerField(default=0)
+    
+    def __str__(self):
+        return self.student.username
+
+    class Meta:
+        verbose_name='study_year'
+        verbose_name_plural ='أرشيف'

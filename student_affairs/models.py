@@ -204,6 +204,21 @@ class Student(models.Model):
         verbose_name='student'
         verbose_name_plural =' A -  سجلات الطلاب'
 
+class Archive(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True)
+    code = models.CharField(max_length=7,verbose_name='الكود ')
+    study_year = models.CharField( max_length=5,verbose_name='العام الدراسي ')
+    school = models.CharField( max_length=6,verbose_name='المدرسة ')
+    grade = models.CharField( max_length=16,verbose_name='الصف ')
+    status = models.CharField( max_length=7,verbose_name='حالة القيد ')
+
+    def __str__(self):
+        return self.student.name
+
+    class Meta:
+        verbose_name='study_year'
+        verbose_name_plural =' G -  أرشيف'
+
 class Contact(models.Model):
     SCHOOL1_CHOICES = (
         ('بنين', 'بنين'),
@@ -226,6 +241,51 @@ class Contact(models.Model):
     class Meta:
         verbose_name='contact'
         verbose_name_plural =' D -  بيانات التواصل'
+
+class Application(models.Model):
+    PARENTS_CHOICES = (
+        ('معاً', 'معاً'),
+        ('منفصلان', 'منفصلان'),
+        ('بالخارج', 'بالخارج'),
+        ('أحدهما متوفى', 'أحدهما متوفى'),
+    )
+
+    ORDER_CHOICES = [(i, i) for i in range(1, 9)]
+
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    school = models.CharField( max_length=6,verbose_name='المدرسة ')
+    father_id = models.CharField(max_length=14, null=True,blank=True,verbose_name=' رقم الأب القومي ')
+    father_job = models.CharField(max_length=46,null=True, blank=True,verbose_name='وظيفة الأب ')
+    mother_job = models.CharField(max_length=46,null=True, blank=True,verbose_name='وظيفة الاَم ')
+    father_mobile = models.CharField(max_length=14, null=True,blank=True,verbose_name='هاتف الأب ')
+    mother_mobile = models.CharField(max_length=13, null=True,blank=True,verbose_name='هاتف الاَم ')
+    phone_number = models.CharField(max_length=13, null=True,blank=True,verbose_name='هاتف المنزل ')
+    phone_number2 = models.CharField(max_length=13, null=True,blank=True,verbose_name='هاتف بديل ')
+    address_1 = models.CharField( max_length=86,null=True,blank=True,verbose_name='العنوان بالتفصيل')
+    email = models.EmailField(max_length=36, blank=True,null=True,verbose_name='ايميل الأب ')
+    email2 = models.EmailField(max_length=36, blank=True,null=True,verbose_name='ايميل الاَم ')
+    student_with = models.CharField(max_length=12,null=True,verbose_name='يتواجدالطالب مع ')
+    student_order = models.PositiveSmallIntegerField(choices=ORDER_CHOICES,null=True,verbose_name='الترتيب بين الإخوة ')
+    parents_status = models.CharField(max_length=12,choices=PARENTS_CHOICES,default='معاً',null=True,verbose_name='الوالدين ')
+    sos_name1 = models.CharField(max_length=46,null=True,verbose_name='الإسم ')
+    sos_phone1 = models.CharField(max_length=13,null=True,verbose_name='الهاتف ')
+    sos_name2 = models.CharField(max_length=46,null=True,verbose_name='الإسم ')
+    sos_phone2 = models.CharField(max_length=13,null=True,verbose_name='الهاتف ')
+    brother1_name  = models.CharField(max_length=46,verbose_name='الإسم ')
+    brother1_grade = models.CharField( max_length=16, choices=Student.GRADE_CHOICES,verbose_name='الصف ')
+    brother2_name  = models.CharField(max_length=46,verbose_name='الإسم ')
+    brother2_grade = models.CharField( max_length=16, choices=Student.GRADE_CHOICES,verbose_name='الصف ')
+    brother3_name  = models.CharField(max_length=46,verbose_name='الإسم ')
+    brother3_grade = models.CharField( max_length=16, choices=Student.GRADE_CHOICES,verbose_name='الصف ')
+    brother4_name  = models.CharField(max_length=46,verbose_name='الإسم ')
+    brother4_grade = models.CharField( max_length=16, choices=Student.GRADE_CHOICES,verbose_name='الصف ')
+
+    def __str__(self):
+        return self.student.name
+
+    class Meta:
+        verbose_name='application'
+        verbose_name_plural =' E -  تحديث البيانات'
         
 def create_student(sender, instance, created, **kwargs):
     if created:

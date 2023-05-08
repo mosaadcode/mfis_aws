@@ -1,6 +1,6 @@
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
-from .models import Student,Bus,BusStudent,Teacher,SchoolFee,Manager,Program
+from .models import Student,Bus,BusStudent,Teacher,SchoolFee,Manager,Program, Archive
 from fees.admin import FeesInline
 # from django.http import HttpResponse
 # import csv
@@ -14,6 +14,20 @@ admin.site.unregister(Group)
 
 current_year = '23-22'
 
+class ArchivesInline(admin.TabularInline):
+    model = Archive
+    can_delete = False
+    exclude = ('code','school')
+    readonly_fields = [
+        'study_year','grade','study','bus','discount','total','status'
+    ]
+    extra = 0
+    ordering = ('-study_year',)
+    def has_change_permission(self, request, obj=None):
+        return False
+    def has_add_permission(self, request, obj=None):
+        return False
+    
 class StudentAdmin(ImportExportMixin, UserAdmin):
     list_display = ('code', 'username', 'total_paid', 'payment_status','total_books')
     search_fields = ('code', 'username')
@@ -27,7 +41,7 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
         ('الأقساط والسداد', {'fields': (('study_payment1', 'study_payment2', 'study_payment3'),('bus_payment1', 'bus_payment2'), ('old_fee','old_paid'),'discount', ('total_paid','payment_status'))}),
         ('الكتب الدراسية', {'fields': (('books','total_books'),)}),
         ('التواصل', {'fields': ('message', ('father_mobile','mother_mobile'),('phone_number', 'email'),'lms_code','last_login')}),
-        ('السيارة', {'fields': ('bus_notes','living_area', 'address','bus_number','old_bus','bus_order')}),
+        # ('السيارة', {'fields': ('bus_notes','living_area', 'address','bus_number','old_bus','bus_order')}),
         # ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'is_admin', 'groups', 'user_permissions')}),
                  )
     resource_class = StudentResource
@@ -84,7 +98,7 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
 
     # actions = ["export_bus", "export_student"]
 
-    inlines = [FeesInline]
+    inlines = [ArchivesInline,FeesInline]
 
     def has_module_permission(self, request):
         if request.user.is_authenticated:
@@ -310,6 +324,33 @@ class ManagerAdmin(ImportExportModelAdmin):
 
             print('==========================delete_queryset==========================')
 
+class ArchiveAdmin(ImportExportModelAdmin):
+    list_display = ('student','study_year','grade','study','bus','discount','total','status')
+    autocomplete_fields = ['student']
+    search_fields = ('code','student__name')
+    readonly_fields = ('student','code','school','study_year','grade','study','bus','discount','total','status')
+    filter_horizontal = ()
+    list_filter = ('school','study_year', 'grade' )
+    fieldsets = ()
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.code == "affg":
+            return qs.filter(school__in = ('.بنات.', 'بنات'))
+        elif request.user.code =="affb":
+            return qs.filter(school__in = ('بنين',))
+        return qs
+
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','affb','affg'):
+                return True
+            return False
+    def has_delete_permission(self, request, obj=None):
+        if request.user.code == "mosaad":
+            return True
+        return False
+
 admin.site.register(Student, StudentAdmin)
 admin.site.register(Bus,BusAdmin)
 admin.site.register(BusStudent,BusStudentAdmin)
@@ -317,3 +358,4 @@ admin.site.register(Teacher,TeacherAdmin)
 admin.site.register(SchoolFee,SchoolFeeAdmin)
 admin.site.register(Manager,ManagerAdmin)
 admin.site.register(Program,ProgramAdmin)
+admin.site.register(Archive,ArchiveAdmin)
