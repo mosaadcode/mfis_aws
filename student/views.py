@@ -5,6 +5,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.db.models import Sum
 from .forms import StudentProfile
 from human_resources.models import Employee
+from student_affairs.models import Student as StudentAff
 from django.http import JsonResponse
 import json
 
@@ -22,13 +23,24 @@ def loginuser(request):
                  code = 0
 
             return JsonResponse({'code':code,})
-        else:        
+        else:
             user = authenticate(request, code=request.POST['username'],password=request.POST['password'])
             if user is None:
                 return render(request, 'student/home.html', {'form':AuthenticationForm, 'error':'برجاء التأكد من الكود وكلمة المرور'})
             else:
                 login(request, user)
                 if user.is_employ == False:
+                    studentaff = StudentAff.objects.get(code=request.user.code)        
+                    if studentaff.grade in ('الاول الابتدائى','الاول الاعدادى','الاول الثانوى'):
+                        if studentaff.document_status == False:
+                            logout(request)
+                            return render(request, 'student/home.html', {'form':AuthenticationForm, 'error':'لا يمكن تسجيل المصروفات قبل إستيفاء كامل الأوراق المطلوبة, برجاء التواصل مع المدرسة'})
+                        else:
+                            if studentaff.application_status == False:
+                                request.session['error'] ='برجاء تحديث البيانات التالية'
+                                return redirect('application')
+                            else:
+                                return redirect('dashboard')
                     return redirect('dashboard')
                 return redirect('home2')
 

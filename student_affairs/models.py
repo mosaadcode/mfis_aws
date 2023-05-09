@@ -145,6 +145,7 @@ class Student(models.Model):
     payment_status = models.BooleanField(default=False,verbose_name='حالة السداد ')
     document_status = models.BooleanField(default=False,verbose_name=' تم تقديم الأوراق   ')
     contact_status = models.BooleanField(default=False,verbose_name='   تم تحديث بيانات التواصل ')
+    application_status = models.BooleanField(default=False,verbose_name='   تم فتح الملف ')
 
 
     def __str__(self):

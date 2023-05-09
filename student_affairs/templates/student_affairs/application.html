@@ -4,17 +4,7 @@
 
   <div class="container-fluid text-right  ">
     <br>
-    {% if error %}
-    <div class="alert alert-danger text-center"  role="alert" >
-        {{ error }}
-    </div>
-    {% endif %}
-    {% if msg %}
-    <div class="alert alert-info text-center" role="alert">
-        {{ msg }}
-    </div>
-    {% endif %}
-{% if error == 'برجاء تحديث بيانات التواصل' %}
+{% if error == 'برجاء تحديث البيانات التالية' %}
     <div class="row">
         <div class="col-md-7">
         </div>
@@ -41,8 +31,18 @@
     {% comment %} <div class="alert alert-danger" role="alert">
         {{ "يرجى تحديث البيانات  ." }}
     </div> {% endcomment %}
-    {% endif %} 
-
+    {% endif %}
+    <br>
+    {% if error %}
+    <div class="alert alert-danger text-center"  role="alert" >
+        {{ error }}
+    </div>
+    {% endif %}
+    {% if msg %}
+    <div class="alert alert-info text-center" role="alert">
+        {{ msg }}
+    </div>
+    {% endif %}
     <!-- <form method="POST" class="form-signin"> -->
         <div class="row justify-content-center mt-4">
             <div class="col-md-10">

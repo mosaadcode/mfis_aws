@@ -6,7 +6,7 @@ from student_affairs.models import Student as StudentAff
 
 def dashboard(request):
     studentaff = StudentAff.objects.get(code=request.user.code)
-    if studentaff.contact_status == False:
+    if studentaff.grade not in ('الاول الابتدائى','الاول الاعدادى','الاول الثانوى') and studentaff.contact_status == False:
         request.session['error'] ='برجاء تحديث بيانات التواصل'
         return redirect('contact')
     else:
@@ -23,14 +23,9 @@ def dashboard(request):
         return render(request, 'fees/dashboard.html',{'oldfee':oldfee,'bus':bus,'msg':msg,'error':error})
 
 def addfees(request):
-    if request.method == 'GET':
-        studentaff = StudentAff.objects.get(code=request.user.code)
-        if studentaff.document_status == True :
-            msg = request.session.get('msg')
-            return render(request, 'fees/addfees.html', {'form':FeesForm(),'msg':msg})
-        else:
-            request.session['error'] ='لا يمكن التسجيل قبل إستيفاء كامل الاوراق المطلوبة'
-            return redirect('dashboard')
+    if request.method == 'GET':   
+        msg = request.session.get('msg')
+        return render(request, 'fees/addfees.html', {'form':FeesForm(),'msg':msg})
     else:
         if request.user.can_pay == True:
             if request.POST['kind'] == "دراسية":

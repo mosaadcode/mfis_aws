@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
-from .models import Student,Contact
-from .forms import ContactData,ContactContact
+from .models import Student,Contact,Application
+from .forms import ContactData,ContactContact,ApplicationForm
 
 def contact(request):
         if request.method == 'GET':
@@ -60,6 +60,61 @@ def contact(request):
                     )
                     contact.save()
                 student.contact_status = True
+                student.save()
+                request.session['msg'] = 'تم استلام البيانات وسيتم التعديل بعد المراجعة'
+                return redirect('dashboard')
+            except ValueError:
+                    request.session['error'] = 'برجاء إدخال البيانات بشكل صحيح'
+                    return redirect('contact')
+            
+def application(request):
+        if request.method == 'GET':
+            msg = request.session.get('msg')
+            request.session['msg'] = ''
+            error = request.session.get('error')
+            request.session['error'] = ''
+            context = {
+                'msg':msg,
+                'error':error,
+                'form':ApplicationForm(),
+            }
+            return render(request, 'student_affairs/application.html',context)
+
+        else:
+            try:
+                student = Student.objects.get(code=request.user.code)
+                application = Application(
+                    student=student,
+                    school = request.user.school,
+                    father_id = request.POST['father_id'],
+                    father_job = request.POST['father_job'],
+                    father_mobile = request.POST['father_mobile'],
+                    email = request.POST['email'],
+                    mother_job = request.POST['mother_job'],
+                    mother_mobile = request.POST['mother_mobile'],
+                    email2 = request.POST['email2'],
+                    phone_number = request.POST['phone_number'],
+                    phone_number2 = request.POST['phone_number2'],
+                    address_1 = request.POST['address_1'],
+                    student_order = request.POST['student_order'],
+                    parents_status = request.POST['parents_status'],
+                    student_with = request.POST['student_with'],
+                    sos_name1 = request.POST['sos_name1'],
+                    sos_phone1 = request.POST['sos_phone1'],
+                    sos_name2 = request.POST['sos_name2'],
+                    sos_phone2 = request.POST['sos_phone2'],
+                    brother1_name = request.POST['brother1_name'],
+                    brother2_name = request.POST['brother2_name'],
+                    brother3_name = request.POST['brother3_name'],
+                    brother4_name = request.POST['brother4_name'],
+                    brother1_grade = request.POST['brother1_grade'],
+                    brother2_grade = request.POST['brother2_grade'],
+                    brother3_grade = request.POST['brother3_grade'],
+                    brother4_grade = request.POST['brother4_grade'],
+
+                )
+                application.save()
+                student.application_status = True
                 student.save()
                 request.session['msg'] = 'تم استلام البيانات وسيتم التعديل بعد المراجعة'
                 return redirect('dashboard')

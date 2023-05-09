@@ -7,10 +7,11 @@
       </button>
       <div id="navb" class="navbar-collapse collapse hide text-right">
         <ul class="navbar-nav ml-auto mr-2">
-                {% url 'profile' as profile_url1 %}
+                {% url 'contact' as contact_url1 %}
+                {% url 'application' as application_url1 %}
                 {% if user.is_authenticated %}
                 {% if user.is_employ == False %}
-                {% if request.get_full_path != profile_url1 or  request.get_full_path == profile_url1 %}
+                {% if request.get_full_path != contact_url1 and  request.get_full_path != application_url1 %}
                 <li class="nav-item">
                   <li class="nav-item active">
                     <a class="nav-link" href="{% url 'dashboard' %}">إستعلام مصروفات</a>
