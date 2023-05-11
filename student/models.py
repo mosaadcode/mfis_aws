@@ -309,7 +309,7 @@ class Archive(models.Model):
     old_paid = models.IntegerField(default=0)
     
     def year_status(self):
-        return (self.total + self.old_paid) - (self.study + self.bus + self.old_fee)
+        return (self.total + self.old_paid + self.discount) - (self.study + self.bus + self.old_fee)
     
     year_status
     
