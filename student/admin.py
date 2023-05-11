@@ -19,7 +19,7 @@ class ArchivesInline(admin.TabularInline):
     can_delete = False
     exclude = ('code','school')
     readonly_fields = [
-        'study_year','grade','study','bus','discount','total','status'
+        'study_year','grade','study','bus','discount','total','old_fee','old_paid','year_status'
     ]
     extra = 0
     ordering = ('-study_year',)
@@ -325,10 +325,10 @@ class ManagerAdmin(ImportExportModelAdmin):
             print('==========================delete_queryset==========================')
 
 class ArchiveAdmin(ImportExportModelAdmin):
-    list_display = ('student','study_year','grade','study','bus','discount','total','status')
+    list_display = ('student','grade','study','bus','discount','total','old_fee','old_paid','year_status')
     autocomplete_fields = ['student']
     search_fields = ('code','student__name')
-    readonly_fields = ('student','code','school','study_year','grade','study','bus','discount','total','status')
+    readonly_fields = ('student','code','school','study_year','grade','study','bus','discount','total','old_fee','old_paid','year_status')
     filter_horizontal = ()
     list_filter = ('school','study_year', 'grade' )
     fieldsets = ()

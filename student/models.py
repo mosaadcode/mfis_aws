@@ -305,11 +305,17 @@ class Archive(models.Model):
     bus = models.PositiveSmallIntegerField(default=0)
     discount = models.PositiveSmallIntegerField(default=0)
     total = models.IntegerField(default=0)
-    status = models.IntegerField(default=0)
+    old_fee = models.IntegerField(default=0)
+    old_paid = models.IntegerField(default=0)
+    
+    def year_status(self):
+        return (self.total + self.old_paid) - (self.study + self.bus + self.old_fee)
+    
+    year_status
     
     def __str__(self):
         return self.student.username
 
     class Meta:
         verbose_name='study_year'
-        verbose_name_plural ='أرشيف'
+        verbose_name_plural ='Archive'
