@@ -327,7 +327,7 @@ class ManagerAdmin(ImportExportModelAdmin):
 class ArchiveAdmin(ImportExportModelAdmin):
     list_display = ('student','grade','study','bus','discount','total','old_fee','old_paid','year_status')
     autocomplete_fields = ['student']
-    search_fields = ('code','student__name')
+    search_fields = ('code','student__username')
     readonly_fields = ('student','code','school','study_year','grade','study','bus','discount','total','old_fee','old_paid','year_status')
     filter_horizontal = ()
     list_filter = ('school','study_year', 'grade' )
