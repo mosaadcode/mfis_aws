@@ -31,7 +31,7 @@ class ArchivesInline(admin.TabularInline):
 class StudentAdmin(ImportExportMixin, UserAdmin):
     list_display = ('code', 'username', 'total_paid', 'payment_status','total_books')
     search_fields = ('code', 'username')
-    readonly_fields = ('code','username','year','school','grade','living_area', 'address','bus_number','old_bus','total_paid', 'old_fee', 'old_paid','study_payment3', 'bus_payment2', 'payment_status','last_login','bus_order','books','total_books','father_mobile','mother_mobile','phone_number', 'email','lms_code')
+    readonly_fields = ('code','username','year','school','grade','living_area', 'address','bus_number','old_bus','total_paid', 'old_fee', 'old_paid','study_payment1', 'study_payment2', 'study_payment3','study_payment3','bus_payment1', 'bus_payment2', 'payment_status','last_login','bus_order','books','total_books','father_mobile','mother_mobile','phone_number', 'email','lms_code')
 
     # filter_horizontal = ()
     list_filter = ('school','year','grade','bus_active','books','is_active','can_pay')
@@ -254,9 +254,9 @@ class SchoolFeeAdmin(ImportExportMixin, admin.ModelAdmin):
             bus1 = obj.bus_payment1
             bus2 = obj.bus_payment2
             if school == 'بنين':
-                students = Student.objects.filter(year=current_year,school=school,grade=grade)
+                students = Student.objects.filter(year=obj.year,school=school,grade=grade)
             else:
-                students = Student.objects.filter(year=current_year,school__in = ('.بنات.', 'بنات'),grade=grade)
+                students = Student.objects.filter(year=obj.year,school__in = ('.بنات.', 'بنات'),grade=grade)
             students.update(
                 study_payment1 = study1,
                 study_payment2 = study2,
