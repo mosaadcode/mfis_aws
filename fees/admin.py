@@ -222,6 +222,7 @@ class FeeAdmin(ImportExportModelAdmin):
                         mystudent.total_paid=F('total_paid') - obj.value                                                                     
                         if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=current_year,verified=True).count()==1:
                             mystudent.bus_active = False
+                    mystudent.save()
                 else:
                     try:
                         archive = Archive.objects.get(code=mystudent.code,study_year=obj.year)
@@ -270,6 +271,7 @@ class FeeAdmin(ImportExportModelAdmin):
                     mystudent.total_paid=F('total_paid') - obj.value                                                                     
                     if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=current_year,verified=True).count()==1:
                         mystudent.bus_active = False
+                    mystudent.save()
             else:
                 try:
                     archive = Archive.objects.get(code=mystudent.code,study_year=obj.year)
