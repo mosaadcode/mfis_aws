@@ -343,7 +343,7 @@ class ArchiveAdmin(ImportExportModelAdmin):
 
     def has_module_permission(self, request):
         if request.user.is_authenticated:
-            if request.user.code in ('mosaad','affb','affg'):
+            if request.user.code in ('mosaad','mfisb','mfisg'):
                 return True
             return False
     def has_delete_permission(self, request, obj=None):

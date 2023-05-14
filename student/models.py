@@ -318,4 +318,4 @@ class Archive(models.Model):
 
     class Meta:
         verbose_name='study_year'
-        verbose_name_plural ='Archive'
+        verbose_name_plural ='أرشيف'
