@@ -439,7 +439,7 @@ class ContactAdmin(ImportExportModelAdmin):
     search_fields = ('student__code','student__name')
     readonly_fields = ('student', 'father_mobile', 'mother_mobile', 'phone_number','email','address_1','school','phone_update','address_update')
     filter_horizontal = ()
-    list_filter = ('school','phone_update', 'address_update' )
+    list_filter = ('school','phone_update', 'address_update','student__grade')
     fieldsets = ()
 
     def get_queryset(self, request):
@@ -456,6 +456,10 @@ class ContactAdmin(ImportExportModelAdmin):
                 return True
             return False
     def has_delete_permission(self, request, obj=None):
+        if request.user.code == "mosaad":
+            return True
+        return False
+    def has_add_permission(self, request, obj=None):
         if request.user.code == "mosaad":
             return True
         return False
@@ -559,7 +563,15 @@ class ArchiveAdmin(ImportExportModelAdmin):
         if request.user.code == "mosaad":
             return True
         return False
-
+    def has_add_permission(self, request, obj=None):
+        if request.user.code == "mosaad":
+            return True
+        return False
+    def has_change_permission(self, request, obj=None):
+        if request.user.code == "mosaad":
+            return True
+        return False
+        
 class ApplicationAdmin(ImportExportModelAdmin):
     list_display = ('student','father_mobile', 'mother_mobile', 'phone_number')
     autocomplete_fields = ['student']
@@ -590,7 +602,11 @@ class ApplicationAdmin(ImportExportModelAdmin):
         if request.user.code == "mosaad":
             return True
         return False
-
+    def has_add_permission(self, request, obj=None):
+        if request.user.code == "mosaad":
+            return True
+        return False
+    
 admin.site.register(Student,StudentAdmin)
 admin.site.register(School,SchoolAdmin)
 admin.site.register(Class,ClassAdmin)

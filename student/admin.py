@@ -109,7 +109,11 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
         if request.user.code == "mosaad":
             return True
         return False
-        
+    def has_add_permission(self, request, obj=None):
+        if request.user.code == "mosaad":
+            return True
+        return False
+
 class BusAdmin(ImportExportMixin, admin.ModelAdmin):
     list_display = ('number','supervisor_name','supervisor_mobile','driver_name','driver_mobile')
     search_fields = ('number','area')
@@ -350,7 +354,15 @@ class ArchiveAdmin(ImportExportModelAdmin):
         if request.user.code == "mosaad":
             return True
         return False
-
+    def has_add_permission(self, request, obj=None):
+        if request.user.code == "mosaad":
+            return True
+        return False
+    def has_change_permission(self, request, obj=None):
+        if request.user.code == "mosaad":
+            return True
+        return False
+    
 admin.site.register(Student, StudentAdmin)
 admin.site.register(Bus,BusAdmin)
 admin.site.register(BusStudent,BusStudentAdmin)
