@@ -3,11 +3,13 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
 from django.utils.translation import ngettext
 from .models import Fee
-from student.models import Student
+from student.models import Student,Archive
 from import_export.admin import ImportExportModelAdmin
 from student.resources import FeesResource
 from django.db.models import F
 from student_affairs.models import Student as StudentAff
+
+current_year = '24-23'
 
 class FeesInline(admin.TabularInline):
     model = Fee
@@ -25,7 +27,7 @@ class FeesInline(admin.TabularInline):
 
 
 class FeeAdmin(ImportExportModelAdmin):
-    list_display = ('student', 'value', 'school', 'kind', 'bank_account', 'payment_date' , 'created','verified')
+    list_display = ('student', 'value', 'school', 'kind', 'bank_account', 'payment_date' , 'created','year','verified')
     autocomplete_fields = ['student']
     search_fields = ('student__code','student__username')
     readonly_fields = ('created','verified')
@@ -55,6 +57,7 @@ class FeeAdmin(ImportExportModelAdmin):
         # updated = queryset.update(verified=True)
         updated = 0
         notupdated = 0
+        cannot = 0
         for obj in queryset:
             if obj.verified == False:
                 mystudent = Student.objects.get(id=obj.student_id)
@@ -82,13 +85,23 @@ class FeeAdmin(ImportExportModelAdmin):
                     elif obj.kind == 'سيارة':
                         mystudent.total_paid=F('total_paid') + obj.value                                                                     
                         mystudent.bus_active = True
+
+                    mystudent.save()
+                    obj.verified = True
+                    obj.save()
+                    self.log_change(request, obj, 'verified')
+                    updated += 1                    
                 else:
-                    mystudent.old_paid=F('old_paid') + obj.value
-                mystudent.save()
-                obj.verified = True
-                obj.save()
-                self.log_change(request, obj, 'verified')
-                updated += 1
+                    try:
+                        archive = Archive.objects.get(code=mystudent.code,study_year=obj.year)
+                        archive.total = F('total')+obj.value
+                        archive.save()
+                        obj.verified = True
+                        obj.save()
+                        self.log_change(request, obj, 'verified')
+                        updated += 1                        
+                    except Archive.DoesNotExist:
+                        cannot +=1
             else:
                 notupdated +=1
         if updated != 0:
@@ -103,6 +116,12 @@ class FeeAdmin(ImportExportModelAdmin):
                 '%d fees were already verified before.',
                 notupdated,
             ) % notupdated, messages.ERROR)
+        if cannot != 0:
+            self.message_user(request, ngettext(
+                '%d fee needs year check.',
+                '%d fees need year check.',
+                cannot,
+            ) % cannot, messages.ERROR)
         
     verified.short_description = "Ok Verified"
 
@@ -110,6 +129,7 @@ class FeeAdmin(ImportExportModelAdmin):
         # updated = queryset.update(verified=False)
         updated = 0
         notupdated = 0
+        cannot = 0
         for obj in queryset:
             if obj.verified == True:
                 mystudent = Student.objects.get(id=obj.student_id)
@@ -131,15 +151,24 @@ class FeeAdmin(ImportExportModelAdmin):
                             pass
                     elif obj.kind == 'سيارة':
                         mystudent.total_paid=F('total_paid') - obj.value                                                                     
-                        if Fee.objects.filter(student=obj.student_id,kind="سيارة",year="22-21",verified=True).count()==1:
+                        if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=current_year,verified=True).count()==1:
                             mystudent.bus_active = False
+                    mystudent.save()
+                    obj.verified = False
+                    obj.save()
+                    self.log_change(request, obj, 'unverified')
+                    updated += 1                   
                 else:
-                    mystudent.old_paid=F('old_paid') - obj.value
-                mystudent.save()
-                obj.verified = False
-                obj.save()
-                self.log_change(request, obj, 'unverified')
-                updated += 1
+                    try:
+                        archive = Archive.objects.get(code=mystudent.code,study_year=obj.year)
+                        archive.total = F('total')-obj.value
+                        archive.save()
+                        obj.verified = False
+                        obj.save()
+                        self.log_change(request, obj, 'unverified')
+                        updated += 1                        
+                    except Archive.DoesNotExist:
+                        cannot +=1
             else:
                 notupdated +=1
         if updated != 0:
@@ -154,6 +183,12 @@ class FeeAdmin(ImportExportModelAdmin):
                 '%d fees were already unverified.',
                 notupdated,
             ) % notupdated, messages.ERROR)
+        if cannot != 0:
+            self.message_user(request, ngettext(
+                '%d fee can not unverified.',
+                '%d fee can not unverified.',
+                cannot,
+            ) % cannot, messages.ERROR)
 
     def delete_queryset(self, request, queryset):
         print('==========================delete_queryset==========================')
@@ -183,11 +218,15 @@ class FeeAdmin(ImportExportModelAdmin):
                             pass
                     elif obj.kind == 'سيارة':
                         mystudent.total_paid=F('total_paid') - obj.value                                                                     
-                        if Fee.objects.filter(student=obj.student_id,kind="سيارة",year="22-21",verified=True).count()==1:
+                        if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=current_year,verified=True).count()==1:
                             mystudent.bus_active = False
                 else:
-                    mystudent.old_paid=F('old_paid') - obj.value
-                mystudent.save()
+                    try:
+                        archive = Archive.objects.get(code=mystudent.code,study_year=obj.year)
+                        archive.total = F('total')-obj.value
+                        archive.save()
+                    except Archive.DoesNotExist:
+                        pass
                 obj.delete()
             else:
                 obj.delete()
@@ -226,11 +265,15 @@ class FeeAdmin(ImportExportModelAdmin):
                         pass
                 elif obj.kind == 'سيارة':
                     mystudent.total_paid=F('total_paid') - obj.value                                                                     
-                    if Fee.objects.filter(student=obj.student_id,kind="سيارة",year="22-21",verified=True).count()==1:
+                    if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=current_year,verified=True).count()==1:
                         mystudent.bus_active = False
             else:
-                mystudent.old_paid=F('old_paid') - obj.value
-            mystudent.save()
+                try:
+                    archive = Archive.objects.get(code=mystudent.code,study_year=obj.year)
+                    archive.total = F('total')-obj.value
+                    archive.save()
+                except Archive.DoesNotExist:
+                    pass
             obj.delete()
         else:
             obj.delete()
@@ -247,7 +290,10 @@ class FeeAdmin(ImportExportModelAdmin):
             if request.user.code in ('mosaad','mfisb','mfisg'):
                 return True
             return False
-
+    def has_delete_permission(self, request, obj=None):
+        if request.user.code == "mosaad":
+            return True
+        return False
 
 # class XeesAdmin(ImportExportModelAdmin):
 #     pass
