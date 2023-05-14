@@ -2,7 +2,7 @@
 from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget, BooleanWidget
 from fees.models import Fee
-from .models import Student,Bus
+from .models import Student,Bus,Archive
 from django.contrib.auth.hashers import make_password
 from django.utils.encoding import force_text
 from import_export.results import RowResult
@@ -51,9 +51,14 @@ class FeesResource(resources.ModelResource):
                 elif row['kind'] == 'سيارة':
                     mystudent.total_paid = F('total_paid')+row['value']
                     mystudent.bus_active = True
+                mystudent.save()
             else:
-                mystudent.old_paid=F('old_paid') + row['value']
-            mystudent.save()
+                try:
+                    archive = Archive.objects.get(code=row['student'],study_year=row['year'])
+                    archive.total = F('total')+row['value']
+                    archive.save()
+                except Archive.DoesNotExist:
+                    pass
 
     class Meta:
         model = Fee

@@ -218,7 +218,7 @@ class Archive(models.Model):
 
     class Meta:
         verbose_name='study_year'
-        verbose_name_plural =' G -  أرشيف'
+        verbose_name_plural =' G -  سنوات سابقة'
 
 class Contact(models.Model):
     SCHOOL1_CHOICES = (
