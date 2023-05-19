@@ -1,6 +1,6 @@
 from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget, BooleanWidget
-from .models import Month,SalaryItem,Employee,Permission,School,Job
+from .models import Month,SalaryItem,Employee,Permission,School,Job,Employee_month
 from import_export.results import RowResult
 
 try:
@@ -61,6 +61,10 @@ class PermResource(resources.ModelResource):
     employee = fields.Field(column_name='employee',
                       attribute='employee',
                       widget=ForeignKeyWidget(Employee, 'code'))
+    
+    month = fields.Field(column_name='month',
+                    attribute='month',
+                    widget=ForeignKeyWidget(Month, 'code'))
 
     def before_import_row(self,row, **kwargs):
         if row['month']==None:
@@ -72,3 +76,26 @@ class PermResource(resources.ModelResource):
         import_id_fields = ('id',)
         fields = ('id','school','employee','date','type','ok1','ok2','month')
         export_order = ('id','school','employee','date','type','ok1','ok2','month')
+
+class Employee_monthResource(resources.ModelResource):
+    employee = fields.Field(column_name='employee',
+                      attribute='employee',
+                      widget=ForeignKeyWidget(Employee, 'code'))
+    
+    month = fields.Field(column_name='month',
+                      attribute='month',
+                      widget=ForeignKeyWidget(Month, 'code'))
+    
+    # print(employee)
+    # print(month)
+
+    def before_import_row(self,row, **kwargs):
+        if row['month']==None:
+            row['month'] = active_month
+        return row
+
+    class Meta:
+        model = Employee_month
+        import_id_fields = ('id',)
+        fields = ('id','school','employee','permissions','vacations','salary_value','is_active','month')
+        export_order = ('id','school','employee','permissions','vacations','salary_value','is_active','month')

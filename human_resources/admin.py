@@ -1,10 +1,11 @@
 from django.contrib import admin
-from .models import School,Department,Job, Employee, Month,SalaryItem,Permission,Vacation
+from .models import School,Department,Job, Employee, Month,SalaryItem,Permission,Vacation,Permission_setting,Employee_month
 from import_export.admin import ImportExportModelAdmin
-from .resources import SalaryItemResource,PermResource,EmployeeResource
+from .resources import SalaryItemResource,PermResource,EmployeeResource,Employee_monthResource
 from django.utils.translation import ngettext
 from django.contrib import admin, messages
 from student.models import Student,Manager
+from django.db.models import F
 
 try:
     active_month = Month.objects.get(active=True)
@@ -60,6 +61,76 @@ class SalaryItemAdmin(ImportExportModelAdmin):
                 return True
             return False
 
+class Employee_monthAdmin(ImportExportModelAdmin):
+    list_display = ('employee','month','salary_value','permissions','vacations','is_active')
+    # list_display_links = ('employee',)
+    autocomplete_fields = ['employee']
+    readonly_fields = ('school','employee','salary_value','permissions','vacations','month','is_active')
+    filter_horizontal = ()
+    search_fields = ('employee__name','employee__code')
+    list_filter = ('school','month','is_active')
+    # fieldsets = (
+    # ('', { 'fields': ('employee','is_perms','is_over',('is_evening','is_between','is_morning'),( 'perms',))}),
+    #             )
+
+    resource_class = Employee_monthResource
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.code == "hrgirls":
+            return qs.filter(school__in = ('بنات',))
+        elif request.user.code =="hrboys":
+            return qs.filter(school__in = ('بنين',))
+        return qs
+
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls'):
+                return True
+            return False
+    def has_add_permission(self, request, obj=None):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad'):
+                return True
+            return False
+    def has_delete_permission(self, request, obj=None):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad'):
+                return True
+            return False
+        
+class Permission_settingAdmin(ImportExportModelAdmin):
+    list_display = ('name','is_perms','is_morning','is_evening','is_between', 'perms','is_over')
+    # list_display_links = ('employee',)
+    # autocomplete_fields = ['employee']
+    readonly_fields = ()
+    filter_horizontal = ()
+    search_fields = ('name',)
+    list_filter = ('school',)
+    fieldsets = (
+    ('', { 'fields': ('name','is_perms','is_over',('is_evening','is_between','is_morning'),( 'perms'))}),
+                )
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.code == "hrgirls":
+            return qs.filter(school__in = ('بنات',))
+        elif request.user.code =="hrboys":
+            return qs.filter(school__in = ('بنين',))
+        return qs
+
+    def save_model(self, request, obj, form, change):
+        if obj.pk is None:
+            if request.user.code == "hrboys":
+                obj.school = "بنين"
+            elif request.user.code == "hrgirls":
+                obj.school = "بنات"
+        super().save_model(request, obj, form, change)
+
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls'):
+                return True
+            return False
 
 class PermissionAdmin(ImportExportModelAdmin):
     list_display = ('employee','type', 'date','reason', 'month','ok1','ok2')
@@ -115,6 +186,9 @@ class PermissionAdmin(ImportExportModelAdmin):
                 if obj.ok1 == True:
                     obj.ok2 = True
                     obj.save()
+                    employee_month = Employee_month.objects.get(employee=obj.employee,month=active_month)
+                    employee_month.permissions=F('permissions') + 1
+                    employee_month.save(update_fields=['permissions'])
                     self.log_change(request, obj, 'تم موافقة الرئيس الأعلى')
                     updated += 1
                 else:
@@ -139,6 +213,9 @@ class PermissionAdmin(ImportExportModelAdmin):
                 if obj.ok2 == False:
                     obj.ok2 = True
                     obj.save()
+                    employee_month = Employee_month.objects.get(employee=obj.employee,month=active_month)
+                    employee_month.permissions=F('permissions') + 1
+                    employee_month.save(update_fields=['permissions'])
                     self.log_change(request, obj, ' موافقة مباشرة')
                     updated += 1
                 else:
@@ -209,6 +286,50 @@ class PermissionAdmin(ImportExportModelAdmin):
             if request.user.code in ('mosaad','hrboys','hrgirls'):
                 return True
             return False
+    def delete_queryset(self, request, queryset):
+        print('==========================delete_queryset==========================')
+        print(queryset)
+
+        """
+        you can do anything here BEFORE deleting the object(s)
+        """
+        for obj in queryset:
+            if obj.ok2 == True and obj.month == active_month:
+                employee_month = Employee_month.objects.get(employee=obj.employee,month=active_month)
+                employee_month.permissions=F('permissions') - 1
+                employee_month.save(update_fields=['permissions'])
+
+                obj.delete()
+            else:
+                obj.delete()
+        # queryset.delete()
+
+        """
+        you can do anything here AFTER deleting the object(s)
+        """
+
+        print('==========================delete_queryset==========================')
+
+    def delete_model(self, request, obj):
+        print('============================delete_model============================')
+        print(obj)
+
+        """
+        you can do anything here BEFORE deleting the object
+        """
+        if obj.ok2 == True and obj.month == active_month:
+            employee_month = Employee_month.objects.get(employee=obj.employee,month=active_month)
+            employee_month.permissions=F('permissions') - 1
+            employee_month.save(update_fields=['permissions'])
+
+            obj.delete()
+        else:
+            obj.delete()
+        """
+        you can do anything here AFTER deleting the object
+        """
+
+        print('============================delete_model============================')
 
 class VacationAdmin(ImportExportModelAdmin):
     list_display = ('employee','date_from','date_to','reason', 'month','ok1','ok2')
@@ -529,3 +650,5 @@ admin.site.register(Month,MonthAdmin)
 admin.site.register(SalaryItem,SalaryItemAdmin)
 admin.site.register(Permission,PermissionAdmin)
 admin.site.register(Vacation,VacationAdmin)
+admin.site.register(Permission_setting,Permission_settingAdmin)
+admin.site.register(Employee_month,Employee_monthAdmin)

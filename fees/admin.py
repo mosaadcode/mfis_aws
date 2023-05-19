@@ -132,46 +132,50 @@ class FeeAdmin(ImportExportModelAdmin):
         cannot = 0
         for obj in queryset:
             if obj.verified == True:
-                mystudent = Student.objects.get(id=obj.student_id)
-                SYear=mystudent.year
-                if obj.year == SYear:
-                    #for book and book
-                    if obj.kind[:3] == 'Boo':
-                        mystudent.total_books = F('total_books')-obj.value
-                        mystudent.books = False
-                    elif obj.kind[:3] == 'Bok':
-                        mystudent.total_books = F('total_books')-obj.value
-                    elif obj.kind == 'دراسية':
-                        mystudent.total_paid=F('total_paid') - obj.value
-                        if Fee.objects.filter(student=obj.student_id,kind='دراسية',year=current_year,verified=True).count()==1:
-                            try:
-                                mystudentAff = StudentAff.objects.get(code=mystudent.code)
-                                mystudentAff.payment_status = False
-                                mystudentAff.save()
-                            except StudentAff.DoesNotExist:
-                                pass
-                    elif obj.kind == 'سيارة':
-                        mystudent.total_paid=F('total_paid') - obj.value                                                                     
-                        if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=current_year,verified=True).count()==1:
-                            mystudent.bus_active = False
-                    mystudent.save()
-                    obj.verified = False
-                    obj.save()
-                    self.log_change(request, obj, 'unverified')
-                    updated += 1                   
-                else:
-                    try:
-                        archive = Archive.objects.get(code=mystudent.code,study_year=obj.year)
-                        archive.total = F('total')-obj.value
-                        archive.save()
+                if obj.year == current_year:
+                    mystudent = Student.objects.get(id=obj.student_id)
+                    SYear=mystudent.year
+                    if obj.year == SYear:
+                        #for book and book
+                        if obj.kind[:3] == 'Boo':
+                            mystudent.total_books = F('total_books')-obj.value
+                            mystudent.books = False
+                        elif obj.kind[:3] == 'Bok':
+                            mystudent.total_books = F('total_books')-obj.value
+                        elif obj.kind == 'دراسية':
+                            mystudent.total_paid=F('total_paid') - obj.value
+                            if Fee.objects.filter(student=obj.student_id,kind='دراسية',year=current_year,verified=True).count()==1:
+                                try:
+                                    mystudentAff = StudentAff.objects.get(code=mystudent.code)
+                                    mystudentAff.payment_status = False
+                                    mystudentAff.save()
+                                except StudentAff.DoesNotExist:
+                                    pass
+                        elif obj.kind == 'سيارة':
+                            mystudent.total_paid=F('total_paid') - obj.value                                                                     
+                            if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=current_year,verified=True).count()==1:
+                                mystudent.bus_active = False
+                        mystudent.save()
                         obj.verified = False
                         obj.save()
                         self.log_change(request, obj, 'unverified')
-                        updated += 1                        
-                    except Archive.DoesNotExist:
-                        cannot +=1
+                        updated += 1                   
+                    else:
+                        try:
+                            archive = Archive.objects.get(code=mystudent.code,study_year=obj.year)
+                            archive.total = F('total')-obj.value
+                            archive.save()
+                            obj.verified = False
+                            obj.save()
+                            self.log_change(request, obj, 'unverified')
+                            updated += 1                        
+                        except Archive.DoesNotExist:
+                            cannot +=1
+                else:
+                    cannot +=1
             else:
                 notupdated +=1
+
         if updated != 0:
             self.message_user(request, ngettext(
                 '%d fee was successfully unverified.',

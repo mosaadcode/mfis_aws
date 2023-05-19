@@ -92,7 +92,8 @@ class Employee(models.Model):
     time_out = models.CharField(max_length=5,blank=True,null=True,verbose_name='موعد الإنصراف')
     time_out_perm = models.CharField(max_length=5,blank=True,null=True,verbose_name='إنصراف بإذن')
     time_code = models.CharField(max_length=6,unique=True,blank=True,null=True,verbose_name='كود البصمة')
-    
+    perms = models.ForeignKey("Permission_setting", on_delete=models.SET_NULL,blank=True,null=True,verbose_name='إعدادات الاَذون ')
+
     def get_code(self):
         if self.code == "":
             code_gen = []
@@ -120,7 +121,7 @@ class Employee(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.name
+        return self.code+" "+self.name
 
     class Meta:
         verbose_name='employee'
@@ -246,6 +247,38 @@ class Vacation(models.Model):
     class Meta:
         verbose_name='vacation'
         verbose_name_plural ='3_ إجازات سنوية'   
+
+class Employee_month(models.Model):   
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE,verbose_name='إسم الموظف')
+    school = models.CharField(max_length=6, choices=SCHOOL_CHOICES,null=True,verbose_name='المدرسة')    
+    month = models.ForeignKey(Month, on_delete=models.CASCADE, null=True,verbose_name='شهر')
+    is_active = models.BooleanField(default=True,verbose_name='نشط')
+    permissions = models.PositiveSmallIntegerField(default=0,verbose_name='اَذون')
+    vacations = models.PositiveSmallIntegerField(default=0,verbose_name='إجازات')
+    salary_value =models.PositiveSmallIntegerField(default=0,verbose_name='الراتب')
+
+    def __str__(self):
+        return self.employee.code
+    class Meta:
+        verbose_name='Employee Month'
+        verbose_name_plural ='بيان شهور' 
+
+class Permission_setting(models.Model):
+    school = models.CharField(max_length=6, choices=SCHOOL_CHOICES,blank=True,null=True,verbose_name='المدرسة')
+    name = models.CharField(max_length=26,verbose_name='الإسم')
+    is_perms = models.BooleanField(default=False,verbose_name='السماح بالاَذون')
+    is_morning = models.BooleanField(default=False,verbose_name='صباحي')
+    is_evening = models.BooleanField(default=False,verbose_name='مسائي')
+    is_between = models.BooleanField(default=False,verbose_name='داخلي')
+    is_over = models.BooleanField(default=False,verbose_name='السماح بتجاوز عدد الاَذون')
+    perms = models.PositiveSmallIntegerField(default=4,verbose_name='عدد الاّذون المتاحة خلال الشهر')
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name='permation setting'
+        verbose_name_plural ='إعدادات الاَذون'  
 
 class Permission(models.Model):
     PERM_CHOICES = (
