@@ -3,7 +3,18 @@
 {% block content %}
 {% load static %}
 	<link rel="stylesheet" href="{% static '/css/base.css' %}">
-
+	<br>
+	{% if error %}
+    <div class="alert alert-danger text-center"  role="alert" >
+        {{ error }}
+    </div>
+    {% endif %}
+    {% if msg %}
+    <div class="alert alert-info text-center" role="alert">
+        {{ msg }}
+    </div>
+    {% endif %}
+	
 	<div class="container-fluid text-right  ">
 		<br>
 			<div class="row">

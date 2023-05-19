@@ -339,9 +339,9 @@ class ArchiveAdmin(ImportExportModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        if request.user.code == "affg":
+        if request.user.code == "mfisg":
             return qs.filter(school__in = ('.بنات.', 'بنات'))
-        elif request.user.code =="affb":
+        elif request.user.code =="mfisb":
             return qs.filter(school__in = ('بنين',))
         return qs
 

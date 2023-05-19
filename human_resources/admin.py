@@ -513,7 +513,7 @@ class PermissionInline(admin.TabularInline):
 
 class EmployeeAdmin(ImportExportModelAdmin):
     list_display = ('name','code','mobile_number' ,'participation_date','job','is_active')
-    # autocomplete_fields = ['job']
+    autocomplete_fields = ['perms']
     raw_id_fields = ('job',)
     readonly_fields = ('birth_date','job_code','time_in','time_in_perm','time_out','time_out_perm')
     search_fields = ('code','name','na_id','insurance_no')
@@ -521,7 +521,7 @@ class EmployeeAdmin(ImportExportModelAdmin):
     list_filter = ('school','job__type','job__grade','is_educational','job__department')
     fieldsets = (
     ('بيانات الموظف', { 'fields': (('name','job'),('code','job_code','birth_date'),('na_id','school'),('mobile_number','phone_number'),('emergency_phone','email'),'address',('basic_certificate','is_educational'),('notes','is_active'))}),
-    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code',('time_in','time_in_perm'),('time_out','time_out_perm'))}),
+    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code','perms',('time_in','time_in_perm'),('time_out','time_out_perm'))}),
                 )
 
     def get_readonly_fields(self, request, obj=None):

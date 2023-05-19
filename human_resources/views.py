@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect
-from .models import Employee,SalaryItem,Month,Permission,Vacation
+from .models import Employee,SalaryItem,Month,Permission,Vacation,Employee_month
 from .forms import PermForm,VacationForm,EmployeeContact
 from datetime import datetime,date
 from django.http import JsonResponse
@@ -22,8 +22,15 @@ except Month.DoesNotExist:
     active_month = None
 
 def home(request):
+    msg = request.session.get('msg')
+    request.session['msg'] = ''
+    error = request.session.get('error')
+    request.session['error'] = ''
+    emp = Employee.objects.get(code=request.user.code)
     context = {
-       'emp':Employee.objects.get(code=request.user.code),
+       'emp':emp,
+       'msg':msg,
+       'error':error,
     }
     return render(request, 'human_resources/home.html',context)
 
@@ -39,22 +46,45 @@ def salary(request):
     return render(request, 'human_resources/salary.html',context)
 
 def perm(request):
+    employee_month = Employee_month.objects.get(employee__code=request.user.code,month=active_month)
+    month_perms= Permission.objects.filter(employee__code=request.user.code,month=active_month).order_by('-date')
+    settings = Employee.objects.get(code=request.user.code).perms
+    total = settings.perms
+    used = month_perms.count()
+    unused = total - used
+    used_perms_percentage = (used / total) * 100
+    unused_perms_percentage = 100 - used_perms_percentage
+    over = employee_month.permissions - total
+
     if request.method == 'GET':
         msg = request.session.get('msg')
         request.session['msg'] = ''
         error = request.session.get('error')
         request.session['error'] = ''
-        context = {
-            'form':PermForm(),
-            'msg':msg,
-            'error':error,
-            'month':active_month,
-            'month_start':month_start,
-            'month_end':month_end,
-            'perms':Permission.objects.filter(employee__code=request.user.code,month=active_month).order_by('-date'),
-        }        
-        return render( request, "human_resources/perm.html", context)
-    else:
+        if settings.is_perms == False:
+            request.session['error'] = 'ليس لك الحق في إستخدام الاَذون'
+            return redirect('home2')
+        else:
+
+            context = {
+                'form':PermForm(),
+                'msg':msg,
+                'error':error,
+                'settings':settings,
+                'month':active_month,
+                'month_start':month_start,
+                'month_end':month_end,
+                'month_perms':month_perms,
+                'total':total,
+                'used':used,
+                'unused':unused,
+                'used_perms_percentage' : used_perms_percentage,
+                'unused_perms_percentage' :unused_perms_percentage,
+                'over':over,    
+            }
+            return render( request, "human_resources/perm.html", context)
+
+    else:       
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             employee = Employee.objects.get(code=request.user.code)
             data = json.loads(request.body)
@@ -68,21 +98,33 @@ def perm(request):
             return JsonResponse({'start_time':start_time,'end_time': end_time })
         else:
             if active_month != None:
-                if datetime.strptime((request.POST['date']), '%Y-%m-%d').date()< month_start or datetime.strptime((request.POST['date']), '%Y-%m-%d').date() > month_end:
-                    request.session['error'] = 'يرجى تحديد تاريخ إذن صحيح'
-                    return redirect('perm')
-                else:
-                    form = PermForm(request.POST)
-                    permission = form.save(commit=False)
-                    permission.employee = Employee.objects.get(code=request.user.code)
-                    permission.school = request.user.school
-                    permission.month=active_month
-                    permission.save()
-                    if Permission.objects.filter(employee__code=request.user.code,month=active_month,ok2=True).count() >= active_month.perms:
-                        request.session['msg'] = ' ( تم تسجيل الإذن زائد ( سيتم الخصم من الراتب'
+                unused_perms = request.POST.get('unused_perms')
+                if used < total :
+                    if datetime.strptime((request.POST['date']), '%Y-%m-%d').date()< month_start or datetime.strptime((request.POST['date']), '%Y-%m-%d').date() > month_end:
+                        request.session['error'] = 'يرجى تحديد تاريخ إذن صحيح'
+                        return redirect('perm')
                     else:
+                        form = PermForm(request.POST)
+                        permission = form.save(commit=False)
+                        permission.employee = Employee.objects.get(code=request.user.code)
+                        permission.school = request.user.school
+                        permission.month=active_month
+                        permission.save()
                         request.session['msg'] = '( تم تسجيل الإذن ( قيد الموافقة'
-                    return redirect('perm')
+                        return redirect('perm')
+                else:
+                    if settings.is_over == False:
+                        request.session['error'] = 'تم استخدام جميع اَذون هذا الشهر وغير مسموح بالتجاوز'
+                        return redirect('perm')
+                    else:
+                        form = PermForm(request.POST)
+                        permission = form.save(commit=False)
+                        permission.employee = Employee.objects.get(code=request.user.code)
+                        permission.school = request.user.school
+                        permission.month=active_month
+                        permission.save()
+                        request.session['msg'] = ' ( تم تسجيل الإذن زائد ( سيتم الخصم من الراتب'
+                        return redirect('perm')
             else:
                 request.session['error'] = 'لا توجد شهور مفعلة'
                 return redirect('perm')
