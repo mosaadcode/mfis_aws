@@ -20,6 +20,16 @@ class FeesInline(admin.TabularInline):
     ]
     extra = 0
     ordering = ('-year','-created')
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.code =="mfisb":
+            return qs.filter(school="بنين")
+        elif request.user.code == "mfisg":
+            # return qs.filter(Q(school='.بنات.')| Q(school='بنات'))
+            return qs.filter(school__in = ('.بنات.', 'بنات'))
+        return qs
+    
     def has_change_permission(self, request, obj=None):
         return False
     # def has_add_permission(self, request, obj=None):
