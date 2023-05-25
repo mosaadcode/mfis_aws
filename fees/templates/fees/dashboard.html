@@ -103,7 +103,6 @@
 	{% endif %}
 	</div>
 	<div class="row">
-
 		<div class="col-md-12">
 			<div class="table-responsive">
 				<table class="table table-hover text-center">
@@ -115,20 +114,20 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td><button type="button" class="btn btn-deafult text-center mt-2 p-0" style="display:inline-block;width:150px"><h6>حتى 07/31</h6></button></td>
+							<td><button type="button" class="btn btn-deafult text-center mt-2 p-0" style="display:inline-block;width:150px"><h6>قبل اخر يونيو</h6></button></td>
 				    	<th scope="row"><button type="button" class="btn btn-primary cib   p-2" style="display:inline-block; width:170px" >القسط الأول<span class="badge badge-light ml-2"><h6>{{ user.study_payment1 }}</h6></span></button></th>
 						</tr>
-	          <!-- <tr>
-							<td><button type="button" class="btn btn-deafult text-center mt-3 p-0" style="display:inline-block;width:150px"><h6>مـن 11/01 الى 11/30</h6></button></td>
-	          	<th scope="row"><button type="button" class="btn btn-primary cib p-2" style="display:inline-block; width:170px" >القسط الثاني<span class="badge badge-light ml-2"><h6>7,000</h6></span></button></th>
-	          </tr> -->
 						<tr>
-							<td><button type="button" class="btn btn-deafult text-center mt-2 p-0" style="display:inline-block;width:150px"><h6>حتى يناير 2023</h6></button></td>
-					{% if user.study_payment2 == 0 %}
-							<th scope="row"><button type="button" class="btn btn-primary cib p-2" style="display:inline-block; width:170px" >القسط الثاني<span class="badge badge-light ml-2">المتبقي</span></button></th>
-	        {% else %}
-					    <th scope="row"><button type="button" class="btn btn-primary cib p-2" style="display:inline-block; width:170px" >القسط الثاني<span class="badge badge-light ml-2"><h6>{{ user.study_payment2 }}</h6></span></button></th>
-	        {% endif %}
+							<td><button type="button" class="btn btn-deafult text-center mt-2 p-0" style="display:inline-block;width:150px"><h6>خلال سبتمير</h6></button></td>
+				    	<th scope="row"><button type="button" class="btn btn-primary cib   p-2" style="display:inline-block; width:170px" >القسط الثاني<span class="badge badge-light ml-2"><h6>{{ user.study_payment2 }}</h6></span></button></th>
+						</tr>
+						<tr>
+							<td><button type="button" class="btn btn-deafult text-center mt-2 p-0" style="display:inline-block;width:150px"><h6>خلال ديسمبر</h6></button></td>
+				    	<th scope="row"><button type="button" class="btn btn-primary cib   p-2" style="display:inline-block; width:170px" >القسط الثالث<span class="badge badge-light ml-2"><h6>{{ user.study_payment3 }}</h6></span></button></th>
+						</tr>
+						<tr>
+							<td><button type="button" class="btn btn-deafult text-center mt-2 p-0" style="display:inline-block;width:150px"><h6>خلال فبراير</h6></button></td>
+				    	<th scope="row"><button type="button" class="btn btn-primary cib   p-2" style="display:inline-block; width:170px" >القسط الرابع<span class="badge badge-light ml-2"><h6>المتبقي</h6></span></button></th>
 						</tr>
 					</tbody>
 				</table>
@@ -148,13 +147,13 @@
 				</thead>
 				<tbody>
 					<tr>
-						<td><button type="button" class="btn btn-deafult text-center mt-3 p-0" style="display:inline-block;width:150px"><h6>حتى 07/31</h6></button></td>
-						<th scope="row"><button type="button" class="btn btn-primary cib p-2" style="display:inline-block; width:170px" >  <span class="badge badge-light ml-2"><h6>{{ user.bus_payment1 }}</h6></span></button></th>
+						<td><button type="button" class="btn btn-deafult text-center mt-3 p-0" style="display:inline-block;width:150px"><h6>قبل اخر مايو</h6></button></td>
+						<th scope="row"><button type="button" class="btn btn-primary cib p-2" style="display:inline-block; width:170px" >القسط الأول<span class="badge badge-light ml-2"><h6>{{ user.bus_payment1 }}</h6></span></button></th>
 					</tr>
-					<!-- <tr>
-						<td><button type="button" class="btn btn-deafult text-center mt-3 p-0" style="display:inline-block;width:150px"><h6>مـن 10/01 الى 10/30</h6></button></td>
+					<tr>
+						<td><button type="button" class="btn btn-deafult text-center mt-3 p-0" style="display:inline-block;width:150px"><h6>قبل بداية الدراسة</h6></button></td>
 						<th scope="row"><button type="button" class="btn btn-primary cib p-2" style="display:inline-block; width:170px" >القسط الثاني<span class="badge badge-light ml-2"><h6>{{ user.bus_payment2 }}</h6></span></button></th>
-          </tr> -->
+                   </tr>
 				</tbody>
 			</table>
 		</div>
