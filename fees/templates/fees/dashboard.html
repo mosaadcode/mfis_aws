@@ -83,24 +83,37 @@
 	<div class="row">
 		<div class="col-md-6">
 		</div>
-	{% if oldfee <= 0 %}
-	<div class="col-md-6">
-		</div>
-		<br>
-	{% else %}
+		{% if oldSign == 0 %}
 		<div class="col-md-6">
-			<div class="alert alert-dismissable alert-danger">
-
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">
-					×
-				</button>
-				<h6>
-					برجاء السداد الفوري للمديونية السابقة
-				</h6> <strong> {{ oldfee }} بقيمة </strong>
 			</div>
-		</div>
-		<br>
-	{% endif %}
+			<br>
+		{% elif oldSign < 0 %}
+			<div class="col-md-6">
+				<div class="alert alert-dismissable alert-danger">
+	
+					<button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+						×
+					</button>
+					<h6>
+						برجاء السداد الفوري للمديونية السابقة
+					</h6> <strong>بقيمة {{ OldVale }} جنيهاً </strong>
+				</div>
+			</div>
+			<br>
+			{% elif oldSign > 0 %}
+			<div class="col-md-6">
+				<div class="alert alert-dismissable alert-info">
+	
+					<button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+						×
+					</button>
+					<h6>
+						لديك رصيد من العام الدراسي السابق
+					</h6> <strong>بقيمة {{ OldVale }} جنيهاً </strong>
+				</div>
+			</div>
+			<br>
+		{% endif %}
 	</div>
 	<div class="row">
 		<div class="col-md-12">

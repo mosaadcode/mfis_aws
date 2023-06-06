@@ -3,15 +3,32 @@ from .forms import FeesForm
 from .models import Fee
 from student.forms import StudentForm, StudentArea
 from student_affairs.models import Student as StudentAff
+from student.models import Archive
+
+last_year = '23-22'
 
 def dashboard(request):
+    try:
+        OldVale = Archive.objects.get(code=request.user.code,study_year=last_year).year_status()
+        OldVale=int(OldVale)
+        if OldVale < 0 :
+            OldVale = OldVale *-1
+            oldSign = -1
+        elif OldVale > 0 :
+            oldSign = 1
+        elif OldVale == 0 :
+            oldSign = 0
+         
+    except Archive.DoesNotExist:
+        oldSign = 0
+        OldVale = 0
+
     studentaff = StudentAff.objects.get(code=request.user.code)
     if studentaff.grade not in ('الاول الابتدائى','الاول الاعدادى','الاول الثانوى') and studentaff.contact_status == False:
         request.session['error'] ='برجاء تحديث بيانات التواصل'
         return redirect('contact')
     else:
         student=request.user
-        oldfee = student.old_fee - student.old_paid
         if len(str(request.user.living_area)) > 4 :
             bus = True
         else :
@@ -20,13 +37,31 @@ def dashboard(request):
         error = request.session.get('error')
         request.session['msg'] = ''
         request.session['error'] = ''
-        return render(request, 'fees/dashboard.html',{'oldfee':oldfee,'bus':bus,'msg':msg,'error':error})
+        context = {
+            'bus':bus,
+            'msg':msg,
+            'error':error,
+            'oldSign':oldSign,
+            'OldVale':OldVale,
+        }
+        return render(request, 'fees/dashboard.html',context)
 
 def addfees(request):
     if request.method == 'GET':   
         msg = request.session.get('msg')
-        return render(request, 'fees/addfees.html', {'form':FeesForm(),'msg':msg})
+        return render(request, 'fees/addfees.html', {'form':FeesForm(),'msg':msg})     
     else:
+        try:
+            LYFee = Archive.objects.get(code=request.user.code,study_year=last_year).year_status()
+            LYFee=int(LYFee)
+            if LYFee < 0 :
+                LYFee = LYFee *-1
+            else:
+                LYFee = 0
+          
+        except Archive.DoesNotExist:
+            LYFee = 0
+
         if request.user.can_pay == True:
             if request.POST['kind'] == "دراسية":
                 # add try: except to solve value Error
@@ -35,15 +70,15 @@ def addfees(request):
                     newfee = form.save(commit=False)
                     newfee.student = request.user
                     newfee.school = request.user.school
-                    LYFee = request.user.old_fee - request.user.old_paid
+
                     SYear=request.user.year
                     if LYFee >0:
                         if int(request.POST['value']) <= LYFee:
-                            newfee.year = '22-21'
+                            newfee.year = last_year
                             newfee.save()
                         else:
                             newfee.value = LYFee
-                            newfee.year ='22-21'
+                            newfee.year = last_year
                             newfee.save()
                             form2 = FeesForm(request.POST)
                             newfee2 = form2.save(commit=False)
@@ -73,24 +108,24 @@ def addfees(request):
                         newfee.school = request.user.school
                         LYFee = request.user.old_fee - request.user.old_paid
                         SYear=request.user.year
-                        if LYFee >0:
-                            if int(request.POST['value']) <= LYFee:
-                                newfee.year = '22-21'
-                                newfee.save()
-                            else:
-                                newfee.value = LYFee
-                                newfee.year ='22-21'
-                                newfee.save()
-                                form2 = FeesForm(request.POST)
-                                newfee2 = form2.save(commit=False)
-                                newfee2.student = request.user
-                                newfee2.school = request.user.school
-                                newfee2.value = int(request.POST['value']) - LYFee
-                                newfee2.year = SYear
-                                newfee2.save()
-                        else:        
-                            newfee.year = SYear
-                            newfee.save()
+                        # if LYFee >0:
+                        #     if int(request.POST['value']) <= LYFee:
+                        #         newfee.year = '22-21'
+                        #         newfee.save()
+                        #     else:
+                        #         newfee.value = LYFee
+                        #         newfee.year ='22-21'
+                        #         newfee.save()
+                        #         form2 = FeesForm(request.POST)
+                        #         newfee2 = form2.save(commit=False)
+                        #         newfee2.student = request.user
+                        #         newfee2.school = request.user.school
+                        #         newfee2.value = int(request.POST['value']) - LYFee
+                        #         newfee2.year = SYear
+                        #         newfee2.save()
+                        # else:        
+                        newfee.year = SYear
+                        newfee.save()
                         request.session['msg'] = ''
                         return redirect('recorded')
                     except ValueError:
@@ -103,8 +138,9 @@ def addfees(request):
 
         else:
             return render(request, 'fees/addfees.html', {'form':FeesForm(),'error':'لا يمكنك التسجيل الان, برجاء مراجعة قسم الحسابات'})
+        
 def recorded(request):
-    fees = Fee.objects.filter(student=request.user.id,year=request.user.year)
+    fees = Fee.objects.filter(student=request.user.id,year=request.user.year,kind__in = ('دراسية','سيارة',)).order_by('payment_date')
     return render(request, 'fees/recorded.html',{'fees':fees})
 
 
