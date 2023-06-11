@@ -57,11 +57,41 @@ class FeeAdmin(ImportExportModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.code =="mfisb":
-            return qs.filter(school="بنين")
+            return qs.filter(school__in = ('بنين','Out-b'))
         elif request.user.code == "mfisg":
             # return qs.filter(Q(school='.بنات.')| Q(school='بنات'))
-            return qs.filter(school__in = ('.بنات.', 'بنات'))
+            return qs.filter(school__in = ('.بنات.', 'بنات','Out-g'))
         return qs
+
+    def out(self, request, queryset):
+        updated = 0
+        notupdated = 0
+        for obj in queryset:
+            if obj.verified == True or obj.school[0] =='O':
+                notupdated +=1
+            else:
+                if request.user.code == 'mfisb':
+                    school = 'Out-b'
+                else:
+                    school = 'Out-g'
+                obj.school = school
+                self.log_change(request, obj, 'delete to out')
+                obj.save()
+                updated +=1
+        if updated != 0:
+            self.message_user(request, ngettext(
+                '%d fee was successfully deleted.',
+                '%d fees were successfully deleted.',
+                updated,
+            ) % updated, messages.SUCCESS)
+        if notupdated != 0:
+            self.message_user(request, ngettext(
+                '%d fee can not be deleted.',
+                '%d fees can not be deleted.',
+                notupdated,
+            ) % notupdated, messages.ERROR)
+            
+    out.short_description = "Delete fee"
 
     def verified(self, request, queryset):
         # updated = queryset.update(verified=True)
@@ -302,7 +332,7 @@ class FeeAdmin(ImportExportModelAdmin):
 
         print('============================delete_model============================')
 
-    actions = ['verified','unverified']
+    actions = ['verified','unverified','out']
 
     def has_module_permission(self, request):
         if request.user.is_authenticated:
