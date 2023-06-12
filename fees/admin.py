@@ -57,10 +57,10 @@ class FeeAdmin(ImportExportModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.code =="mfisb":
-            return qs.filter(school__in = ('بنين','Out-b'))
+            return qs.filter(school__in = ('بنين',))
         elif request.user.code == "mfisg":
             # return qs.filter(Q(school='.بنات.')| Q(school='بنات'))
-            return qs.filter(school__in = ('.بنات.', 'بنات','Out-g'))
+            return qs.filter(school__in = ('.بنات.', 'بنات'))
         return qs
 
     def out(self, request, queryset):

@@ -6,6 +6,8 @@ from django.db.models import Sum
 from datetime import date
 from django.db.models.deletion import SET_NULL
 
+current_year = '24-23'
+
 class Grade(models.Model):
     name = models.CharField(max_length=24, blank=True)
     def __str__(self):
@@ -70,7 +72,7 @@ class Bus(models.Model):
         verbose_name_plural ='السيارات المدرسية '
 
     def bus_count(self):
-        s_count = Student.objects.filter(bus_number=self.id).count()
+        s_count = Student.objects.filter(bus_number=self.id,year=current_year).count()
         t_count = Teacher.objects.filter(bus_number=self.id).count()
         return '( '+str(s_count+t_count)+' ) , '+str(t_count)+'t , '+str(s_count)+'s'
 
@@ -157,7 +159,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
     mother_mobile = models.CharField(max_length=13, null=True, blank=True,verbose_name='موبيل الام ')
     phone_number = models.CharField(max_length=13, null=True, blank=True,verbose_name='تليفون المنزل ')
     email = models.EmailField(max_length=60, null=True, blank=True)
-    year = models.CharField( max_length=5,choices=YEAR_CHOICES, default='24-23')
+    year = models.CharField( max_length=5,choices=YEAR_CHOICES, default=current_year)
     study_payment1 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 1')
     study_payment2 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 2')
     study_payment3 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 3')
