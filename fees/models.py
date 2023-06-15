@@ -47,7 +47,7 @@ class Fee(models.Model):
     )
     payment_date = models.DateField(null=True, blank=True)
     bank_account = models.CharField(max_length=19, choices=BankA_CHOICES)
-    value = models.SmallIntegerField(null=True)
+    value = models.IntegerField(null=True)
     created = models.DateTimeField(auto_now_add=True)
     kind = models.CharField(max_length=6, choices=KIND_CHOICES)
     school = models.CharField( max_length=6, choices=SCHOOL_CHOICES, blank=True)
