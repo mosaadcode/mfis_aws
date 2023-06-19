@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import School,Department,Job, Employee, Month,SalaryItem,Permission,Vacation,Permission_setting,Employee_month
+from .models import School,Department,Job, Employee, Month,SalaryItem,Permission,Vacation,Permission_setting,Employee_month,Time_setting
 from import_export.admin import ImportExportModelAdmin
-from .resources import SalaryItemResource,PermResource,EmployeeResource,Employee_monthResource
+from .resources import SalaryItemResource,PermResource,EmployeeResource,Employee_monthResource,Time_settingResource
 from django.utils.translation import ngettext
 from django.contrib import admin, messages
 from student.models import Student,Manager
@@ -117,6 +117,41 @@ class Permission_settingAdmin(ImportExportModelAdmin):
         elif request.user.code =="hrboys":
             return qs.filter(school__in = ('بنين',))
         return qs
+
+    def save_model(self, request, obj, form, change):
+        if obj.pk is None:
+            if request.user.code == "hrboys":
+                obj.school = "بنين"
+            elif request.user.code == "hrgirls":
+                obj.school = "بنات"
+        super().save_model(request, obj, form, change)
+
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls'):
+                return True
+            return False
+
+class Time_settingAdmin(ImportExportModelAdmin):
+    list_display = ('date','time_in','time_in_perm','time_out', 'time_out_perm','school')
+    # list_display_links = ('employee',)
+    # autocomplete_fields = ['employee']
+    readonly_fields = ()
+    filter_horizontal = ()
+    search_fields = ('name',)
+    list_filter = ('school','name','month')
+    fieldsets = (
+    ('', { 'fields': ('name','month','date','time_in','time_in_perm','time_out', 'time_out_perm')}),
+                )
+    resource_class=Time_settingResource
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.code == "hrgirls":
+            return qs.filter(school__in = ('بنات',))
+        elif request.user.code =="hrboys":
+            return qs.filter(school__in = ('بنين',))
+        return qs.order_by('date')
 
     def save_model(self, request, obj, form, change):
         if obj.pk is None:
@@ -513,7 +548,7 @@ class PermissionInline(admin.TabularInline):
 
 class EmployeeAdmin(ImportExportModelAdmin):
     list_display = ('name','code','mobile_number' ,'participation_date','job','is_active')
-    autocomplete_fields = ['perms']
+    autocomplete_fields = ['perms','times']
     raw_id_fields = ('job',)
     readonly_fields = ('birth_date','job_code','time_in','time_in_perm','time_out','time_out_perm')
     search_fields = ('code','name','na_id','insurance_no')
@@ -521,7 +556,7 @@ class EmployeeAdmin(ImportExportModelAdmin):
     list_filter = ('school','job__type','job__grade','is_educational','job__department')
     fieldsets = (
     ('بيانات الموظف', { 'fields': (('name','job'),('code','job_code','birth_date'),('na_id','school'),('mobile_number','phone_number'),('emergency_phone','email'),'address',('basic_certificate','is_educational'),('notes','is_active'))}),
-    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code','perms',('time_in','time_in_perm'),('time_out','time_out_perm'))}),
+    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code','perms','times')}),
                 )
 
     def get_readonly_fields(self, request, obj=None):
@@ -693,3 +728,4 @@ admin.site.register(Permission,PermissionAdmin)
 admin.site.register(Vacation,VacationAdmin)
 admin.site.register(Permission_setting,Permission_settingAdmin)
 admin.site.register(Employee_month,Employee_monthAdmin)
+admin.site.register(Time_setting,Time_settingAdmin)

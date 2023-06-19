@@ -1,7 +1,8 @@
 from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget, BooleanWidget
-from .models import Month,SalaryItem,Employee,Permission,School,Job,Employee_month
+from .models import Month,SalaryItem,Employee,Permission,School,Job,Employee_month,Time_setting
 from import_export.results import RowResult
+from operator import attrgetter
 
 try:
     active_month = Month.objects.get(active=True)
@@ -99,3 +100,20 @@ class Employee_monthResource(resources.ModelResource):
         import_id_fields = ('id',)
         fields = ('id','school','employee','permissions','vacations','salary_value','is_active','month')
         export_order = ('id','school','employee','permissions','vacations','salary_value','is_active','month')
+
+class Time_settingResource(resources.ModelResource):
+
+    month = fields.Field(column_name='month',
+                      attribute='month',
+                      widget=ForeignKeyWidget(Month, 'code'))
+    
+    class Meta:
+        model = Time_setting
+        import_id_fields = ('id',)      
+        fields = ('id','name','month','date','time_in','time_in_perm','time_out', 'time_out_perm','school')
+        export_order = ('id','name','month','date','time_in','time_in_perm','time_out', 'time_out_perm','school')
+    
+    def export(self, queryset=None, *args, **kwargs):
+        queryset = self.get_queryset() if queryset is None else queryset
+        sorted_queryset = sorted(queryset, key=attrgetter('date'))
+        return super().export(sorted_queryset, *args, **kwargs)

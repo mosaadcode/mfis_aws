@@ -93,6 +93,7 @@ class Employee(models.Model):
     time_out_perm = models.CharField(max_length=5,blank=True,null=True,verbose_name='إنصراف بإذن')
     time_code = models.CharField(max_length=6,unique=True,blank=True,null=True,verbose_name='كود البصمة')
     perms = models.ForeignKey("Permission_setting", on_delete=models.SET_NULL,blank=True,null=True,verbose_name='إعدادات الاَذون ')
+    times = models.ForeignKey("Time_setting", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='الحضور والإنصراف')
 
     def get_code(self):
         if self.code == "":
@@ -284,6 +285,24 @@ class Permission_setting(models.Model):
     class Meta:
         verbose_name='permation setting'
         verbose_name_plural ='إعدادات الاَذون'  
+
+class Time_setting(models.Model):
+    name = models.CharField(max_length=26,verbose_name='مواعيد فئة')
+    date = models.DateField(verbose_name='يوم')
+    time_in = models.CharField(max_length=5,verbose_name='موعد الحضور')
+    time_out = models.CharField(max_length=5,verbose_name='موعد الإنصراف')
+    time_in_perm = models.CharField(max_length=5,verbose_name='حضور بإذن')
+    time_out_perm = models.CharField(max_length=5,verbose_name='إنصراف بإذن')
+    month = models.ForeignKey(Month, on_delete=SET_NULL, null=True,verbose_name='شهر ')
+    school = models.CharField(max_length=6, choices=SCHOOL_CHOICES,blank=True,null=True,verbose_name='المدرسة') 
+    
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name='Time setting'
+        verbose_name_plural ='مواعيد الحضور والإنصراف'
 
 class Permission(models.Model):
     PERM_CHOICES = (
