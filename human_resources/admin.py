@@ -605,6 +605,46 @@ class MonthAdmin(ImportExportModelAdmin):
                         self.message_user(request,obj.code  + ' تم إنهاء شهر ' + closed_month.code +' وفتح  شهر  ', messages.SUCCESS)
                     else:
                         self.message_user(request,obj.code  + ' تم فتح شهر ', messages.SUCCESS)
+
+    def MonthlyRecords(self, request, queryset):
+        count = 0
+        for obj in queryset:
+            count +=1
+        if count > 1 :
+            self.message_user(request,'لا يمكن فتح اكثر من شهر في نفس الفترة', messages.ERROR)
+        else:
+            if obj.active == False:
+                self.message_user(request,'تم فتح الشهر من قبل', messages.ERROR)
+            else:
+                if obj.status == '3':
+                    self.message_user(request,'تم إغلاق الشهر سابقاً ولا يمكن إعادة تفعيلة مرة اخرى', messages.ERROR)
+                else:
+                    before_count = Employee_month.objects.count()
+                    # Retrieve the active employees queryset
+                    employees = Employee.objects.all()
+                    # Prepare a list of Employee_month objects
+                    employee_months = [
+                        Employee_month(
+                            employee=employee,
+                            school=employee.school,
+                            month=active_month,
+                            is_active=employee.is_active,
+                            permissions=0,
+                            vacations=0,
+                            salary_value=0
+                        )
+                        for employee in employees
+                    ]
+                    # Bulk create the Employee_month objects
+                    Employee_month.objects.bulk_create(employee_months)
+
+                    after_count = Employee_month.objects.count()
+                    created = after_count - before_count
+                    self.message_user(request, ngettext(
+                        '%d Monthly Record was Created',
+                        '%d Monthly Records ware Created',
+                        created,
+                    ) % created, messages.SUCCESS)
             
     def publish(self, request, queryset):
         count = 0
@@ -635,7 +675,8 @@ class MonthAdmin(ImportExportModelAdmin):
 
     activate.short_description = 'إعداد الشهر لبداية التسجيل'
     publish.short_description = 'عرض بيانات شهر للموظفين'
-    actions = ['activate','publish']
+    MonthlyRecords.short_description = 'إنشاء السجلات الشهرية'
+    actions = ['activate','publish','MonthlyRecords']
     def has_module_permission(self, request):
         if request.user.is_authenticated:
             if request.user.code in ('mosaad',):

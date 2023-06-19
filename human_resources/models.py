@@ -197,7 +197,7 @@ class Month(models.Model):
 
     class Meta:
         verbose_name='month'
-        verbose_name_plural ='6_ شهور'   
+        verbose_name_plural ='إعدادات الشهور'
 
 class SalaryItem(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE,verbose_name='إسم الموظف')
@@ -259,9 +259,14 @@ class Employee_month(models.Model):
 
     def __str__(self):
         return self.employee.code
+    
+    class Meta:
+        # Add a unique constraint on employee and month fields
+        unique_together = ('employee', 'month')
+
     class Meta:
         verbose_name='Employee Month'
-        verbose_name_plural ='بيان شهور' 
+        verbose_name_plural ='السجلات الشهرية'
 
 class Permission_setting(models.Model):
     school = models.CharField(max_length=6, choices=SCHOOL_CHOICES,blank=True,null=True,verbose_name='المدرسة')
