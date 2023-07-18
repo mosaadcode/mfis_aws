@@ -133,7 +133,7 @@ class Permission_settingAdmin(ImportExportModelAdmin):
             return False
 
 class Time_settingAdmin(ImportExportModelAdmin):
-    list_display = ('date','time_in','time_in_perm','time_out', 'time_out_perm','school')
+    list_display = ('name','date','time_in','time_in_perm','time_out', 'time_out_perm','school')
     # list_display_links = ('employee',)
     # autocomplete_fields = ['employee']
     readonly_fields = ()
@@ -147,11 +147,12 @@ class Time_settingAdmin(ImportExportModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
+        qs = qs.order_by('name', 'date')
         if request.user.code == "hrgirls":
             return qs.filter(school__in = ('بنات',))
         elif request.user.code =="hrboys":
             return qs.filter(school__in = ('بنين',))
-        return qs.order_by('date')
+        return qs
 
     def save_model(self, request, obj, form, change):
         if obj.pk is None:

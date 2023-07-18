@@ -115,5 +115,5 @@ class Time_settingResource(resources.ModelResource):
     
     def export(self, queryset=None, *args, **kwargs):
         queryset = self.get_queryset() if queryset is None else queryset
-        sorted_queryset = sorted(queryset, key=attrgetter('date'))
+        sorted_queryset = sorted(queryset, key=attrgetter('name','date'))
         return super().export(sorted_queryset, *args, **kwargs)
