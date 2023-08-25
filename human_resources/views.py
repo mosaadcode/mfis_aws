@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect
-from .models import Employee,SalaryItem,Month,Permission,Vacation,Employee_month
+from .models import Employee,SalaryItem,Month,Permission,Vacation,Employee_month,Time_setting
 from .forms import PermForm,VacationForm,EmployeeContact
 from datetime import datetime,date
 from django.http import JsonResponse
@@ -46,9 +46,18 @@ def salary(request):
     return render(request, 'human_resources/salary.html',context)
 
 def perm(request):
-    employee_month = Employee_month.objects.get(employee__code=request.user.code,month=active_month)
+    try:
+        employee_month = Employee_month.objects.get(employee__code=request.user.code,month=active_month)
+    except Employee_month.DoesNotExist:
+        request.session['error'] = 'إعدادات اَذون غير صحيحة برجاء التواصل مع قسم شؤون العاملين'
+        return redirect('home2')
     month_perms= Permission.objects.filter(employee__code=request.user.code,month=active_month).order_by('-date')
-    settings = Employee.objects.get(code=request.user.code).perms
+    employee = Employee.objects.get(code=request.user.code)
+    settings = employee.perms
+    times = employee.times
+    if settings is None or times is None:
+        request.session['error'] = 'إعدادات اَذون غير صحيحة برجاء التواصل مع قسم شؤون العاملين'
+        return redirect('home2')       
     total = settings.perms
     used = month_perms.count()
     unused = total - used
@@ -86,31 +95,33 @@ def perm(request):
 
     else:       
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            employee = Employee.objects.get(code=request.user.code)
+            # employee = Employee.objects.get(code=request.user.code)
             data = json.loads(request.body)
             type = data ['type']
+            date = data['date']
+            work_time = Time_setting.objects.get(month=active_month,date=date,name=times.name)
             if type == 'صباحي':
-                start_time = employee.time_in
-                end_time = employee.time_in_perm
+                start_time = work_time.time_in
+                end_time = work_time.time_in_perm
             elif type == 'مسائي':
-                start_time = employee.time_out_perm
-                end_time = employee.time_out
+                start_time = work_time.time_out_perm
+                end_time = work_time.time_out
             return JsonResponse({'start_time':start_time,'end_time': end_time })
         else:
             if active_month != None:
                 unused_perms = request.POST.get('unused_perms')
                 if used < total :
-                    if datetime.strptime((request.POST['date']), '%Y-%m-%d').date()< month_start or datetime.strptime((request.POST['date']), '%Y-%m-%d').date() > month_end:
-                        request.session['error'] = 'يرجى تحديد تاريخ إذن صحيح'
-                        return redirect('perm')
-                    else:
-                        form = PermForm(request.POST)
+                    form = PermForm(request.POST)
+                    if form.is_valid():
                         permission = form.save(commit=False)
                         permission.employee = Employee.objects.get(code=request.user.code)
                         permission.school = request.user.school
                         permission.month=active_month
                         permission.save()
                         request.session['msg'] = '( تم تسجيل الإذن ( قيد الموافقة'
+                        return redirect('perm')
+                    else:
+                        request.session['error'] = 'حدث خطأ , رجاء إعادة المحاولة'
                         return redirect('perm')
                 else:
                     if settings.is_over == False:
