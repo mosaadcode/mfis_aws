@@ -6,6 +6,7 @@ from django.utils.translation import ngettext
 from django.contrib import admin, messages
 from student.models import Student,Manager
 from django.db.models import F
+from django.db.models import Min
 
 try:
     active_month = Month.objects.get(active=True)
@@ -549,7 +550,7 @@ class PermissionInline(admin.TabularInline):
 
 class EmployeeAdmin(ImportExportModelAdmin):
     list_display = ('name','code','mobile_number' ,'participation_date','job','is_active')
-    autocomplete_fields = ['perms','times']
+    autocomplete_fields = ['perms']
     raw_id_fields = ('job',)
     readonly_fields = ('birth_date','job_code','time_in','time_in_perm','time_out','time_out_perm')
     search_fields = ('code','name','na_id','insurance_no')
@@ -565,6 +566,13 @@ class EmployeeAdmin(ImportExportModelAdmin):
             return ('code','na_id','school') + self.readonly_fields
         return self.readonly_fields
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'times':
+            # Create a queryset to select only the first record for each unique 'name' value
+            unique_names = Time_setting.objects.values('name').annotate(min_id=Min('id')).values('min_id')
+            kwargs['queryset'] = Time_setting.objects.filter(id__in=unique_names)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
     inlines = [PermissionInline,SalaryItemInline]
     resource_class = EmployeeResource
     def has_module_permission(self, request):
