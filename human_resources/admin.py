@@ -49,6 +49,14 @@ class SalaryItemAdmin(ImportExportModelAdmin):
     search_fields = ('employee__code','employee__name','item')
     list_filter = ('school','month',)
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.code == "hrgirls":
+            return qs.filter(school__in = ('بنات',))
+        elif request.user.code =="hrboys":
+            return qs.filter(school__in = ('بنين',))
+        return qs
+    
     def get_readonly_fields(self, request, obj=None):
         if obj:
             return ('month',) + self.readonly_fields
@@ -561,6 +569,15 @@ class EmployeeAdmin(ImportExportModelAdmin):
     ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code','perms','times')}),
                 )
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.code =="hrboys":
+            return qs.filter(school__in = ('بنين',))
+        elif request.user.code == "hrgirls":
+            # return qs.filter(Q(school='.بنات.')| Q(school='بنات'))
+            return qs.filter(school__in = ('بنات',))
+        return qs
+    
     def get_readonly_fields(self, request, obj=None):
         if obj:
             return ('code','na_id','school') + self.readonly_fields
