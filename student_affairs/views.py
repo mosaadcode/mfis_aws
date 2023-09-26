@@ -11,7 +11,7 @@ def contact(request):
 
             student = Student.objects.get(code=request.user.code)
             try:
-                contact = Contact.objects.get(student=student).last()
+                contact = Contact.objects.get(student=student)
                 context = {
                 'msg':msg,
                 'error':error,
