@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import School,Department,Job, Employee, Month,SalaryItem,Permission,Vacation,Permission_setting,Employee_month,Time_setting
+from .models import School,Department,Job, Employee, Month,SalaryItem,Permission,Vacation,Permission_setting,Employee_month,Time_setting,Vacation_setting
 from import_export.admin import ImportExportModelAdmin
 from .resources import SalaryItemResource,PermResource,EmployeeResource,Employee_monthResource,Time_settingResource
 from django.utils.translation import ngettext
@@ -52,7 +52,7 @@ class SalaryItemAdmin(ImportExportModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.code == "hrgirls":
-            return qs.filter(school__in = ('بنات',))
+            return qs.filter(school__in = ('بنات','Ig'))
         elif request.user.code =="hrboys":
             return qs.filter(school__in = ('بنين',))
         return qs
@@ -87,7 +87,7 @@ class Employee_monthAdmin(ImportExportModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.code == "hrgirls":
-            return qs.filter(school__in = ('بنات',))
+            return qs.filter(school__in = ('بنات','Ig'))
         elif request.user.code =="hrboys":
             return qs.filter(school__in = ('بنين',))
         return qs
@@ -140,7 +140,40 @@ class Permission_settingAdmin(ImportExportModelAdmin):
             if request.user.code in ('mosaad','hrboys','hrgirls'):
                 return True
             return False
+        
+class Vacation_settingAdmin(ImportExportModelAdmin):
+    list_display = ('name','is_vacation', 'vacations','vacations_s')
+    # list_display_links = ('employee',)
+    # autocomplete_fields = ['employee']
+    readonly_fields = ()
+    filter_horizontal = ()
+    search_fields = ('name',)
+    list_filter = ('school',)
+    fieldsets = (
+    ('', { 'fields': ('name','is_vacation', 'vacations','vacations_s')}),
+                )
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.code == "hrgirls":
+            return qs.filter(school__in = ('بنات',))
+        elif request.user.code =="hrboys":
+            return qs.filter(school__in = ('بنين',))
+        return qs
 
+    def save_model(self, request, obj, form, change):
+        if obj.pk is None:
+            if request.user.code == "hrboys":
+                obj.school = "بنين"
+            elif request.user.code == "hrgirls":
+                obj.school = "بنات"
+        super().save_model(request, obj, form, change)
+
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls'):
+                return True
+            return False
+        
 class Time_settingAdmin(ImportExportModelAdmin):
     list_display = ('name','date','time_in','time_in_perm','time_out', 'time_out_perm','school')
     # list_display_links = ('employee',)
@@ -158,7 +191,7 @@ class Time_settingAdmin(ImportExportModelAdmin):
         qs = super().get_queryset(request)
         qs = qs.order_by('name', 'date')
         if request.user.code == "hrgirls":
-            return qs.filter(school__in = ('بنات',))
+            return qs.filter(school__in = ('بنات','Ig'))
         elif request.user.code =="hrboys":
             return qs.filter(school__in = ('بنين',))
         return qs
@@ -185,7 +218,7 @@ class PermissionAdmin(ImportExportModelAdmin):
     filter_horizontal = ()
     search_fields = ('employee__code','employee__name')
     list_filter = ('school','month','type')
-
+    
     def get_readonly_fields(self, request, obj=None):
         if obj:
             if obj.ok2==True:
@@ -295,7 +328,7 @@ class PermissionAdmin(ImportExportModelAdmin):
                 del actions['ok']
                 del actions['ok2']
                 return actions
-
+                
     resource_class = PermResource
 
     def get_queryset(self, request):
@@ -471,7 +504,7 @@ class VacationAdmin(ImportExportModelAdmin):
     ok1.short_description = "موافقة الرئيس المباشر"
     ok2.short_description = "موافقة الرئيس الأعلى"
     ok.short_description = "موافقة مباشرة"
-
+    
     actions = ['ok1','ok2','ok']
     def get_actions(self, request):
         actions= super().get_actions(request)
@@ -557,16 +590,16 @@ class PermissionInline(admin.TabularInline):
         return False
 
 class EmployeeAdmin(ImportExportModelAdmin):
-    list_display = ('name','code','mobile_number' ,'participation_date','job','is_active')
-    autocomplete_fields = ['perms']
+    list_display = ('code','name','mobile_number' ,'participation_date','job','is_active')
+    autocomplete_fields = ['perms','vecation_role']
     raw_id_fields = ('job',)
-    readonly_fields = ('birth_date','job_code','time_in','time_in_perm','time_out','time_out_perm')
+    readonly_fields = ('birth_date','job_code','vacations','vacations_s')
     search_fields = ('code','name','na_id','insurance_no')
     filter_horizontal = ()
     list_filter = ('school','job__type','job__grade','is_educational','job__department')
     fieldsets = (
     ('بيانات الموظف', { 'fields': (('name','job'),('code','job_code','birth_date'),('na_id','school'),('mobile_number','phone_number'),('emergency_phone','email'),'address',('basic_certificate','is_educational'),('notes','is_active'))}),
-    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code','perms','times')}),
+    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code','perms','vecation_role','times',('vacations','vacations_s'))}),
                 )
 
     def get_queryset(self, request):
@@ -575,7 +608,7 @@ class EmployeeAdmin(ImportExportModelAdmin):
             return qs.filter(school__in = ('بنين',))
         elif request.user.code == "hrgirls":
             # return qs.filter(Q(school='.بنات.')| Q(school='بنات'))
-            return qs.filter(school__in = ('بنات',))
+            return qs.filter(school__in = ('بنات','Ig'))
         return qs
     
     def get_readonly_fields(self, request, obj=None):
@@ -589,7 +622,7 @@ class EmployeeAdmin(ImportExportModelAdmin):
             unique_names = Time_setting.objects.values('name').annotate(min_id=Min('id')).values('min_id')
             kwargs['queryset'] = Time_setting.objects.filter(id__in=unique_names)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
-    
+
     inlines = [PermissionInline,SalaryItemInline]
     resource_class = EmployeeResource
     def has_module_permission(self, request):
@@ -597,6 +630,46 @@ class EmployeeAdmin(ImportExportModelAdmin):
             if request.user.code in ('mosaad','hrboys','hrgirls'):
                 return True
             return False
+
+    def Fix_job_code(self, request, queryset):
+        # updated = queryset.update(verified=True)
+        updated = 0
+        notupdated = 0
+
+        for obj in queryset:
+            if obj.job is not None:
+                school=obj.school
+                if school=="بنين":
+                    school="b"
+                elif school=="بنات":
+                    school="g"            
+                job_dep = str(obj.job.department.id)
+                job_grade = obj.job.grade
+                if job_grade !=None:
+                    code = school+job_grade + job_dep
+                else:
+                    code = school+job_dep
+                obj.job_code=code
+                obj.save(update_fields=["job_code",])
+                updated +=1
+            else:
+                notupdated +=1
+
+        if updated != 0:
+            self.message_user(request, ngettext(
+                '%d Job Code was successfully set.',
+                '%d Job Codes ware successfully set.',
+                updated,
+            ) % updated, messages.SUCCESS)
+        if notupdated != 0:
+            self.message_user(request, ngettext(
+                '%d Job Code not set.',
+                '%d Job Codes not set.',
+                notupdated,
+            ) % notupdated, messages.ERROR)
+    
+    Fix_job_code.short_description = 'ضبط  كود الوظيفة'
+    actions = ['Fix_job_code',]
 
     def delete_queryset(self, request, queryset):
             print('==========================delete_queryset==========================')
@@ -706,7 +779,7 @@ class MonthAdmin(ImportExportModelAdmin):
                         '%d Monthly Records ware Created',
                         created,
                     ) % created, messages.SUCCESS)
-            
+           
     def publish(self, request, queryset):
         count = 0
         for obj in queryset:
@@ -755,3 +828,4 @@ admin.site.register(Vacation,VacationAdmin)
 admin.site.register(Permission_setting,Permission_settingAdmin)
 admin.site.register(Employee_month,Employee_monthAdmin)
 admin.site.register(Time_setting,Time_settingAdmin)
+admin.site.register(Vacation_setting,Vacation_settingAdmin)

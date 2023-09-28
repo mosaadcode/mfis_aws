@@ -11,6 +11,7 @@ from django import forms
 SCHOOL_CHOICES = (
     ('بنين','بنين'),
     ('بنات','بنات'),
+    ('Ig','Ig'),
 )
 
 class School(models.Model):
@@ -44,7 +45,7 @@ class Job(models.Model):
     type = models.CharField(max_length=7, choices=TYPES_CHOICES, verbose_name='نوع الوظيفة')
     title = models.CharField(max_length=20 ,verbose_name='المسمى الوظيفي')
     department = models.ForeignKey(Department, on_delete=SET_NULL, null=True,verbose_name='القسم')
-    grade = models.CharField(max_length=7, choices=GRADE_CHOICES, null=True,blank=True,verbose_name='المرحلة الدراسية')
+    grade = models.CharField(max_length=2, choices=GRADE_CHOICES, null=True,blank=True,verbose_name='المرحلة الدراسية')
 
     def __str__(self):
         if self.department!=None:
@@ -82,18 +83,17 @@ class Employee(models.Model):
     insurance_no = models.CharField(max_length=10, unique=True,null=True,blank=True,verbose_name='الرقم التأميني')
     notes = models.TextField( max_length=260,null=True,blank=True,verbose_name='ملاحظات ')
     job = models.ForeignKey(Job, on_delete=SET_NULL,null=True, blank=True,verbose_name='الوظيفة')
-    job_code = models.CharField(max_length=4,blank=True,null=True,verbose_name='')
+    job_code = models.CharField(max_length=6,blank=True,null=True,verbose_name='')
     is_active = models.BooleanField(default=True,verbose_name='الحالة')
     salary_parameter = models.TextField( max_length=120,blank=True,null=True,verbose_name='عوامل تحديد الراتب ')
     salary = models.PositiveSmallIntegerField(null=True,blank=True,verbose_name='قيمة الراتب')
-    message = models.CharField(max_length=260, null=True, blank=True) 
-    time_in = models.CharField(max_length=5,blank=True,null=True,verbose_name='موعد الحضور')
-    time_in_perm = models.CharField(max_length=5,blank=True,null=True,verbose_name='حضور بإذن')
-    time_out = models.CharField(max_length=5,blank=True,null=True,verbose_name='موعد الإنصراف')
-    time_out_perm = models.CharField(max_length=5,blank=True,null=True,verbose_name='إنصراف بإذن')
+    message = models.CharField(max_length=260, null=True, blank=True)
     time_code = models.CharField(max_length=6,unique=True,blank=True,null=True,verbose_name='كود البصمة')
-    perms = models.ForeignKey("Permission_setting", on_delete=models.SET_NULL,blank=True,null=True,verbose_name='إعدادات الاَذون ')
+    perms = models.ForeignKey("Permission_setting", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='إعدادات الاَذون ')
+    vecation_role = models.ForeignKey("Vacation_setting", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='إعدادات الإجازات ')
     times = models.ForeignKey("Time_setting", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='الحضور والإنصراف')
+    vacations = models.PositiveSmallIntegerField(default=0,verbose_name='اجازات ')
+    vacations_s = models.PositiveSmallIntegerField(default=0,verbose_name='اجازات مرضي ')
 
     def get_code(self):
         if self.code == "":
@@ -267,10 +267,10 @@ class Employee_month(models.Model):
 
     class Meta:
         verbose_name='Employee Month'
-        verbose_name_plural ='السجلات الشهرية'
+        verbose_name_plural ='السجلات الشهرية' 
 
 class Permission_setting(models.Model):
-    school = models.CharField(max_length=6, choices=SCHOOL_CHOICES,blank=True,null=True,verbose_name='المدرسة')
+    school = models.CharField(max_length=6, choices=SCHOOL_CHOICES,blank=True,null=True,verbose_name='المدرسة') 
     name = models.CharField(max_length=26,verbose_name='الإسم')
     is_perms = models.BooleanField(default=False,verbose_name='السماح بالاَذون')
     is_morning = models.BooleanField(default=False,verbose_name='صباحي')
@@ -284,7 +284,21 @@ class Permission_setting(models.Model):
 
     class Meta:
         verbose_name='permation setting'
-        verbose_name_plural ='إعدادات الاَذون'  
+        verbose_name_plural ='إعدادات الاَذون'
+
+class Vacation_setting(models.Model):
+    school = models.CharField(max_length=6, choices=SCHOOL_CHOICES,blank=True,null=True,verbose_name='المدرسة') 
+    name = models.CharField(max_length=26,verbose_name='الإسم')
+    is_vacation = models.BooleanField(default=False,verbose_name='اجازة من الرصيد ')
+    vacations = models.PositiveSmallIntegerField(default=0,verbose_name='رصيد اجازات ')
+    vacations_s = models.PositiveSmallIntegerField(default=0,verbose_name='رصيد اجازات مرضي ')
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name='vacation setting'
+        verbose_name_plural ='إعدادات الاجازات'
 
 class Time_setting(models.Model):
     name = models.CharField(max_length=26,verbose_name='مواعيد فئة')
