@@ -7,6 +7,7 @@ from django.contrib import admin, messages
 from student.models import Student,Manager
 from django.db.models import F
 from django.db.models import Min
+from datetime import date,datetime
 
 try:
     active_month = Month.objects.get(active=True)
@@ -667,9 +668,41 @@ class EmployeeAdmin(ImportExportModelAdmin):
                 '%d Job Codes not set.',
                 notupdated,
             ) % notupdated, messages.ERROR)
+
+    def Fix_birth_date(self, request, queryset):
+        # updated = queryset.update(verified=True)
+        updated = 0
+        notupdated = 0
+
+        for obj in queryset:
+            na_id = obj.na_id
+            if na_id == "2" or na_id =="3":
+                if na_id[0] =="2":
+                    year_prefix = '19'
+                elif na_id[0] == "3":
+                    year_prefix ='20'
+                birth_date = datetime.strptime(year_prefix + na_id[1:3] + '-' + na_id[3:5] + '-' + na_id[5:7], '%Y-%m-%d').date()
+                obj.birth_date = birth_date
+                obj.save(update_fields=["birth_date"])
+                updated +=1
+            else:
+                notupdated +=1
+        if updated != 0:
+            self.message_user(request, ngettext(
+                '%d birth date was successfully update.',
+                '%d birth date ware successfully update.',
+                updated,
+            ) % updated, messages.SUCCESS)
+        if notupdated != 0:
+            self.message_user(request, ngettext(
+                '%d birth date not set.',
+                '%d birth date not set.',
+                notupdated,
+            ) % notupdated, messages.ERROR)
     
+    Fix_birth_date.short_description = 'ضبط  تاريخ الميلاد'    
     Fix_job_code.short_description = 'ضبط  كود الوظيفة'
-    actions = ['Fix_job_code',]
+    actions = ['Fix_job_code','Fix_birth_date']
 
     def delete_queryset(self, request, queryset):
             print('==========================delete_queryset==========================')
