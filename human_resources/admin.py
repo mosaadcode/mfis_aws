@@ -676,7 +676,7 @@ class EmployeeAdmin(ImportExportModelAdmin):
 
         for obj in queryset:
             na_id = obj.na_id
-            if na_id == "2" or na_id =="3":
+            if na_id[0] == "2" or na_id[0] =="3":
                 if na_id[0] =="2":
                     year_prefix = '19'
                 elif na_id[0] == "3":
