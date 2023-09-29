@@ -101,9 +101,10 @@ class Employee(models.Model):
             code_gen.append(self.na_id[1:3])
             if self.school == "بنين":
                 code_gen.append('b')
+                myschool = School.objects.get(school='بنين')
             else:
                 code_gen.append('g')
-            myschool = School.objects.get(school=self.school)
+                myschool = School.objects.get(school='بنات')
             myschool.count +=1
             code_gen.append(format(myschool.count,'04'))
             myschool.save()
@@ -111,8 +112,16 @@ class Employee(models.Model):
 
     def get_birth_date(self):
         if self.birth_date is None:
-            birth_date = datetime.strptime(self.na_id[1:3]+'-'+self.na_id[3:5]+'-'+self.na_id[5:7], '%y-%m-%d').date()
-        return birth_date
+            if self.na_id[0] == "2" or self.na_id[0] =="3":
+                if self.na_id[0] =="2":
+                    year_prefix = '19'
+                elif self.na_id[0] == "3":
+                    year_prefix ='20'
+                birth_date = datetime.strptime(year_prefix + self.na_id[1:3] + '-' + self.na_id[3:5] + '-' + self.na_id[5:7], '%Y-%m-%d').date()
+                print(birth_date)
+                return birth_date
+            else:
+                return None
 
     def save(self, *args, **kwargs):
         if self.code == "":
