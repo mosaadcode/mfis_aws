@@ -1,6 +1,6 @@
 from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget, BooleanWidget
-from .models import Month,SalaryItem,Employee,Permission,School,Job,Employee_month,Time_setting
+from .models import Month,SalaryItem,Employee,Permission,School,Job,Employee_month,Time_setting,Permission_setting,Vacation_setting,Department
 from import_export.results import RowResult
 from operator import attrgetter
 
@@ -36,6 +36,13 @@ class EmployeeResource(resources.ModelResource):
         Returns the class used to store the result of a row import.
         """
         return RowResult
+    
+    perms = fields.Field(column_name='perms',
+                      attribute='perms',
+                      widget=ForeignKeyWidget(Permission_setting, 'name'))
+    vecation_role = fields.Field(column_name='vecation_role',
+                      attribute='vecation_role',
+                      widget=ForeignKeyWidget(Vacation_setting, 'name'))
 
     def before_import_row(self,row, **kwargs):
         if not row['code']:
@@ -56,8 +63,8 @@ class EmployeeResource(resources.ModelResource):
     class Meta:
         model = Employee
         import_id_fields = ('code',)
-        fields = ('code','school','name','na_id','birth_date','mobile_number','phone_number','emergency_phone','email','address','basic_certificate','is_educational','attendance_date','insurance_date','participation_date','contract_date','insurance_no','notes','job','is_active','salary_parameter','salary','message','time_code')
-        export_order = ('code','school','name','na_id','birth_date','mobile_number','phone_number','emergency_phone','email','address','basic_certificate','is_educational','attendance_date','insurance_date','participation_date','contract_date','insurance_no','notes','job','is_active','salary_parameter','salary','message','time_code')
+        fields = ('code','school','name','na_id','birth_date','mobile_number','phone_number','emergency_phone','email','address','basic_certificate','is_educational','attendance_date','insurance_date','participation_date','contract_date','insurance_no','notes','job','is_active','salary_parameter','salary','message','time_code','perms','vecation_role','times')
+        export_order = ('code','school','name','na_id','birth_date','mobile_number','phone_number','emergency_phone','email','address','basic_certificate','is_educational','attendance_date','insurance_date','participation_date','contract_date','insurance_no','notes','job','is_active','salary_parameter','salary','message','time_code','perms','vecation_role','times')
 
 
 class PermResource(resources.ModelResource):
@@ -119,3 +126,13 @@ class Time_settingResource(resources.ModelResource):
         queryset = self.get_queryset() if queryset is None else queryset
         sorted_queryset = sorted(queryset, key=attrgetter('name','date'))
         return super().export(sorted_queryset, *args, **kwargs)
+    
+class JobResource(resources.ModelResource):
+    department = fields.Field(column_name='department',
+                    attribute='department',
+                    widget=ForeignKeyWidget(Department, 'name'))
+    class Meta:
+        model = Job
+        import_id_fields = ('id',)
+        fields = ('type','title','department','grade','id')
+        export_order = ('type','title','department','grade','id')

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import School,Department,Job, Employee, Month,SalaryItem,Permission,Vacation,Permission_setting,Employee_month,Time_setting,Vacation_setting
 from import_export.admin import ImportExportModelAdmin
-from .resources import SalaryItemResource,PermResource,EmployeeResource,Employee_monthResource,Time_settingResource
+from .resources import SalaryItemResource,PermResource,EmployeeResource,Employee_monthResource,Time_settingResource,JobResource
 from django.utils.translation import ngettext
 from django.contrib import admin, messages
 from student.models import Student,Manager
@@ -26,6 +26,9 @@ class JobAdmin(ImportExportModelAdmin):
     filter_horizontal = ()
     search_fields = ('title',)
     list_filter = ('type','grade','department')
+
+    resource_class = JobResource
+
     def has_module_permission(self, request):
         if request.user.is_authenticated:
             if request.user.code in ('mosaad','hrboys','hrgirls'):
