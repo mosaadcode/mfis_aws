@@ -1,9 +1,8 @@
 from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget, BooleanWidget
-from .models import Month,SalaryItem,Employee,Permission,School,Job,Employee_month,Time_setting,Permission_setting,Vacation_setting,Department
+from .models import Month,SalaryItem,Employee,Permission,School,Job,Employee_month,Time_setting,Permission_setting,Vacation_setting,Department,Time_template
 from import_export.results import RowResult
 from operator import attrgetter
-
 try:
     active_month = Month.objects.get(active=True)
 except Month.DoesNotExist:
@@ -27,10 +26,6 @@ class SalaryItemResource(resources.ModelResource):
 
 class EmployeeResource(resources.ModelResource):
 
-    # job = fields.Field(column_name='job',
-    #                   attribute='job',
-    #                   widget=ForeignKeyWidget(Job, 'title'))
-
     def get_row_result_class(self):
         """
         Returns the class used to store the result of a row import.
@@ -40,11 +35,16 @@ class EmployeeResource(resources.ModelResource):
     perms = fields.Field(column_name='perms',
                       attribute='perms',
                       widget=ForeignKeyWidget(Permission_setting, 'name'))
+    
     vecation_role = fields.Field(column_name='vecation_role',
                       attribute='vecation_role',
                       widget=ForeignKeyWidget(Vacation_setting, 'name'))
+    
+    times = fields.Field(column_name='times',
+                      attribute='times',
+                      widget=ForeignKeyWidget(Time_template, 'name'))
 
-    def before_import_row(self,row, **kwargs):
+    def before_import_row(self, row, **kwargs):
         if not row['code']:
             code_gen = []
             row['na_id'] = str(row['na_id'])
@@ -55,16 +55,17 @@ class EmployeeResource(resources.ModelResource):
             else:
                 code_gen.append('g')
                 myschool = School.objects.get(school='بنات')
-            myschool.count +=1
-            code_gen.append(format(myschool.count,'04'))
+            myschool.count += 1
+            code_gen.append(format(myschool.count, '04'))
             myschool.save()
             row['code'] = ''.join(code_gen)
 
     class Meta:
         model = Employee
         import_id_fields = ('code',)
-        fields = ('code','school','name','na_id','birth_date','mobile_number','phone_number','emergency_phone','email','address','basic_certificate','is_educational','attendance_date','insurance_date','participation_date','contract_date','insurance_no','notes','job','is_active','salary_parameter','salary','message','time_code','perms','vecation_role','times')
-        export_order = ('code','school','name','na_id','birth_date','mobile_number','phone_number','emergency_phone','email','address','basic_certificate','is_educational','attendance_date','insurance_date','participation_date','contract_date','insurance_no','notes','job','is_active','salary_parameter','salary','message','time_code','perms','vecation_role','times')
+        fields = ('code', 'school', 'name', 'na_id', 'birth_date', 'mobile_number', 'phone_number', 'emergency_phone', 'email', 'address', 'basic_certificate', 'is_educational', 'attendance_date', 'insurance_date', 'participation_date', 'contract_date', 'insurance_no', 'notes', 'job', 'is_active', 'salary_parameter', 'salary', 'message', 'time_code', 'perms', 'vecation_role', 'times')
+        export_order = ('code', 'school', 'name', 'na_id', 'birth_date', 'mobile_number', 'phone_number', 'emergency_phone', 'email', 'address', 'basic_certificate', 'is_educational', 'attendance_date', 'insurance_date', 'participation_date', 'contract_date', 'insurance_no', 'notes', 'job', 'is_active', 'salary_parameter', 'salary', 'message', 'time_code', 'perms', 'vecation_role', 'times')
+
 
 
 class PermResource(resources.ModelResource):
@@ -112,6 +113,10 @@ class Employee_monthResource(resources.ModelResource):
 
 class Time_settingResource(resources.ModelResource):
 
+    name = fields.Field(column_name='name',
+                      attribute='name',
+                      widget=ForeignKeyWidget(Time_template, 'name'))
+    
     month = fields.Field(column_name='month',
                       attribute='month',
                       widget=ForeignKeyWidget(Month, 'code'))
@@ -119,8 +124,8 @@ class Time_settingResource(resources.ModelResource):
     class Meta:
         model = Time_setting
         import_id_fields = ('id',)      
-        fields = ('id','name','month','date','time_in','time_in_perm','time_out', 'time_out_perm','school')
-        export_order = ('id','name','month','date','time_in','time_in_perm','time_out', 'time_out_perm','school')
+        fields = ('id','name','month','date','time_in','time_in_perm','time_out', 'time_out_perm')
+        export_order = ('id','name','month','date','time_in','time_in_perm','time_out', 'time_out_perm')
     
     def export(self, queryset=None, *args, **kwargs):
         queryset = self.get_queryset() if queryset is None else queryset

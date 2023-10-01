@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import School,Department,Job, Employee, Month,SalaryItem,Permission,Vacation,Permission_setting,Employee_month,Time_setting,Vacation_setting
+from .models import School,Department,Job, Employee, Month,SalaryItem,Permission,Vacation,Permission_setting,Employee_month,Time_setting,Vacation_setting,Time_template
 from import_export.admin import ImportExportModelAdmin
 from .resources import SalaryItemResource,PermResource,EmployeeResource,Employee_monthResource,Time_settingResource,JobResource
 from django.utils.translation import ngettext
@@ -22,13 +22,13 @@ class SchoolAdmin(ImportExportModelAdmin):
             return False
 
 class JobAdmin(ImportExportModelAdmin):
-    # list_display = ('title','department')
+    # list_display = ('__str__','title','department')
     filter_horizontal = ()
     search_fields = ('title',)
     list_filter = ('type','grade','department')
 
     resource_class = JobResource
-
+    
     def has_module_permission(self, request):
         if request.user.is_authenticated:
             if request.user.code in ('mosaad','hrboys','hrgirls'):
@@ -179,13 +179,13 @@ class Vacation_settingAdmin(ImportExportModelAdmin):
             return False
         
 class Time_settingAdmin(ImportExportModelAdmin):
-    list_display = ('name','date','time_in','time_in_perm','time_out', 'time_out_perm','school')
+    list_display = ('name','date','time_in','time_in_perm','time_out', 'time_out_perm')
     # list_display_links = ('employee',)
     # autocomplete_fields = ['employee']
     readonly_fields = ()
     filter_horizontal = ()
     search_fields = ('name',)
-    list_filter = ('school','name','month')
+    list_filter = ('name','month')
     fieldsets = (
     ('', { 'fields': ('name','month','date','time_in','time_in_perm','time_out', 'time_out_perm')}),
                 )
@@ -194,23 +194,33 @@ class Time_settingAdmin(ImportExportModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         qs = qs.order_by('name', 'date')
-        if request.user.code == "hrgirls":
-            return qs.filter(school__in = ('بنات','Ig'))
-        elif request.user.code =="hrboys":
-            return qs.filter(school__in = ('بنين',))
         return qs
-
-    def save_model(self, request, obj, form, change):
-        if obj.pk is None:
-            if request.user.code == "hrboys":
-                obj.school = "بنين"
-            elif request.user.code == "hrgirls":
-                obj.school = "بنات"
-        super().save_model(request, obj, form, change)
 
     def has_module_permission(self, request):
         if request.user.is_authenticated:
             if request.user.code in ('mosaad','hrboys','hrgirls'):
+                return True
+            return False
+
+class Time_templateAdmin(ImportExportModelAdmin):
+    # list_display = ('__str__','title','department')
+    filter_horizontal = ()
+    search_fields = ()
+    list_filter = ()
+    
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls'):
+                return True
+            return False
+    def has_add_permission(self, request, obj=None):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad'):
+                return True
+            return False
+    def has_delete_permission(self, request, obj=None):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad'):
                 return True
             return False
 
@@ -594,7 +604,7 @@ class PermissionInline(admin.TabularInline):
         return False
 
 class EmployeeAdmin(ImportExportModelAdmin):
-    list_display = ('code','name','mobile_number' ,'participation_date','job','is_active')
+    list_display = ('code','name','birth_date','mobile_number' ,'participation_date','job','is_active')
     autocomplete_fields = ['perms','vecation_role']
     raw_id_fields = ('job',)
     readonly_fields = ('birth_date','job_code','vacations','vacations_s')
@@ -619,13 +629,6 @@ class EmployeeAdmin(ImportExportModelAdmin):
         if obj:
             return ('code','na_id','school') + self.readonly_fields
         return self.readonly_fields
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == 'times':
-            # Create a queryset to select only the first record for each unique 'name' value
-            unique_names = Time_setting.objects.values('name').annotate(min_id=Min('id')).values('min_id')
-            kwargs['queryset'] = Time_setting.objects.filter(id__in=unique_names)
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     inlines = [PermissionInline,SalaryItemInline]
     resource_class = EmployeeResource
@@ -865,3 +868,4 @@ admin.site.register(Permission_setting,Permission_settingAdmin)
 admin.site.register(Employee_month,Employee_monthAdmin)
 admin.site.register(Time_setting,Time_settingAdmin)
 admin.site.register(Vacation_setting,Vacation_settingAdmin)
+admin.site.register(Time_template,Time_templateAdmin)

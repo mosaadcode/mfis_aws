@@ -91,7 +91,7 @@ class Employee(models.Model):
     time_code = models.CharField(max_length=6,unique=True,blank=True,null=True,verbose_name='كود البصمة')
     perms = models.ForeignKey("Permission_setting", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='إعدادات الاَذون ')
     vecation_role = models.ForeignKey("Vacation_setting", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='إعدادات الإجازات ')
-    times = models.ForeignKey("Time_setting", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='الحضور والإنصراف')
+    times = models.ForeignKey("Time_template", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='الحضور والإنصراف')
     vacations = models.PositiveSmallIntegerField(default=0,verbose_name='اجازات ')
     vacations_s = models.PositiveSmallIntegerField(default=0,verbose_name='اجازات مرضي ')
 
@@ -310,18 +310,17 @@ class Vacation_setting(models.Model):
         verbose_name_plural ='إعدادات الاجازات'
 
 class Time_setting(models.Model):
-    name = models.CharField(max_length=26,verbose_name='مواعيد فئة')
+    name = models.ForeignKey("Time_template", on_delete=models.CASCADE,null=True,verbose_name='مواعيد ')
     date = models.DateField(verbose_name='يوم')
     time_in = models.CharField(max_length=5,verbose_name='موعد الحضور')
     time_out = models.CharField(max_length=5,verbose_name='موعد الإنصراف')
     time_in_perm = models.CharField(max_length=5,verbose_name='حضور بإذن')
     time_out_perm = models.CharField(max_length=5,verbose_name='إنصراف بإذن')
     month = models.ForeignKey(Month, on_delete=SET_NULL, null=True,verbose_name='شهر ')
-    school = models.CharField(max_length=6, choices=SCHOOL_CHOICES,blank=True,null=True,verbose_name='المدرسة') 
     
 
     def __str__(self):
-        return self.name
+        return self.name.name
 
     class Meta:
         verbose_name='Time setting'
@@ -357,6 +356,15 @@ class Permission(models.Model):
         verbose_name='permission'
         verbose_name_plural ='2_ اُذون يومية'   
 
+class Time_template(models.Model):
+    name = models.CharField(unique=True,max_length=26)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name='Time_template'
+        verbose_name_plural ='_ اعدادات الحضور والانصراف '   
 
 def create_employ(sender, instance, created, **kwargs):
     if created:
