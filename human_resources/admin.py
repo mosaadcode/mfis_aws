@@ -184,7 +184,7 @@ class Time_settingAdmin(ImportExportModelAdmin):
     # autocomplete_fields = ['employee']
     readonly_fields = ()
     filter_horizontal = ()
-    search_fields = ('name',)
+    search_fields = ('name__name',)
     list_filter = ('name','month')
     fieldsets = (
     ('', { 'fields': ('name','month','date','time_in','time_in_perm','time_out', 'time_out_perm')}),
