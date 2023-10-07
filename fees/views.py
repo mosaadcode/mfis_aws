@@ -140,7 +140,7 @@ def addfees(request):
             return render(request, 'fees/addfees.html', {'form':FeesForm(),'error':'لا يمكنك التسجيل الان, برجاء مراجعة قسم الحسابات'})
         
 def recorded(request):
-    fees = Fee.objects.filter(student=request.user.id,year=request.user.year,kind__in = ('دراسية','سيارة',)).order_by('payment_date')
+    fees = Fee.objects.filter(student=request.user.id,year=request.user.year,kind__in = ('دراسية','سيارة',)).exclude(school__in=('Out-b', 'Out-g')).order_by('payment_date')
     return render(request, 'fees/recorded.html',{'fees':fees})
 
 
