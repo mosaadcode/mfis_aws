@@ -52,10 +52,10 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.code == "mfisb":
-            return qs.filter(school__in = ('بنين','Out-b'),is_employ=False)
+            return qs.filter(school__in = ('بنين',),is_employ=False)
         elif request.user.code == "mfisg":
             # return qs.filter(Q(school='.بنات.')| Q(school='بنات'))
-            return qs.filter(school__in = ('.بنات.', 'بنات','Out-g'),is_employ=False)
+            return qs.filter(school__in = ('.بنات.', 'بنات',),is_employ=False)
         return qs
 
     # def export_bus(self, request, queryset):
