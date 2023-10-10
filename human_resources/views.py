@@ -99,7 +99,7 @@ def perm(request):
             data = json.loads(request.body)
             type = data ['type']
             date = data['date']
-            work_time = Time_setting.objects.get(month=active_month,date=date,name=times.name)
+            work_time = Time_setting.objects.get(month=active_month,date=date,name=times)
             if type == 'صباحي':
                 start_time = work_time.time_in
                 end_time = work_time.time_in_perm

@@ -279,8 +279,7 @@ class Employee_month(models.Model):
         verbose_name_plural ='السجلات الشهرية' 
 
 class Permission_setting(models.Model):
-    school = models.CharField(max_length=6, choices=SCHOOL_CHOICES,blank=True,null=True,verbose_name='المدرسة') 
-    name = models.CharField(max_length=26,verbose_name='الإسم')
+    name = models.CharField(unique=True,max_length=26,verbose_name='الإسم')
     is_perms = models.BooleanField(default=False,verbose_name='السماح بالاَذون')
     is_morning = models.BooleanField(default=False,verbose_name='صباحي')
     is_evening = models.BooleanField(default=False,verbose_name='مسائي')
@@ -296,8 +295,7 @@ class Permission_setting(models.Model):
         verbose_name_plural ='إعدادات الاَذون'
 
 class Vacation_setting(models.Model):
-    school = models.CharField(max_length=6, choices=SCHOOL_CHOICES,blank=True,null=True,verbose_name='المدرسة') 
-    name = models.CharField(max_length=26,verbose_name='الإسم')
+    name = models.CharField(unique=True,max_length=26,verbose_name='الإسم')
     is_vacation = models.BooleanField(default=False,verbose_name='اجازة من الرصيد ')
     vacations = models.PositiveSmallIntegerField(default=0,verbose_name='رصيد اجازات ')
     vacations_s = models.PositiveSmallIntegerField(default=0,verbose_name='رصيد اجازات مرضي ')

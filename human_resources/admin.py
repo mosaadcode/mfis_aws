@@ -119,25 +119,11 @@ class Permission_settingAdmin(ImportExportModelAdmin):
     readonly_fields = ()
     filter_horizontal = ()
     search_fields = ('name',)
-    list_filter = ('school',)
+    list_filter = ()
     fieldsets = (
     ('', { 'fields': ('name','is_perms','is_over',('is_evening','is_between','is_morning'),( 'perms'))}),
                 )
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        if request.user.code == "hrgirls":
-            return qs.filter(school__in = ('بنات',))
-        elif request.user.code =="hrboys":
-            return qs.filter(school__in = ('بنين',))
-        return qs
 
-    def save_model(self, request, obj, form, change):
-        if obj.pk is None:
-            if request.user.code == "hrboys":
-                obj.school = "بنين"
-            elif request.user.code == "hrgirls":
-                obj.school = "بنات"
-        super().save_model(request, obj, form, change)
 
     def has_module_permission(self, request):
         if request.user.is_authenticated:
@@ -152,25 +138,10 @@ class Vacation_settingAdmin(ImportExportModelAdmin):
     readonly_fields = ()
     filter_horizontal = ()
     search_fields = ('name',)
-    list_filter = ('school',)
+    list_filter = ()
     fieldsets = (
     ('', { 'fields': ('name','is_vacation', 'vacations','vacations_s')}),
                 )
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        if request.user.code == "hrgirls":
-            return qs.filter(school__in = ('بنات',))
-        elif request.user.code =="hrboys":
-            return qs.filter(school__in = ('بنين',))
-        return qs
-
-    def save_model(self, request, obj, form, change):
-        if obj.pk is None:
-            if request.user.code == "hrboys":
-                obj.school = "بنين"
-            elif request.user.code == "hrgirls":
-                obj.school = "بنات"
-        super().save_model(request, obj, form, change)
 
     def has_module_permission(self, request):
         if request.user.is_authenticated:
@@ -605,7 +576,7 @@ class PermissionInline(admin.TabularInline):
 
 class EmployeeAdmin(ImportExportModelAdmin):
     list_display = ('code','name','birth_date','mobile_number' ,'participation_date','job','is_active')
-    autocomplete_fields = ['perms','vecation_role']
+    # autocomplete_fields = ['perms','vecation_role']
     raw_id_fields = ('job',)
     readonly_fields = ('birth_date','job_code','vacations','vacations_s')
     search_fields = ('code','name','na_id','insurance_no')
