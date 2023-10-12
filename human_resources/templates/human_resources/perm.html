@@ -41,10 +41,6 @@
             {% endif %}
           </div>
         </div>
-
-
-
-      
         <div class="row">
         <div class="col-md-5 ">
         </div>
@@ -53,7 +49,8 @@
                   <thead>
                     <tr>
                   <th scope="col"><i class="fa fa-edit" aria-hidden="true" ></th>
-                  <th scope="col"><i class="fa fa-edit" aria-hidden="true" ></i></th>
+                  <th scope="col"><i class="fa fa-check" aria-hidden="true" ></th>
+                  <th scope="col"><i class="fa fa-check" aria-hidden="true" ></i></th>
                   <th scope="col">إذن</th>
                   <th scope="col">التاريخ</th>
                     </tr>
@@ -61,15 +58,24 @@
                   <tbody>
                   {% for perm in month_perms %}
                   <tr>
+                    <!-- Inside the table that displays permissions -->
+                    <td>
+                      {% if  not perm.ok2 %}
+                          <form method="POST" action="{% url 'delete_permission' perm.id %}">
+                              {% csrf_token %}
+                              <button type="submit" class="btn btn-danger">إلغاء</button>
+                          </form>
+                      {% endif %}
+                    </td>
                     {% if perm.ok2 == True %}
-                    <td class="align-middle"><i class="fa fa-check" aria-hidden="true" style="color:green"></i></td>
+                    <td class="align-middle"><i class="fa fa-check-circle" aria-hidden="true" style="color:green"></i></td>
                     {% else %}
-                    <td class="align-middle"><i class="fa fa-minus" aria-hidden="true" style="color:red"></i></td>
+                    <td class="align-middle"><i class="fa fa-minus-circle" aria-hidden="true" style="color:red"></i></td>
                     {% endif %}
                     {% if perm.ok1 == True %}
-                    <td class="align-middle"><i class="fa fa-check" aria-hidden="true" style="color:green"></i></td>
+                    <td class="align-middle"><i class="fa fa-check-circle" aria-hidden="true" style="color:green"></i></td>
                     {% else %}
-                    <td class="align-middle"><i class="fa fa-minus" aria-hidden="true" style="color:red"></i></td>
+                    <td class="align-middle"><i class="fa fa-minus-circle" aria-hidden="true" style="color:red"></i></td>
                     {% endif %}
                     <td>{{ perm.type}}</td>
                     <td>{{ perm.date|date:'M d'}}</td>
@@ -81,7 +87,7 @@
       </div> 
       <br>
 
-
+      {% if not OpenPerm %}
       <div id="card-434020">  
         <div class="card border-0" style="background-color: transparent; ">
             <div class="card-header">
@@ -151,6 +157,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
 
 

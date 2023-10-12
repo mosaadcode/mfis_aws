@@ -196,10 +196,10 @@ class Time_templateAdmin(ImportExportModelAdmin):
             return False
 
 class PermissionAdmin(ImportExportModelAdmin):
-    list_display = ('employee','type', 'date','reason', 'month','ok1','ok2')
+    list_display = ('employee','type', 'date','reason', 'month','count','total','ok1','ok2')
     # list_display_links = ('employee',)
     autocomplete_fields = ['employee']
-    readonly_fields = ('school','created','reason','ok1','ok2','start_time','end_time')
+    readonly_fields = ('school','created','reason','ok1','ok2','start_time','end_time','count','total')
     filter_horizontal = ()
     search_fields = ('employee__code','employee__name')
     list_filter = ('school','month','type')
@@ -296,11 +296,34 @@ class PermissionAdmin(ImportExportModelAdmin):
                     notupdated,
                 ) % notupdated, messages.ERROR)
 
+    def refused(self, request, queryset):
+            updated = 0
+            notupdated = 0
+            for obj in queryset:
+                if obj.ok1 == False and obj.ok2== False:
+                    obj.delete()
+                    updated += 1
+                else:
+                    notupdated +=1
+            if updated != 0:
+                self.message_user(request, ngettext(
+                    '%d تم رفض ',
+                    '%d تم رفض',
+                    updated,
+                ) % updated, messages.SUCCESS)
+            if notupdated != 0:
+                self.message_user(request, ngettext(
+                    '%d لا يمكن رفض ',
+                    '%d لا يمكن رفض ',
+                    notupdated,
+                ) % notupdated, messages.ERROR)
+
     ok1.short_description = "موافقة الرئيس المباشر"
     ok2.short_description = "موافقة الرئيس الأعلى"
     ok.short_description = "موافقة مباشرة"
+    refused.short_description = "رفض الإذن"
 
-    actions = ['ok1','ok2','ok']
+    actions = ['ok1','ok2','ok','refused']
     def get_actions(self, request):
         actions= super().get_actions(request)
         if request.user.is_authenticated:

@@ -9,5 +9,6 @@ urlpatterns = [
     path('perm/', views.perm, name='perm'),
     path('vacation/', views.vacation, name='vacation'),
     path('contact/', views.employee_contact, name='employee_contact'),
+    path('delete_permission/<int:permission_id>/', views.delete_permission, name='delete_permission'),
 
 ]

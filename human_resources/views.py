@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from .models import Employee,SalaryItem,Month,Permission,Vacation,Employee_month,Time_setting
 from .forms import PermForm,VacationForm,EmployeeContact
 from datetime import datetime,date
@@ -49,9 +49,9 @@ def perm(request):
     try:
         employee_month = Employee_month.objects.get(employee__code=request.user.code,month=active_month)
     except Employee_month.DoesNotExist:
-        request.session['error'] = 'إعدادات اَذون غير صحيحة برجاء التواصل مع قسم شؤون العاملين'
+        request.session['error'] = 'لم يتم العثور على السجل الشهري برجاء التواصل مع قسم شؤون العاملين'
         return redirect('home2')
-    month_perms= Permission.objects.filter(employee__code=request.user.code,month=active_month).order_by('-date')
+    month_perms= Permission.objects.filter(employee__code=request.user.code,month=active_month).order_by('-created')
     employee = Employee.objects.get(code=request.user.code)
     settings = employee.perms
     times = employee.times
@@ -64,6 +64,9 @@ def perm(request):
     used_perms_percentage = (used / total) * 100
     unused_perms_percentage = 100 - used_perms_percentage
     over = employee_month.permissions - total
+
+    # Check if there are any month_perms with ok2=False
+    OpenPerm = month_perms.filter(ok2=False).exists()
 
     if request.method == 'GET':
         msg = request.session.get('msg')
@@ -89,7 +92,8 @@ def perm(request):
                 'unused':unused,
                 'used_perms_percentage' : used_perms_percentage,
                 'unused_perms_percentage' :unused_perms_percentage,
-                'over':over,    
+                'over':over,  
+                'OpenPerm' :OpenPerm,
             }
             return render( request, "human_resources/perm.html", context)
 
@@ -117,6 +121,8 @@ def perm(request):
                         permission.employee = Employee.objects.get(code=request.user.code)
                         permission.school = request.user.school
                         permission.month=active_month
+                        permission.count=employee_month.permissions+1
+                        permission.total=settings.perms
                         permission.save()
                         request.session['msg'] = '( تم تسجيل الإذن ( قيد الموافقة'
                         return redirect('perm')
@@ -133,12 +139,29 @@ def perm(request):
                         permission.employee = Employee.objects.get(code=request.user.code)
                         permission.school = request.user.school
                         permission.month=active_month
+                        permission.count=employee_month.permissions+1
+                        permission.total=settings.perms
                         permission.save()
                         request.session['msg'] = ' ( تم تسجيل الإذن زائد ( سيتم الخصم من الراتب'
                         return redirect('perm')
             else:
                 request.session['error'] = 'لا توجد شهور مفعلة'
                 return redirect('perm')
+
+
+def delete_permission(request, permission_id):
+    try:
+        permission = get_object_or_404(Permission, id=permission_id)    
+        # Check if both ok1 and ok2 are False
+        if  not permission.ok2:
+            permission.delete()
+    except:
+        pass
+    
+    return redirect('perm')
+
+
+
 
 def vacation(request):
     if request.method == 'GET':

@@ -94,7 +94,7 @@ class Employee(models.Model):
     times = models.ForeignKey("Time_template", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='الحضور والإنصراف')
     vacations = models.PositiveSmallIntegerField(default=0,verbose_name='اجازات ')
     vacations_s = models.PositiveSmallIntegerField(default=0,verbose_name='اجازات مرضي ')
-
+    
     def get_code(self):
         if self.code == "":
             code_gen = []
@@ -337,10 +337,12 @@ class Permission(models.Model):
     type = models.CharField( max_length=5, choices=PERM_CHOICES,null=True,verbose_name='النوع ')
     school = models.CharField( max_length=6, choices=SCHOOL_CHOICES,null=True,verbose_name='المدرسة ')
     created = models.DateTimeField(auto_now_add=True)
-    ok1 = models.BooleanField(default=False,verbose_name='مدير مباشر')
-    ok2 = models.BooleanField(default=False,verbose_name='مدير أعلى')
+    ok1 = models.BooleanField(default=False,verbose_name='م.مدير مباشر')
+    ok2 = models.BooleanField(default=False,verbose_name='م.مدير أعلى')
     start_time = models.CharField(max_length=5,blank=True,null=True,verbose_name='من ساعة')
     end_time = models.CharField(max_length=5,blank=True,null=True,verbose_name='الى ساعة')
+    count = models.PositiveSmallIntegerField(default=0,verbose_name='إذن رقم')
+    total = models.PositiveSmallIntegerField(default=0,verbose_name='من ')
 
     def save(self, *args, **kwargs):
         if self.month == "":
