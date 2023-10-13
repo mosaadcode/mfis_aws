@@ -8,6 +8,7 @@ from student.models import Student,Manager
 from django.db.models import F
 from django.db.models import Min
 from datetime import date,datetime
+from django.contrib.auth.hashers import make_password
 
 try:
     active_month = Month.objects.get(active=True)
@@ -626,6 +627,69 @@ class EmployeeAdmin(ImportExportModelAdmin):
 
     inlines = [PermissionInline,SalaryItemInline]
     resource_class = EmployeeResource
+
+    def manager_1(self, request, queryset):
+        updated = 0
+        notupdated = 0
+        for obj in queryset:
+            if obj.code[:2] != "m1":
+                new_code = "m1" + obj.code[2:]
+                employee_acc = Student.objects.get(code=obj.code)
+                employee_acc.code = new_code
+                employee_acc.password=make_password(new_code)
+                employee_acc.is_admin = True
+                employee_acc.is_staff = True
+                obj.code = new_code
+                obj.save(update_fields=["code",])
+                employee_acc.save(update_fields=["code", "password", "is_staff", "is_staff"])
+                self.log_change(request, obj, 'إعطاء صلاحية الرئيس المباشر')
+                updated += 1
+            else:
+                notupdated +=1
+        if updated != 0:
+            self.message_user(request, ngettext(
+                '%d تم إعطاء صلاحية الرئيس المباشر الى',
+                '%d تم إعطاء صلاحية الرئيس المباشر الى',
+                updated,
+            ) % updated, messages.SUCCESS)
+        if notupdated != 0:
+            self.message_user(request, ngettext(
+                '%d بالفعل يمتلك صلاحية الرئيس المباشر ',
+                '%d بالفعل يمتلك صلاحية الرئيس المباشر ',
+                notupdated,
+            ) % notupdated, messages.ERROR)
+
+    def manager_2(self, request, queryset):
+        updated = 0
+        notupdated = 0
+        for obj in queryset:
+            if obj.code[:2] != "m2":
+                new_code = "m2" + obj.code[2:]
+                employee_acc = Student.objects.get(code=obj.code)
+                employee_acc.code = new_code
+                employee_acc.password=make_password(new_code)
+                employee_acc.is_admin = True
+                employee_acc.is_staff = True
+                obj.code = new_code
+                obj.save(update_fields=["code",])
+                employee_acc.save(update_fields=["code", "password", "is_staff", "is_staff"])
+                self.log_change(request, obj, 'إعطاء صلاحية الرئيس الأعلى')
+                updated += 1
+            else:
+                notupdated +=1
+        if updated != 0:
+            self.message_user(request, ngettext(
+                '%d تم إعطاء صلاحية الرئيس الأعلى الى',
+                '%d تم إعطاء صلاحية الرئيس الأعلى الى',
+                updated,
+            ) % updated, messages.SUCCESS)
+        if notupdated != 0:
+            self.message_user(request, ngettext(
+                '%d بالفعل يمتلك صلاحية الرئيس الأعلى ',
+                '%d بالفعل يمتلك صلاحية الرئيس الأعلى ',
+                notupdated,
+            ) % notupdated, messages.ERROR)
+
     def has_module_permission(self, request):
         if request.user.is_authenticated:
             if request.user.code in ('mosaad','hrboys','hrgirls'):
@@ -702,7 +766,10 @@ class EmployeeAdmin(ImportExportModelAdmin):
     
     Fix_birth_date.short_description = 'ضبط  تاريخ الميلاد'    
     Fix_job_code.short_description = 'ضبط  كود الوظيفة'
-    actions = ['Fix_job_code','Fix_birth_date']
+    manager_1.short_description = 'إعطاء صلاحية الرئيس المباشر'
+    manager_2.short_description = 'إعطاء صلاحية الرئيس الأعلى'
+
+    actions = ['manager_1','manager_2','Fix_job_code','Fix_birth_date']
 
     def delete_queryset(self, request, queryset):
             print('==========================delete_queryset==========================')
