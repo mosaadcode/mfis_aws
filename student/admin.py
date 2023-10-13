@@ -8,6 +8,8 @@ from import_export.admin import ImportExportMixin, ImportExportModelAdmin
 from .resources import StudentResource,BusStudentResource
 from django.contrib.auth.models import Group
 from django.utils.translation import ngettext
+from django.contrib.auth.hashers import make_password
+from human_resources.models import Employee
 # from django.db.models import Q
 
 admin.site.unregister(Group)
@@ -51,9 +53,9 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
     # payment_status.short_description = "مستحق سداد "
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        if request.user.code == "mfisb":
+        if request.user.code == "mfisb" or request.user.code[:3]=="acb":
             return qs.filter(school__in = ('بنين',),is_employ=False)
-        elif request.user.code == "mfisg":
+        elif request.user.code == "mfisg" or request.user.code[:3]=="acg":
             # return qs.filter(Q(school='.بنات.')| Q(school='بنات'))
             return qs.filter(school__in = ('.بنات.', 'بنات',),is_employ=False)
         return qs
@@ -102,7 +104,7 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
 
     def has_module_permission(self, request):
         if request.user.is_authenticated:
-            if request.user.code in ('mosaad','mfisb','mfisg'):
+            if request.user.code in ('mosaad','mfisb','mfisg') or request.user.code[:2]=="ac":
                 return True
             return False
     def has_delete_permission(self, request, obj=None):
@@ -113,7 +115,7 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
         if request.user.code == "mosaad":
             return True
         return False
-
+        
 class BusAdmin(ImportExportMixin, admin.ModelAdmin):
     list_display = ('number','supervisor_name','supervisor_mobile','driver_name','driver_mobile')
     search_fields = ('number','area')
@@ -224,14 +226,14 @@ class SchoolFeeAdmin(ImportExportMixin, admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        if request.user.code == "mfisg":
+        if request.user.code == "mfisg" or request.user.code[:3]=="acg":
             return qs.filter(school__in = ('.بنات.', 'بنات'))
-        elif request.user.code =="mfisb":
+        elif request.user.code =="mfisb" or request.user.code[:3]=="acb":
             return qs.filter(school="بنين")
         return qs
     def has_module_permission(self, request):
         if request.user.is_authenticated:
-            if request.user.code in ('mosaad','mfisb','mfisg'):
+            if request.user.code in ('mosaad','mfisb','mfisg') or request.user.code[:2]=="ac":
                 return True
             return False
     def has_delete_permission(self, request, obj=None):
@@ -282,8 +284,8 @@ class SchoolFeeAdmin(ImportExportMixin, admin.ModelAdmin):
 class ProgramAdmin(ImportExportModelAdmin):
     # list_display = ('app', 'model')
     filter_horizontal = ()
-    list_filter = ('app',)
-    fieldsets = ((None, {'fields':('app','model'),}),)
+    list_filter = ('name',)
+    fieldsets = ((None, {'fields':('name','code','count'),}),)
 
     def has_module_permission(self, request):
         if request.user.is_authenticated:
@@ -294,12 +296,53 @@ class ProgramAdmin(ImportExportModelAdmin):
 class ManagerAdmin(ImportExportModelAdmin):
     list_display = ('user', 'program','level')
     autocomplete_fields = ['user']
-    raw_id_fields = ('program',)
+    # raw_id_fields = ('program',)
     search_fields = ('user__username','user__code')
     readonly_fields = ()
     filter_horizontal = ()
-    list_filter = ('program__app',)
+    list_filter = ('program__name',)
     fieldsets = ((None, {'fields': ('user', ('program','level'))}),)
+
+    def manager(self, request, queryset):
+        updated = 0
+        notupdated = 0
+        for obj in queryset:
+            code = obj.user.code
+            if  code[:2] == "ac" or code[:2] == "hr" or code[:2] == "af" or code[:2] == "bu":
+                notupdated +=1
+            else:
+                user = Student.objects.get(id=obj.user.pk)
+                employee = Employee.objects.get(code=code)
+                program = Program.objects.get(id=obj.program.pk)
+                new_code = program.code + code[2:3] + format(program.count+1,'04')
+                program.count+=1
+                program.save()
+                user.code = new_code
+                user.password = make_password(new_code)
+                user.is_admin = True
+                user.is_staff = True
+                user.save(update_fields=["code", "password", "is_staff", "is_staff"])
+                employee.code=new_code
+                employee.save(update_fields=["code"])
+                self.log_change(request, obj, 'إعطاء صلاحيات الموظف')
+                obj.save()
+                updated += 1
+        if updated != 0:
+            self.message_user(request, ngettext(
+                '%d تم إعطاء صلاحيات الموظف الى',
+                '%d تم إعطاء صلاحيات الموظف الى',
+                updated,
+            ) % updated, messages.SUCCESS)
+        if notupdated != 0:
+            self.message_user(request, ngettext(
+                '%d بالفعل يمتلك صلاحيات الموظف ',
+                '%d بالفعل يمتلك صلاحيات الموظف ',
+                notupdated,
+            ) % notupdated, messages.ERROR)
+
+    manager.short_description = 'إعطاء صلاحيات الموظف'
+
+    actions = ['manager',]
 
     def has_module_permission(self, request):
         if request.user.is_authenticated:
@@ -339,15 +382,15 @@ class ArchiveAdmin(ImportExportModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        if request.user.code == "mfisg":
+        if request.user.code == "mfisg" or request.user.code[:3]=="acg":
             return qs.filter(school__in = ('.بنات.', 'بنات'))
-        elif request.user.code =="mfisb":
+        elif request.user.code =="mfisb" or request.user.code[:3]=="acb":
             return qs.filter(school__in = ('بنين',))
         return qs
 
     def has_module_permission(self, request):
         if request.user.is_authenticated:
-            if request.user.code in ('mosaad','mfisb','mfisg'):
+            if request.user.code in ('mosaad','mfisb','mfisg') or request.user.code[:2]=="ac":
                 return True
             return False
     def has_delete_permission(self, request, obj=None):
@@ -362,7 +405,7 @@ class ArchiveAdmin(ImportExportModelAdmin):
         if request.user.code == "mosaad":
             return True
         return False
-    
+
 admin.site.register(Student, StudentAdmin)
 admin.site.register(Bus,BusAdmin)
 admin.site.register(BusStudent,BusStudentAdmin)

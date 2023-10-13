@@ -170,7 +170,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
     bus_payment2 = models.PositiveSmallIntegerField( default=0,verbose_name='Bus 2')
     total_paid = models.IntegerField(default=0)
     old_paid = models.IntegerField( default=0)
-    
+
     def payment_status(self):
 #due date 1st study and 1st bus
         if date.today() <= date(2020,9,30):
@@ -275,27 +275,20 @@ class SchoolFee(models.Model):
         verbose_name_plural ='School Fees  '
 
 class Program(models.Model):
-    app = models.CharField(max_length=16)
-    model = models.CharField(max_length=16)
+    name = models.CharField(max_length=16)
+    code = models.CharField(max_length=16)
+    count = models.PositiveSmallIntegerField(default=0)
     
     def __str__(self):
-        return self.app+ ' - ' + self.model
+        return self.name
 
 class Manager(models.Model):
     user = models.ForeignKey(Student, on_delete=models.CASCADE, null=True)
     program = models.ForeignKey(Program, on_delete=models.CASCADE, null=True)
     level = models.PositiveSmallIntegerField(default=0)
 
-
-    def save(self, *args, **kwargs):
-        employee = Student.objects.get(id=self.user.id)
-        employee.is_admin = True
-        employee.is_staff = True
-        employee.save(update_fields=["is_admin", "is_staff"])
-        super().save(*args, **kwargs)
-
     def __str__(self):
-        return self.user.code
+        return self.user.username
     
 class Archive(models.Model):
     student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True)
