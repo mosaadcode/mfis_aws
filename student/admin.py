@@ -321,7 +321,7 @@ class ManagerAdmin(ImportExportModelAdmin):
                 user.password = make_password(new_code)
                 user.is_admin = True
                 user.is_staff = True
-                user.save(update_fields=["code", "password", "is_staff", "is_staff"])
+                user.save(update_fields=["code", "password", "is_staff", "is_admin"])
                 employee.code=new_code
                 employee.save(update_fields=["code"])
                 self.log_change(request, obj, 'إعطاء صلاحيات الموظف')

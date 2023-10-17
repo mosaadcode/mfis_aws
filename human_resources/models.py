@@ -65,7 +65,7 @@ class Job(models.Model):
 
 class Employee(models.Model):
     school = models.CharField( max_length=6, choices=SCHOOL_CHOICES,verbose_name='المدرسة ')
-    code = models.CharField(max_length=7, unique=True,blank=True)
+    code = models.CharField(max_length=7, unique=True,blank=True,verbose_name='كود')
     name = models.CharField(max_length=60,verbose_name='الإسم')
     na_id = models.CharField(max_length=14, unique=True,verbose_name='رقم قومي ')
     birth_date = models.DateField(null=True,blank=True, verbose_name='تاريخ الميلاد ')
@@ -83,7 +83,7 @@ class Employee(models.Model):
     insurance_no = models.CharField(max_length=10, unique=True,null=True,blank=True,verbose_name='الرقم التأميني')
     notes = models.TextField( max_length=260,null=True,blank=True,verbose_name='ملاحظات ')
     job = models.ForeignKey(Job, on_delete=SET_NULL,null=True, blank=True,verbose_name='الوظيفة')
-    job_code = models.CharField(max_length=6,blank=True,null=True,verbose_name='')
+    job_code = models.CharField(max_length=6,blank=True,null=True,verbose_name='كود وظيفي')
     is_active = models.BooleanField(default=True,verbose_name='الحالة')
     salary_parameter = models.TextField( max_length=120,blank=True,null=True,verbose_name='عوامل تحديد الراتب ')
     salary = models.PositiveSmallIntegerField(null=True,blank=True,verbose_name='قيمة الراتب')
@@ -118,7 +118,6 @@ class Employee(models.Model):
                 elif self.na_id[0] == "3":
                     year_prefix ='20'
                 birth_date = datetime.strptime(year_prefix + self.na_id[1:3] + '-' + self.na_id[3:5] + '-' + self.na_id[5:7], '%Y-%m-%d').date()
-                print(birth_date)
                 return birth_date
             else:
                 return None
@@ -131,7 +130,7 @@ class Employee(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.code+" "+self.name
+        return self.name
 
     class Meta:
         verbose_name='employee'
@@ -341,12 +340,21 @@ class Permission(models.Model):
     ok2 = models.BooleanField(default=False,verbose_name='م.مدير أعلى')
     start_time = models.CharField(max_length=5,blank=True,null=True,verbose_name='من ساعة')
     end_time = models.CharField(max_length=5,blank=True,null=True,verbose_name='الى ساعة')
-    count = models.PositiveSmallIntegerField(default=0,verbose_name='إذن رقم')
+    count = models.PositiveSmallIntegerField(default=0,verbose_name='إذن')
     total = models.PositiveSmallIntegerField(default=0,verbose_name='من ')
+    job_code = models.CharField(max_length=6,blank=True,null=True,verbose_name='كود وظيفي')
 
     def save(self, *args, **kwargs):
         if self.month == "":
             self.month = Month.objects.last()
+        if not self.job_code:
+            try:
+                # Assuming you have a ForeignKey from Permission to Employee
+                employee = self.employee  # Replace with your actual ForeignKey field name
+                self.job_code = employee.job_code
+            except Employee.DoesNotExist:
+                # Handle the case where the associated employee doesn't exist
+                pass
         super().save(*args, **kwargs)
 
     def __str__(self):
