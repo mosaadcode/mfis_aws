@@ -612,7 +612,7 @@ class EmployeeAdmin(ImportExportModelAdmin):
     list_display = ('name','job','perms','vecation_role','times','code','job_code','time_code','is_active')
     # autocomplete_fields = ['perms','vecation_role']
     raw_id_fields = ('job',)
-    readonly_fields = ('birth_date','vacations','vacations_s')
+    readonly_fields = ('birth_date','job_code','vacations','vacations_s')
     search_fields = ('code','name','na_id','insurance_no')
     filter_horizontal = ()
     list_filter = ('school','job__type','job__grade','is_educational','job__title','job__department')
