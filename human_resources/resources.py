@@ -1,6 +1,6 @@
 from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget, BooleanWidget
-from .models import Month,SalaryItem,Employee,Permission,School,Job,Employee_month,Time_setting,Permission_setting,Vacation_setting,Department,Time_template
+from .models import MonthN as Month,SalaryItem,Employee,Permission,School,Job,Employee_month,Time_setting,Permission_setting,Vacation_setting,Department,Time_template
 from import_export.results import RowResult
 from operator import attrgetter
 try:

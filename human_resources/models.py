@@ -147,35 +147,6 @@ class ModifiedArrayField(ArrayField):
 
 LABELS_CHOICES = [(str(i), str(i)) for i in range(16, 32)] + [(str(i), str(i)) for i in range(1, 16)]
 
-class Month(models.Model):
-    STATUS_CHOSIES = (
-        ('1','جديد'),
-        ('2','قيد النشر'),
-        ('3','مغلق'),
-    )
-    code = models.CharField(max_length=7,verbose_name='شهر  ')
-    perms = models.PositiveSmallIntegerField(default=4,verbose_name='الاُذون المتاحة  ')
-    active=models.BooleanField(default=False,verbose_name='نشط  ')
-    published =models.BooleanField(default=False,verbose_name='نشر  ')
-    status=models.CharField(max_length=1,choices=STATUS_CHOSIES,default=1,verbose_name='الحالة  ')
-    dayoff = ModifiedArrayField(
-        models.CharField(
-            choices=LABELS_CHOICES,
-            max_length=100,
-            blank=True,
-            null=True,
-        ),
-        blank=True,
-        null=True,
-    )  
-
-    def __str__(self):
-        return self.code
-
-    class Meta:
-        verbose_name='month'
-        verbose_name_plural ='إعدادات الشهور'
-
 class MonthN(models.Model):
     STATUS_CHOSIES = (
         ('1','جديد'),
@@ -231,7 +202,7 @@ class MonthN(models.Model):
 
 class SalaryItem(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE,verbose_name='إسم الموظف')
-    month = models.ForeignKey(Month, on_delete=models.CASCADE, null=True,verbose_name='شهر ')
+    month = models.ForeignKey(MonthN, on_delete=models.CASCADE, null=True,verbose_name='شهر ')
     item = models.CharField(max_length=66,verbose_name='الوصف')
     value = models.SmallIntegerField(verbose_name='القيمة')
     school = models.CharField( max_length=6, choices=SCHOOL_CHOICES,null=True,verbose_name='المدرسة ')
@@ -239,7 +210,7 @@ class SalaryItem(models.Model):
 
     def save(self, *args, **kwargs):
         if self.month == "":
-            self.month = Month.objects.get(active=True)
+            self.month = MonthN.objects.get(active=True)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -251,12 +222,12 @@ class SalaryItem(models.Model):
 
 class Vacation(models.Model):
     OFF_CHOICES = (
-    ('إذن','إذن'),
+    ('إذن غياب','إذن غياب'),
     ('مرضي','مرضي'),
     ('من الرصيد','من الرصيد'),
 )
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE,verbose_name='إسم الموظف')
-    month = models.ForeignKey(Month, on_delete=models.CASCADE, null=True,verbose_name='شهر ')
+    month = models.ForeignKey(MonthN, on_delete=models.CASCADE, null=True,verbose_name='شهر ')
     date_from = models.DateField(verbose_name='من')
     date_to = models.DateField(verbose_name='الى')
     reason = models.CharField (max_length=24,blank=True,null=True,verbose_name='السبب')
@@ -265,10 +236,13 @@ class Vacation(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     ok1 = models.BooleanField(default=False,verbose_name='مدير مباشر')
     ok2 = models.BooleanField(default=False,verbose_name='مدير أعلى')
+    count = models.PositiveSmallIntegerField(default=0,verbose_name='إذن')
+    total = models.PositiveSmallIntegerField(default=0,verbose_name='من ')
+    job_code = models.CharField(max_length=6,blank=True,null=True,verbose_name='كود وظيفي')
 
     def save(self, *args, **kwargs):
         if self.month == "":
-            self.month = Month.objects.last()
+            self.month = MonthN.objects.last()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -281,11 +255,14 @@ class Vacation(models.Model):
 class Employee_month(models.Model):   
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE,verbose_name='إسم الموظف')
     school = models.CharField(max_length=6, choices=SCHOOL_CHOICES,null=True,verbose_name='المدرسة')    
-    month = models.ForeignKey(Month, on_delete=models.CASCADE, null=True,verbose_name='شهر')
+    month = models.ForeignKey(MonthN, on_delete=models.CASCADE, null=True,verbose_name='شهر')
     is_active = models.BooleanField(default=True,verbose_name='نشط')
     permissions = models.PositiveSmallIntegerField(default=0,verbose_name='اَذون')
     vacations = models.PositiveSmallIntegerField(default=0,verbose_name='إجازات')
+    vacations_s = models.PositiveSmallIntegerField(default=0,verbose_name='إجازات مرضي')
     salary_value =models.PositiveSmallIntegerField(default=0,verbose_name='الراتب')
+    absent =models.PositiveSmallIntegerField(default=0,verbose_name='غياب')
+    absent_ok =models.PositiveSmallIntegerField(default=0,verbose_name='غياب بإذن')
 
     def __str__(self):
         return self.employee.code
@@ -317,8 +294,11 @@ class Permission_setting(models.Model):
 class Vacation_setting(models.Model):
     name = models.CharField(unique=True,max_length=26,verbose_name='الإسم')
     is_vacation = models.BooleanField(default=False,verbose_name='اجازة من الرصيد ')
-    vacations = models.PositiveSmallIntegerField(default=0,verbose_name='رصيد اجازات ')
-    vacations_s = models.PositiveSmallIntegerField(default=0,verbose_name='رصيد اجازات مرضي ')
+    is_vacation_s = models.BooleanField(default=False,verbose_name='اجازة مرضي  ')
+    is_absent = models.BooleanField(default=False,verbose_name='إذن غياب')
+    vacations = models.PositiveSmallIntegerField(default=21,verbose_name='رصيد اجازات ')
+    vacations_s = models.PositiveSmallIntegerField(default=7,verbose_name='رصيد اجازات مرضي ')
+    absents = models.PositiveSmallIntegerField(default=3,verbose_name='رصيد غياب')
 
     def __str__(self):
         return self.name
@@ -334,7 +314,7 @@ class Time_setting(models.Model):
     time_out = models.CharField(max_length=5,verbose_name='موعد الإنصراف')
     time_in_perm = models.CharField(max_length=5,verbose_name='حضور بإذن')
     time_out_perm = models.CharField(max_length=5,verbose_name='إنصراف بإذن')
-    month = models.ForeignKey(Month, on_delete=SET_NULL, null=True,verbose_name='شهر ')
+    month = models.ForeignKey(MonthN, on_delete=SET_NULL, null=True,verbose_name='شهر ')
     
 
     def __str__(self):
@@ -351,7 +331,7 @@ class Permission(models.Model):
     ('مسائي','مسائي'),
 )
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE,verbose_name='إسم الموظف')
-    month = models.ForeignKey(Month, on_delete=models.CASCADE, null=True,verbose_name='شهر ')
+    month = models.ForeignKey(MonthN, on_delete=models.CASCADE, null=True,verbose_name='شهر ')
     date = models.DateField(verbose_name='تاريخ الإذن')
     reason = models.CharField (max_length=24,blank=True,null=True,verbose_name='السبب')
     type = models.CharField( max_length=5, choices=PERM_CHOICES,null=True,verbose_name='النوع ')
@@ -367,7 +347,7 @@ class Permission(models.Model):
 
     def save(self, *args, **kwargs):
         if self.month == "":
-            self.month = Month.objects.last()
+            self.month = MonthN.objects.last()
         if not self.job_code:
             try:
                 # Assuming you have a ForeignKey from Permission to Employee

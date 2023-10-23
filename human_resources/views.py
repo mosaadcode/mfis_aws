@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect,get_object_or_404
-from .models import Employee,SalaryItem,Month,Permission,Vacation,Employee_month,Time_setting
+from .models import Employee,SalaryItem,MonthN as Month,Permission,Vacation,Employee_month,Time_setting
 from .forms import PermForm,VacationForm,EmployeeContact
 from datetime import datetime,date
 from django.http import JsonResponse

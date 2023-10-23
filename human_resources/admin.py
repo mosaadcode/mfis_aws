@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import School,Department,Job, Employee, Month,SalaryItem,Permission,Vacation,Permission_setting,Employee_month,Time_setting,Vacation_setting,Time_template
+from .models import School,Department,Job, Employee, MonthN as Month,SalaryItem,Permission,Vacation,Permission_setting,Employee_month,Time_setting,Vacation_setting,Time_template
 from import_export.admin import ImportExportModelAdmin
 from .resources import SalaryItemResource,PermResource,EmployeeResource,Employee_monthResource,Time_settingResource,JobResource
 from django.utils.translation import ngettext
@@ -77,7 +77,7 @@ class SalaryItemAdmin(ImportExportModelAdmin):
             return False
 
 class Employee_monthAdmin(ImportExportModelAdmin):
-    list_display = ('employee','month','salary_value','permissions','vacations','is_active')
+    list_display = ('employee','month','salary_value','permissions','vacations','absent','absent_ok','is_active')
     # list_display_links = ('employee',)
     autocomplete_fields = ['employee']
     readonly_fields = ('school','employee','salary_value','permissions','vacations','month','is_active')
@@ -142,7 +142,7 @@ class Vacation_settingAdmin(ImportExportModelAdmin):
     search_fields = ('name',)
     list_filter = ()
     fieldsets = (
-    ('', { 'fields': ('name','is_vacation', 'vacations','vacations_s')}),
+    ('', { 'fields': ('name',('vacations','is_vacation'),('vacations_s','is_vacation_s'),('absents','is_absent'))}),
                 )
 
     def has_module_permission(self, request):
@@ -214,7 +214,6 @@ class PermissionAdmin(ImportExportModelAdmin):
         return self.readonly_fields
     
     def formatted_date(self, obj):
-        # Use the formats.date_format function to format the date as "M.dd"
         return formats.date_format(obj.date, "M-d")
 
     formatted_date.short_description = 'التاريخ'  # Set a custom column header name
@@ -429,21 +428,30 @@ class PermissionAdmin(ImportExportModelAdmin):
         print('============================delete_model============================')
 
 class VacationAdmin(ImportExportModelAdmin):
-    list_display = ('employee','date_from','date_to','reason', 'month','ok1','ok2')
+    list_display = ('employee','DateFrom','DateTo','reason','count','total','ok1','ok2','job_code')
     # list_display_links = None
     autocomplete_fields = ['employee'] 
-    readonly_fields = ('created','reason','ok1','ok2')
+    readonly_fields = ('created','reason','ok1','ok2','count','total')
     filter_horizontal = ()
     search_fields = ('employee__code','employee__name')
     list_filter = ('school','month','type')
     fieldsets =(
-        ('-----------', { 'fields': (('employee','month'),'type',('date_from','date_to'),'reason',('ok1','ok2'),'created','school')}),
+        ('-----------', { 'fields': (('employee','month'),'type',('date_from','date_to'),'reason',('ok1','ok2'),('count','total'),'created','school')}),
     )
+
+    def DateFrom(self, obj):
+        return formats.date_format(obj.date_from, "M-d")
+    
+    def DateTo(self, obj):
+        return formats.date_format(obj.date_to, "M-d")
+
+    DateFrom.short_description = 'من'  # Set a custom column header name
+    DateTo.short_description = 'إلى'  # Set a custom column header name
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
             if obj.ok2==True:
-                return ('employee','date_from','date_to','type','month') + self.readonly_fields
+                return ('employee','date_from','date_to','type','month',) + self.readonly_fields
             return self.readonly_fields
         return self.readonly_fields
 
@@ -540,26 +548,34 @@ class VacationAdmin(ImportExportModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        if request.user.code !="mosaad":
-            qs.filter(school=request.user.school)
-            if request.user.id in Manager.objects.filter(level=1).values_list('user',flat=True):
-                employee = Employee.objects.get(code=request.user.code)
-                return qs.filter(employee__job_code=employee.job_code,ok1=False,ok2=False)
-            elif request.user.id in Manager.objects.filter(level=2).values_list('user',flat=True):
-                employee = Employee.objects.get(code=request.user.code)
-                return qs.filter(employee__job_code__startswith=employee.job_code[:2],ok2=False)
-        return qs
+        if request.user.code!='mosaad':           
+            user_code = request.user.code[:3]
+            employee = Employee.objects.get(code=request.user.code)
+
+            code_filters = {
+                'hrb': dict(school='بنين'),
+                'hrg': dict(school__in=('بنات', 'Ig')),
+                'm1b': dict(school='بنين', ok1=False, ok2=False, job_code=employee.job_code),
+                'm2b': dict(school='بنين', ok2=False, job_code__startswith=employee.job_code),
+                'm1g': dict(school__in=('بنات', 'Ig'), ok1=False, ok2=False, job_code=employee.job_code),
+                'm2g': dict(school__in=('بنات', 'Ig'), ok2=False, job_code__startswith=employee.job_code)
+            }
+            if user_code in code_filters:
+                return qs.filter(**code_filters[user_code])
+            else:
+                # Handle default case when user code doesn't match any condition
+                return qs.none()
+        else:
+            return qs
 
     def has_module_permission(self, request):
         if request.user.is_authenticated:
-            if request.user.code in ('mosaad','hrboys','hrgirls'):
-                return True
-            elif request.user.id in Manager.objects.filter(level__in=(1,2)).values_list('user',flat=True):
+            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr','m1','m2'):
                 return True
             return False
 
     def get_list_display_links(self, request, obj=None):
-        if request.user.code in ('mosaad','hrboys','hrgirls'):
+        if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
             self.list_display_links = ('employee',)
             return self.list_display_links
         else:
@@ -621,6 +637,8 @@ class EmployeeAdmin(ImportExportModelAdmin):
     ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code','perms','vecation_role','times',('vacations','vacations_s'))}),
                 )
 
+    list_per_page = 50
+    
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.code =="hrboys":
@@ -741,7 +759,7 @@ class EmployeeAdmin(ImportExportModelAdmin):
             if request.user.code in ('mosaad',):
                 return True
             return False
-        
+
     def Fix_job_code(self, request, queryset):
         # updated = queryset.update(verified=True)
         updated = 0
@@ -771,6 +789,10 @@ class EmployeeAdmin(ImportExportModelAdmin):
                 # Update related permissions
                 related_permissions = Permission.objects.filter(employee=obj,month=active_month)
                 related_permissions.update(job_code=code)
+
+                # Update related vacations
+                related_vacations= Vacation.objects.filter(employee=obj,month=active_month)
+                related_vacations.update(job_code=code)
 
                 updated +=1
             else:
@@ -851,11 +873,11 @@ class EmployeeAdmin(ImportExportModelAdmin):
             print('==========================delete_queryset==========================')
 
 class MonthAdmin(ImportExportModelAdmin):
-    list_display = ('code','perms','active','published','status')
+    list_display = ('code','active','published','status')
     filter_horizontal = ()
-    readonly_fields = ('active','published',)
+    readonly_fields = ('code','active','published',)
     fieldsets =(
-        ('None', { 'fields': ('code','active','published','perms','dayoff')}),
+        ('None', { 'fields': ('code','start_date','end_date','dayoff',('active','published'))}),
         )
     
     def get_queryset(self, request):
@@ -864,7 +886,7 @@ class MonthAdmin(ImportExportModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ('code',) + self.readonly_fields
+            return ('code','start_date','end_date') + self.readonly_fields
         return self.readonly_fields
 
     def activate(self, request, queryset):

@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 from django import forms
-from .models import Employee,Permission,Vacation,Month
+from .models import Employee,Permission,Vacation,MonthN as Month
 from datetime import date
 
 try:
