@@ -3,7 +3,7 @@ from django.db.models.deletion import SET_NULL
 from django.db.models.signals import post_save
 from student.models import Student as StudentAcc
 from django.contrib.auth.hashers import make_password
-from datetime import date,datetime
+from datetime import date,datetime,timedelta
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import ArrayField
 from django import forms
@@ -145,45 +145,13 @@ class ModifiedArrayField(ArrayField):
         }
         return super(ArrayField, self).formfield(**defaults)
 
+LABELS_CHOICES = [(str(i), str(i)) for i in range(16, 32)] + [(str(i), str(i)) for i in range(1, 16)]
 
 class Month(models.Model):
     STATUS_CHOSIES = (
         ('1','جديد'),
         ('2','قيد النشر'),
         ('3','مغلق'),
-    )
-    LABELS_CHOICES = (
-    ("16", "16"),
-    ("17", "17"),
-    ("18", "18"),
-    ("19", "19"),
-    ("20", "20"),
-    ("21", "21"),
-    ("22", "22"),
-    ("23", "23"),
-    ("24", "24"),
-    ("25", "25"),
-    ("26", "26"),
-    ("27", "27"),
-    ("28", "28"),
-    ("29", "29"),
-    ("30", "30"),
-    ("31", "31"),
-    ("1", "1"),
-    ("2", "2"),
-    ("3", "3"),
-    ("4", "4"),
-    ("5", "5"),
-    ("6", "6"),
-    ("7", "7"),
-    ("8", "8"),
-    ("9", "9"),
-    ("10", "10"),
-    ("11", "11"),
-    ("12", "12"),
-    ("13", "13"),
-    ("14", "14"),
-    ("15", "15"),
     )
     code = models.CharField(max_length=7,verbose_name='شهر  ')
     perms = models.PositiveSmallIntegerField(default=4,verbose_name='الاُذون المتاحة  ')
@@ -207,6 +175,59 @@ class Month(models.Model):
     class Meta:
         verbose_name='month'
         verbose_name_plural ='إعدادات الشهور'
+
+class MonthN(models.Model):
+    STATUS_CHOSIES = (
+        ('1','جديد'),
+        ('2','قيد النشر'),
+        ('3','مغلق'),
+    )
+    code = models.CharField(blank=True,null=True,max_length=7,verbose_name='شهر  ')
+    active=models.BooleanField(default=False,verbose_name='نشط  ')
+    published =models.BooleanField(default=False,verbose_name='نشر  ')
+    status=models.CharField(max_length=1,choices=STATUS_CHOSIES,default=1,verbose_name='الحالة  ')
+    start_date = models.DateField(verbose_name='تاريخ البدء')
+    end_date = models.DateField(verbose_name='تاريخ الانتهاء')
+
+    dayoff = ModifiedArrayField(
+        models.CharField(
+            choices=LABELS_CHOICES,
+            max_length=100,
+            blank=True,
+            null=True,
+        ),
+        blank=True,
+        null=True,
+        verbose_name='العطلات الرسمية',
+    )
+
+    def calculate_dayoff(self):
+        # Calculate the default value for dayoff based on start_date and end_date
+        Friday_days = []
+        current_date = self.start_date
+        while current_date <= self.end_date:
+            if current_date.weekday() == 4:  # 4 represents Friday (0=Monday, 1=Tuesday, ..., 6=Sunday)
+                Friday_days.append(str(current_date.day))
+            current_date += timedelta(days=1)
+        return Friday_days
+
+    def calculate_code(self):
+        # Calculate the code based on the end_date in the format 'yyyy-mm'
+        return self.end_date.strftime('%Y-%m')
+
+    def save(self, *args, **kwargs):
+        if not self.dayoff:
+            self.dayoff = self.calculate_dayoff()
+        if not self.code:
+            self.code = self.calculate_code()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.code
+
+    class Meta:
+        verbose_name = 'month'
+        verbose_name_plural = 'إعدادات الشهور'
 
 class SalaryItem(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE,verbose_name='إسم الموظف')
