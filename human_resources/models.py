@@ -190,8 +190,6 @@ class Month(models.Model):
     active=models.BooleanField(default=False,verbose_name='نشط  ')
     published =models.BooleanField(default=False,verbose_name='نشر  ')
     status=models.CharField(max_length=1,choices=STATUS_CHOSIES,default=1,verbose_name='الحالة  ')
-    start_date = models.DateField(verbose_name='تاريخ البدء')
-    end_date = models.DateField(verbose_name='تاريخ الانتهاء')
     dayoff = ModifiedArrayField(
         models.CharField(
             choices=LABELS_CHOICES,
