@@ -29,7 +29,7 @@ class PermForm(forms.ModelForm):
         end_time = forms.TimeInput(format='%H:%M'),
         # exclude = ('date','type')
 
-    date = forms.DateField(widget=DateInput(attrs={'type': 'date', 'min': month_start, 'max': month_end,'class': 'form-control','id':'dateInput','required':""}))
+    # date = forms.DateField(widget=DateInput(attrs={'type': 'date', 'min': month_start, 'max': month_end,'class': 'form-control','id':'dateInput','required':""}))
 
 class VacationForm(forms.ModelForm):
     class Meta:
@@ -37,8 +37,6 @@ class VacationForm(forms.ModelForm):
         fields = ('date_from','date_to','type','reason')
         # exclude = ('date','type')
 
-    date_from = forms.DateField(widget=DateInput,)
-    date_to = forms.DateField(widget=DateInput,)
-
-    # q: what is github copilot can do?
+    # date_from = forms.DateField(widget=DateInput(attrs={'type': 'date', 'min': month_start, 'max': month_end,'class': 'form-control','id':'date_from','required':""}))
+    # date_to = forms.DateField(widget=DateInput(attrs={'type': 'date', 'min': month_start, 'max': month_end,'class': 'form-control','id':'date_to','required':"",'readOnly':'true'}))
     
