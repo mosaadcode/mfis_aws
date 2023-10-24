@@ -148,6 +148,8 @@ class ModifiedArrayField(ArrayField):
 LABELS_CHOICES = [(str(i), str(i)) for i in range(16, 32)] + [(str(i), str(i)) for i in range(1, 16)]
 
 class MonthN(models.Model):
+
+   
     STATUS_CHOSIES = (
         ('1','جديد'),
         ('2','قيد النشر'),
@@ -315,6 +317,7 @@ class Time_setting(models.Model):
     time_in_perm = models.CharField(max_length=5,verbose_name='حضور بإذن')
     time_out_perm = models.CharField(max_length=5,verbose_name='إنصراف بإذن')
     month = models.ForeignKey(MonthN, on_delete=SET_NULL, null=True,verbose_name='شهر ')
+    dayoff = models.BooleanField(default=False,verbose_name='عطلة')
     
 
     def __str__(self):

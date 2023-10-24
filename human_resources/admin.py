@@ -152,16 +152,18 @@ class Vacation_settingAdmin(ImportExportModelAdmin):
             return False
         
 class Time_settingAdmin(ImportExportModelAdmin):
-    list_display = ('name','date','time_in','time_in_perm','time_out', 'time_out_perm')
+    list_display = ('name','date','time_in','time_in_perm','time_out', 'time_out_perm','dayoff')
     # list_display_links = ('employee',)
     # autocomplete_fields = ['employee']
     readonly_fields = ()
     filter_horizontal = ()
     search_fields = ('name__name',)
-    list_filter = ('name','month')
+    list_filter = ('name','month','dayoff')
     fieldsets = (
-    ('', { 'fields': ('name','month','date','time_in','time_in_perm','time_out', 'time_out_perm')}),
+    ('', { 'fields': ('name','month',('date','dayoff'),'time_in','time_in_perm','time_out', 'time_out_perm')}),
                 )
+    list_per_page = 30
+    list_editable = ('dayoff',)
     resource_class=Time_settingResource
 
     def get_queryset(self, request):
