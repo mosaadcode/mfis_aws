@@ -301,6 +301,11 @@ class Vacation_setting(models.Model):
     vacations = models.PositiveSmallIntegerField(default=21,verbose_name='رصيد اجازات ')
     vacations_s = models.PositiveSmallIntegerField(default=7,verbose_name='رصيد اجازات مرضي ')
     absents = models.PositiveSmallIntegerField(default=3,verbose_name='رصيد غياب')
+    time_in = models.CharField(max_length=5,verbose_name='موعد الحضور')
+    time_out = models.CharField(max_length=5,verbose_name='موعد الإنصراف')
+    time_in_perm = models.CharField(max_length=5,verbose_name='حضور بإذن')
+    time_out_perm = models.CharField(max_length=5,verbose_name='إنصراف بإذن')
+    saturday = models.BooleanField(default=False,verbose_name='إجازة ايام السبت')
 
     def __str__(self):
         return self.name
@@ -310,7 +315,7 @@ class Vacation_setting(models.Model):
         verbose_name_plural ='إعدادات الاجازات'
 
 class Time_setting(models.Model):
-    name = models.ForeignKey("Time_template", on_delete=models.CASCADE,null=True,verbose_name='مواعيد ')
+    name = models.ForeignKey(Vacation_setting, on_delete=models.CASCADE,null=True,verbose_name='مواعيد ')
     date = models.DateField(verbose_name='يوم')
     time_in = models.CharField(max_length=5,verbose_name='موعد الحضور')
     time_out = models.CharField(max_length=5,verbose_name='موعد الإنصراف')

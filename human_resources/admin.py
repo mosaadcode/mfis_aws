@@ -7,10 +7,9 @@ from django.contrib import admin, messages
 from student.models import Student,Manager
 from django.db.models import F
 from django.db.models import Min
-from datetime import date,datetime
+from datetime import date,datetime,timedelta
 from django.contrib.auth.hashers import make_password
 from django.utils import formats
-
 try:
     active_month = Month.objects.get(active=True)
 except Month.DoesNotExist:
@@ -134,7 +133,7 @@ class Permission_settingAdmin(ImportExportModelAdmin):
             return False
         
 class Vacation_settingAdmin(ImportExportModelAdmin):
-    list_display = ('name','is_vacation', 'vacations','vacations_s')
+    list_display = ('name','is_vacation','is_vacation_s','is_absent','time_in','time_in_perm','time_out', 'time_out_perm','saturday')
     # list_display_links = ('employee',)
     # autocomplete_fields = ['employee']
     readonly_fields = ()
@@ -142,7 +141,7 @@ class Vacation_settingAdmin(ImportExportModelAdmin):
     search_fields = ('name',)
     list_filter = ()
     fieldsets = (
-    ('', { 'fields': ('name',('vacations','is_vacation'),('vacations_s','is_vacation_s'),('absents','is_absent'))}),
+    ('', { 'fields': ('name',('vacations','is_vacation'),('vacations_s','is_vacation_s'),('absents','is_absent','saturday'),('time_in','time_in_perm'),('time_out', 'time_out_perm'))}),
                 )
 
     def has_module_permission(self, request):
@@ -150,7 +149,7 @@ class Vacation_settingAdmin(ImportExportModelAdmin):
             if request.user.code in ('mosaad','hrboys','hrgirls'):
                 return True
             return False
-        
+
 class Time_settingAdmin(ImportExportModelAdmin):
     list_display = ('name','date','time_in','time_in_perm','time_out', 'time_out_perm','dayoff')
     # list_display_links = ('employee',)
@@ -171,6 +170,26 @@ class Time_settingAdmin(ImportExportModelAdmin):
         qs = qs.order_by('name', 'date')
         return qs
 
+    def Fridays(self, request, queryset):
+        updated = 0
+        for obj in queryset:
+            if obj.date.weekday() == 4:
+                obj.dayoff = True
+                obj.save()
+                self.log_change(request, obj, 'Make Off Day')
+                updated += 1
+            else:
+                pass
+        if updated != 0:
+            self.message_user(request, ngettext(
+                '%d عدد ايام الجمعة',
+                '%d عدد ايام الجمعة',
+                updated,
+            ) % updated, messages.SUCCESS)
+
+    Fridays.short_description = 'ايام الجمعة'
+
+    actions = ['Fridays',]
     def has_module_permission(self, request):
         if request.user.is_authenticated:
             if request.user.code in ('mosaad','hrboys','hrgirls'):
@@ -960,7 +979,56 @@ class MonthAdmin(ImportExportModelAdmin):
                         '%d Monthly Records ware Created',
                         created,
                     ) % created, messages.SUCCESS)
-           
+
+    def Create_Time_setting(self, request, queryset):
+        count = 0
+        unique_names = set()  # To store the unique names of processed categories
+
+        for obj in queryset:
+            count += 1
+
+        if count > 1:
+            self.message_user(request, 'لا يمكن انشاء مواعيد الحضور والانصراف لاكثر من شهر في نفس الوقت', messages.ERROR)
+        else:
+            for obj in queryset:
+                if obj.start_date and obj.end_date:
+                    current_date = obj.start_date
+                    while current_date <= obj.end_date:
+                        for vacation_setting in Vacation_setting.objects.all():
+                            saturday = vacation_setting.saturday
+                            time_setting, created = Time_setting.objects.get_or_create(
+                                name=vacation_setting,
+                                date=current_date,
+                                defaults={
+                                    'time_in': vacation_setting.time_in,
+                                    'time_out': vacation_setting.time_out,
+                                    'time_in_perm': vacation_setting.time_in_perm,
+                                    'time_out_perm': vacation_setting.time_out_perm,
+                                    'month': obj,
+                                    'dayoff': False,  # Default to False
+                                }
+                            )
+                            if saturday == True:
+                                if current_date.weekday() == 4 or current_date.weekday() == 5:  # Friday and Saturday
+                                    time_setting.dayoff = True
+                                    time_setting.save()
+                            else:
+                                if current_date.weekday() == 4:  # Friday
+                                    time_setting.dayoff = True
+                                    time_setting.save()
+
+                            # Add the name to the set of unique names
+                            unique_names.add(vacation_setting.name)
+
+                        # Move to the next date
+                        current_date += timedelta(days=1)
+
+            # Convert the set of unique names to a string
+            unique_names_str = ' و '.join(unique_names)
+
+            message = f'تم انشاء الجداول الافتراضية للحضور والانصراف لفئات {unique_names_str}'
+            self.message_user(request, message)
+    
     def publish(self, request, queryset):
         count = 0
         for obj in queryset:
@@ -991,7 +1059,7 @@ class MonthAdmin(ImportExportModelAdmin):
     activate.short_description = 'إعداد الشهر لبداية التسجيل'
     publish.short_description = 'عرض بيانات شهر للموظفين'
     MonthlyRecords.short_description = 'إنشاء السجلات الشهرية'
-    actions = ['activate','publish','MonthlyRecords']
+    actions = ['activate','publish','MonthlyRecords','Create_Time_setting']
     def has_module_permission(self, request):
         if request.user.is_authenticated:
             if request.user.code in ('mosaad',):
