@@ -943,42 +943,57 @@ class MonthAdmin(ImportExportModelAdmin):
     def MonthlyRecords(self, request, queryset):
         count = 0
         for obj in queryset:
-            count +=1
-        if count > 1 :
-            self.message_user(request,'لا يمكن فتح اكثر من شهر في نفس الفترة', messages.ERROR)
-        else:
-            if obj.active == False:
-                self.message_user(request,'تم فتح الشهر من قبل', messages.ERROR)
+            count += 1
+            if count > 1:
+                self.message_user(request, 'لا يمكن فتح اكثر من شهر في نفس الفترة', messages.ERROR)
             else:
-                if obj.status == '3':
-                    self.message_user(request,'تم إغلاق الشهر سابقاً ولا يمكن إعادة تفعيلة مرة اخرى', messages.ERROR)
+                if obj.active == False:
+                    self.message_user(request, 'تم فتح الشهر من قبل', messages.ERROR)
                 else:
-                    before_count = Employee_month.objects.count()
-                    # Retrieve the active employees queryset
-                    employees = Employee.objects.all()
-                    # Prepare a list of Employee_month objects
-                    employee_months = [
-                        Employee_month(
-                            employee=employee,
-                            school=employee.school,
-                            month=active_month,
-                            is_active=employee.is_active,
-                            permissions=0,
-                            vacations=0,
-                            salary_value=0
-                        )
-                        for employee in employees
-                    ]
-                    # Bulk create the Employee_month objects
-                    Employee_month.objects.bulk_create(employee_months)
+                    if obj.status == '3':
+                        self.message_user(request, 'تم إغلاق الشهر سابقاً ولا يمكن إعادة تفعيله مرة أخرى', messages.ERROR)
+                    else:
+                        # Retrieve the active employees queryset
+                        employees = Employee.objects.all()
+                        new_records = []
+                        existing_records_count = 0
 
-                    after_count = Employee_month.objects.count()
-                    created = after_count - before_count
-                    self.message_user(request, ngettext(
-                        '%d Monthly Record was Created',
-                        '%d Monthly Records ware Created',
-                        created,
-                    ) % created, messages.SUCCESS)
+                        for employee in employees:
+                            # Check if an Employee_month record already exists for this employee and month
+                            existing_record = Employee_month.objects.filter(employee=employee, month=obj).first()
+
+                            if not existing_record:
+                                # Create a new Employee_month object and add it to the list for bulk_create
+                                new_record = Employee_month(
+                                    employee=employee,
+                                    school=employee.school,
+                                    month=obj,
+                                    is_active=employee.is_active,
+                                )
+                                new_records.append(new_record)
+                            else:
+                                existing_records_count += 1
+
+                        # Bulk create the new Employee_month objects
+                        Employee_month.objects.bulk_create(new_records)
+
+                        created = len(new_records)
+                        self.message_user(
+                            request,
+                            ngettext(
+                                '%d Monthly Record was Created',
+                                '%d Monthly Records were Created',
+                                created,
+                            ) % created,
+                            messages.SUCCESS
+                        )
+
+                        if existing_records_count > 0:
+                            self.message_user(
+                                request,
+                                f'{existing_records_count} existing Monthly Records were found and skipped.',
+                                messages.WARNING
+                            )
 
     def Create_Time_setting(self, request, queryset):
         count = 0
@@ -1026,7 +1041,7 @@ class MonthAdmin(ImportExportModelAdmin):
             # Convert the set of unique names to a string
             unique_names_str = ' و '.join(unique_names)
 
-            message = f'تم انشاء الجداول الافتراضية للحضور والانصراف لفئات {unique_names_str}'
+            message = f'تم انشاء جداول الحضور والانصراف الافتراضية لفئات {unique_names_str}'
             self.message_user(request, message)
     
     def publish(self, request, queryset):
@@ -1058,8 +1073,9 @@ class MonthAdmin(ImportExportModelAdmin):
 
     activate.short_description = 'إعداد الشهر لبداية التسجيل'
     publish.short_description = 'عرض بيانات شهر للموظفين'
-    MonthlyRecords.short_description = 'إنشاء السجلات الشهرية'
-    actions = ['activate','publish','MonthlyRecords','Create_Time_setting']
+    MonthlyRecords.short_description = 'إنشاء السجلات الشهرية للموظفين'
+    Create_Time_setting.short_description = 'انشاء جداول الحضور والانصراف الافتراضية'
+    actions = ['activate','MonthlyRecords','Create_Time_setting','publish']
     def has_module_permission(self, request):
         if request.user.is_authenticated:
             if request.user.code in ('mosaad',):
