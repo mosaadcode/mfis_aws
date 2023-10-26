@@ -1,6 +1,6 @@
 from import_export import fields, resources
 from import_export.widgets import ForeignKeyWidget, BooleanWidget
-from .models import MonthN as Month,SalaryItem,Employee,Permission,School,Job,Employee_month,Time_setting,Permission_setting,Vacation_setting,Department,Time_template
+from .models import MonthN as Month,SalaryItem,Employee,Permission,School,Job,Employee_month,Time_setting,Permission_setting,Vacation_setting,Department
 from import_export.results import RowResult
 from operator import attrgetter
 try:
@@ -40,10 +40,6 @@ class EmployeeResource(resources.ModelResource):
                       attribute='vecation_role',
                       widget=ForeignKeyWidget(Vacation_setting, 'name'))
     
-    times = fields.Field(column_name='times',
-                      attribute='times',
-                      widget=ForeignKeyWidget(Time_template, 'name'))
-
     def before_import_row(self, row, **kwargs):
         if not row['code']:
             code_gen = []
@@ -63,8 +59,8 @@ class EmployeeResource(resources.ModelResource):
     class Meta:
         model = Employee
         import_id_fields = ('code',)
-        fields = ('code', 'school', 'name', 'na_id', 'birth_date', 'mobile_number', 'phone_number', 'emergency_phone', 'email', 'address', 'basic_certificate', 'is_educational', 'attendance_date', 'insurance_date', 'participation_date', 'contract_date', 'insurance_no', 'notes', 'job', 'is_active', 'salary_parameter', 'salary', 'message', 'time_code', 'perms', 'vecation_role', 'times')
-        export_order = ('code', 'school', 'name', 'na_id', 'birth_date', 'mobile_number', 'phone_number', 'emergency_phone', 'email', 'address', 'basic_certificate', 'is_educational', 'attendance_date', 'insurance_date', 'participation_date', 'contract_date', 'insurance_no', 'notes', 'job', 'is_active', 'salary_parameter', 'salary', 'message', 'time_code', 'perms', 'vecation_role', 'times')
+        fields = ('code', 'school', 'name', 'na_id', 'birth_date', 'mobile_number', 'phone_number', 'emergency_phone', 'email', 'address', 'basic_certificate', 'is_educational', 'attendance_date', 'insurance_date', 'participation_date', 'contract_date', 'insurance_no', 'notes', 'job', 'is_active', 'salary_parameter', 'salary', 'message', 'time_code', 'perms', 'vecation_role')
+        export_order = ('code', 'school', 'name', 'na_id', 'birth_date', 'mobile_number', 'phone_number', 'emergency_phone', 'email', 'address', 'basic_certificate', 'is_educational', 'attendance_date', 'insurance_date', 'participation_date', 'contract_date', 'insurance_no', 'notes', 'job', 'is_active', 'salary_parameter', 'salary', 'message', 'time_code', 'perms', 'vecation_role')
 
 
 
@@ -115,7 +111,7 @@ class Time_settingResource(resources.ModelResource):
 
     name = fields.Field(column_name='name',
                       attribute='name',
-                      widget=ForeignKeyWidget(Time_template, 'name'))
+                      widget=ForeignKeyWidget(Vacation_setting, 'name'))
     
     month = fields.Field(column_name='month',
                       attribute='month',

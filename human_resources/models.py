@@ -90,8 +90,7 @@ class Employee(models.Model):
     message = models.CharField(max_length=260, null=True, blank=True)
     time_code = models.CharField(max_length=6,unique=True,blank=True,null=True,verbose_name='كود البصمة')
     perms = models.ForeignKey("Permission_setting", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='إعدادات الاَذون ')
-    vecation_role = models.ForeignKey("Vacation_setting", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='إعدادات الإجازات ')
-    times = models.ForeignKey("Time_template", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='الحضور والإنصراف')
+    vecation_role = models.ForeignKey("Vacation_setting", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='حضور وإجازات')
     vacations = models.PositiveSmallIntegerField(default=0,verbose_name='اجازات ')
     vacations_s = models.PositiveSmallIntegerField(default=0,verbose_name='اجازات مرضي ')
     
@@ -372,16 +371,6 @@ class Permission(models.Model):
     class Meta:
         verbose_name='permission'
         verbose_name_plural ='2_ اُذون يومية'   
-
-class Time_template(models.Model):
-    name = models.CharField(unique=True,max_length=26)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name='Time_template'
-        verbose_name_plural ='_ اعدادات الحضور والانصراف '   
 
 def create_employ(sender, instance, created, **kwargs):
     if created:

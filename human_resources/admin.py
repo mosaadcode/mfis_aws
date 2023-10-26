@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import School,Department,Job, Employee, MonthN as Month,SalaryItem,Permission,Vacation,Permission_setting,Employee_month,Time_setting,Vacation_setting,Time_template
+from .models import School,Department,Job, Employee, MonthN as Month,SalaryItem,Permission,Vacation,Permission_setting,Employee_month,Time_setting,Vacation_setting
 from import_export.admin import ImportExportModelAdmin
 from .resources import SalaryItemResource,PermResource,EmployeeResource,Employee_monthResource,Time_settingResource,JobResource
 from django.utils.translation import ngettext
@@ -193,28 +193,6 @@ class Time_settingAdmin(ImportExportModelAdmin):
     def has_module_permission(self, request):
         if request.user.is_authenticated:
             if request.user.code in ('mosaad','hrboys','hrgirls'):
-                return True
-            return False
-
-class Time_templateAdmin(ImportExportModelAdmin):
-    # list_display = ('__str__','title','department')
-    filter_horizontal = ()
-    search_fields = ()
-    list_filter = ()
-    
-    def has_module_permission(self, request):
-        if request.user.is_authenticated:
-            if request.user.code in ('mosaad','hrboys','hrgirls'):
-                return True
-            return False
-    def has_add_permission(self, request, obj=None):
-        if request.user.is_authenticated:
-            if request.user.code in ('mosaad'):
-                return True
-            return False
-    def has_delete_permission(self, request, obj=None):
-        if request.user.is_authenticated:
-            if request.user.code in ('mosaad'):
                 return True
             return False
 
@@ -646,7 +624,7 @@ class PermissionInline(admin.TabularInline):
         return False
 
 class EmployeeAdmin(ImportExportModelAdmin):
-    list_display = ('name','job','perms','vecation_role','times','code','job_code','time_code','is_active')
+    list_display = ('name','job','perms','vecation_role','code','job_code','time_code','is_active')
     # autocomplete_fields = ['perms','vecation_role']
     raw_id_fields = ('job',)
     readonly_fields = ('birth_date','job_code','vacations','vacations_s')
@@ -655,7 +633,7 @@ class EmployeeAdmin(ImportExportModelAdmin):
     list_filter = ('school','job__type','job__grade','is_educational','job__title','job__department')
     fieldsets = (
     ('بيانات الموظف', { 'fields': (('name','code'),('job_code','job'),('na_id','birth_date','school'),('mobile_number','phone_number'),('emergency_phone','email'),'address',('basic_certificate','is_educational'),('notes','is_active'))}),
-    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code','perms','vecation_role','times',('vacations','vacations_s'))}),
+    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code','perms','vecation_role',('vacations','vacations_s'))}),
                 )
 
     list_per_page = 50
@@ -997,7 +975,7 @@ class MonthAdmin(ImportExportModelAdmin):
 
     def Create_Time_setting(self, request, queryset):
         count = 0
-        unique_names = set()  # To store the unique names of processed categories
+        vacation_names = set()  # To store the names of processed vacation settings
 
         for obj in queryset:
             count += 1
@@ -1007,10 +985,15 @@ class MonthAdmin(ImportExportModelAdmin):
         else:
             for obj in queryset:
                 if obj.start_date and obj.end_date:
-                    current_date = obj.start_date
-                    while current_date <= obj.end_date:
-                        for vacation_setting in Vacation_setting.objects.all():
-                            saturday = vacation_setting.saturday
+                    # Loop through all vacation settings
+                    vacation_settings = Vacation_setting.objects.all()
+                    for vacation_setting in vacation_settings:
+                        saturday = vacation_setting.saturday
+
+                        # Loop through dates within the start_date and end_date of the selected Month
+                        current_date = obj.start_date
+                        while current_date <= obj.end_date:
+                            # Create time_setting for the current vacation_setting
                             time_setting, created = Time_setting.objects.get_or_create(
                                 name=vacation_setting,
                                 date=current_date,
@@ -1023,7 +1006,8 @@ class MonthAdmin(ImportExportModelAdmin):
                                     'dayoff': False,  # Default to False
                                 }
                             )
-                            if saturday == True:
+
+                            if saturday:
                                 if current_date.weekday() == 4 or current_date.weekday() == 5:  # Friday and Saturday
                                     time_setting.dayoff = True
                                     time_setting.save()
@@ -1032,17 +1016,18 @@ class MonthAdmin(ImportExportModelAdmin):
                                     time_setting.dayoff = True
                                     time_setting.save()
 
-                            # Add the name to the set of unique names
-                            unique_names.add(vacation_setting.name)
+                            # Add the name to the set of vacation names
+                            vacation_names.add(f'"{vacation_setting.name}"')
 
-                        # Move to the next date
-                        current_date += timedelta(days=1)
+                            # Move to the next date
+                            current_date += timedelta(days=1)
 
-            # Convert the set of unique names to a string
-            unique_names_str = ' و '.join(unique_names)
+            # Convert the set of vacation names to a string
+            vacation_names_str = ' و '.join(vacation_names)
 
-            message = f'تم انشاء جداول الحضور والانصراف الافتراضية لفئات {unique_names_str}'
+            message = f'تم انشاء جداول الحضور والانصراف الافتراضية لفئات {vacation_names_str}'
             self.message_user(request, message)
+
     
     def publish(self, request, queryset):
         count = 0
@@ -1094,4 +1079,3 @@ admin.site.register(Permission_setting,Permission_settingAdmin)
 admin.site.register(Employee_month,Employee_monthAdmin)
 admin.site.register(Time_setting,Time_settingAdmin)
 admin.site.register(Vacation_setting,Vacation_settingAdmin)
-admin.site.register(Time_template,Time_templateAdmin)
