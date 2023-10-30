@@ -1,15 +1,20 @@
 from django.contrib import admin, messages
-from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.models import Group
 from django.utils.translation import ngettext
+from django.db.models import F
+from import_export.admin import ImportExportModelAdmin
 from .models import Fee
 from student.models import Student,Archive
-from import_export.admin import ImportExportModelAdmin
 from student.resources import FeesResource
-from django.db.models import F
 from student_affairs.models import Student as StudentAff
 
-current_year = '24-23'
+CURRENT_YEAR = '24-23'
+
+def get_allowed_schools(user_code):
+    if user_code == "mfisb" or user_code[:3] == "acb":
+        return ('بنين',)
+    elif user_code == "mfisg" or user_code[:3] == "acg":
+        return ('.بنات.', 'بنات',)
+    return ()
 
 class FeesInline(admin.TabularInline):
     model = Fee
@@ -21,13 +26,12 @@ class FeesInline(admin.TabularInline):
     extra = 0
     ordering = ('-year','-created')
 
+    # Adjust School Access ''''''''''''''''''''''''''''
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        if request.user.code =="mfisb":
-            return qs.filter(school="بنين")
-        elif request.user.code == "mfisg":
-            # return qs.filter(Q(school='.بنات.')| Q(school='بنات'))
-            return qs.filter(school__in = ('.بنات.', 'بنات'))
+        if request.user.code != 'mosaad':
+            allowed_schools = get_allowed_schools(request.user.code)
+            return qs.filter(school__in=allowed_schools)
         return qs
     
     def has_change_permission(self, request, obj=None):
@@ -54,15 +58,15 @@ class FeeAdmin(ImportExportModelAdmin):
             return self.readonly_fields
         return self.readonly_fields
 
+    # Adjust School Access ''''''''''''''''''''''''''''
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        if request.user.code =="mfisb":
-            return qs.filter(school__in = ('بنين',))
-        elif request.user.code == "mfisg":
-            # return qs.filter(Q(school='.بنات.')| Q(school='بنات'))
-            return qs.filter(school__in = ('.بنات.', 'بنات'))
+        if request.user.code != 'mosaad':
+            allowed_schools = get_allowed_schools(request.user.code)
+            return qs.filter(school__in=allowed_schools)
         return qs
 
+    
     def out(self, request, queryset):
         updated = 0
         notupdated = 0
@@ -92,7 +96,7 @@ class FeeAdmin(ImportExportModelAdmin):
             ) % notupdated, messages.ERROR)
             
     out.short_description = "Delete fee"
-
+            
     def verified(self, request, queryset):
         # updated = queryset.update(verified=True)
         updated = 0
@@ -184,7 +188,7 @@ class FeeAdmin(ImportExportModelAdmin):
                         mystudent.total_books = F('total_books')-obj.value
                     elif obj.kind == 'دراسية':
                         mystudent.total_paid=F('total_paid') - obj.value
-                        if Fee.objects.filter(student=obj.student_id,kind='دراسية',year=current_year,verified=True).count()==1:
+                        if Fee.objects.filter(student=obj.student_id,kind='دراسية',year=CURRENT_YEAR,verified=True).count()==1:
                             try:
                                 mystudentAff = StudentAff.objects.get(code=mystudent.code)
                                 mystudentAff.payment_status = False
@@ -193,7 +197,7 @@ class FeeAdmin(ImportExportModelAdmin):
                                 pass
                     elif obj.kind == 'سيارة':
                         mystudent.total_paid=F('total_paid') - obj.value                                                                     
-                        if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=current_year,verified=True).count()==1:
+                        if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=CURRENT_YEAR,verified=True).count()==1:
                             mystudent.bus_active = False
                     mystudent.save()
                     obj.verified = False
@@ -236,12 +240,7 @@ class FeeAdmin(ImportExportModelAdmin):
             ) % cannot, messages.ERROR)
 
     def delete_queryset(self, request, queryset):
-        print('==========================delete_queryset==========================')
-        print(queryset)
 
-        """
-        you can do anything here BEFORE deleting the object(s)
-        """
         for obj in queryset:
             if obj.verified == True:
                 mystudent = Student.objects.get(id=obj.student_id)
@@ -255,7 +254,7 @@ class FeeAdmin(ImportExportModelAdmin):
                         mystudent.total_books = F('total_books')-obj.value
                     elif obj.kind == 'دراسية':
                         mystudent.total_paid=F('total_paid') - obj.value
-                        if Fee.objects.filter(student=obj.student_id,kind='دراسية',year=current_year,verified=True).count()==1:
+                        if Fee.objects.filter(student=obj.student_id,kind='دراسية',year=CURRENT_YEAR,verified=True).count()==1:
                             try:
                                 mystudentAff = StudentAff.objects.get(code=mystudent.code)
                                 mystudentAff.payment_status = False
@@ -264,7 +263,7 @@ class FeeAdmin(ImportExportModelAdmin):
                                 pass
                     elif obj.kind == 'سيارة':
                         mystudent.total_paid=F('total_paid') - obj.value                                                                     
-                        if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=current_year,verified=True).count()==1:
+                        if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=CURRENT_YEAR,verified=True).count()==1:
                             mystudent.bus_active = False
                     mystudent.save()
                 else:
@@ -277,21 +276,9 @@ class FeeAdmin(ImportExportModelAdmin):
                 obj.delete()
             else:
                 obj.delete()
-        # queryset.delete()
-
-        """
-        you can do anything here AFTER deleting the object(s)
-        """
-
-        print('==========================delete_queryset==========================')
 
     def delete_model(self, request, obj):
-        print('============================delete_model============================')
-        print(obj)
 
-        """
-        you can do anything here BEFORE deleting the object
-        """
         if obj.verified == True:
             mystudent = Student.objects.get(id=obj.student_id)
             SYear=mystudent.year
@@ -304,7 +291,7 @@ class FeeAdmin(ImportExportModelAdmin):
                     mystudent.total_books = F('total_books')-obj.value
                 elif obj.kind == 'دراسية':
                     mystudent.total_paid=F('total_paid') - obj.value
-                    if Fee.objects.filter(student=obj.student_id,kind='دراسية',year=current_year,verified=True).count()==1:
+                    if Fee.objects.filter(student=obj.student_id,kind='دراسية',year=CURRENT_YEAR,verified=True).count()==1:
                         try:
                             mystudentAff = StudentAff.objects.get(code=mystudent.code)
                             mystudentAff.payment_status = False
@@ -313,7 +300,7 @@ class FeeAdmin(ImportExportModelAdmin):
                             pass
                 elif obj.kind == 'سيارة':
                     mystudent.total_paid=F('total_paid') - obj.value                                                                     
-                    if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=current_year,verified=True).count()==1:
+                    if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=CURRENT_YEAR,verified=True).count()==1:
                         mystudent.bus_active = False
                     mystudent.save()
             else:
@@ -326,24 +313,29 @@ class FeeAdmin(ImportExportModelAdmin):
             obj.delete()
         else:
             obj.delete()
-        """
-        you can do anything here AFTER deleting the object
-        """
-
-        print('============================delete_model============================')
 
     actions = ['verified','unverified','out']
 
+    # Adjust User Access ''''''''''''''''''''''''''''''''''''''''''
     def has_module_permission(self, request):
+        return self.has_permission(request)
+
+    def has_view_permission(self, request, obj=None):
+        return self.has_permission(request)
+
+    def has_change_permission(self, request, obj=None):
+        return self.has_permission(request)
+
+    def has_add_permission(self, request, obj=None):
+        return self.has_permission(request)
+
+    def has_permission(self, request, obj=None):
         if request.user.is_authenticated:
-            if request.user.code in ('mosaad','mfisb','mfisg'):
-                return True
-            return False
-    def has_delete_permission(self, request, obj=None):
-        if request.user.code == "mosaad":
-            return True
+            user_code = request.user.code
+            return user_code in ('mosaad', 'mfisb', 'mfisg') or user_code[0] == 'a' and user_code[1] == 'c'
         return False
 
-# class XeesAdmin(ImportExportModelAdmin):
-#     pass
+    def has_delete_permission(self, request, obj=None):
+        return request.user.code == "mosaad"
+
 admin.site.register(Fee, FeeAdmin)
