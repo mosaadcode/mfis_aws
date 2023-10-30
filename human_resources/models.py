@@ -1,12 +1,11 @@
+from datetime import datetime,timedelta
+from django import forms
+from django.contrib.auth.hashers import make_password
 from django.db import models
 from django.db.models.deletion import SET_NULL
 from django.db.models.signals import post_save
-from student.models import Student as StudentAcc
-from django.contrib.auth.hashers import make_password
-from datetime import date,datetime,timedelta
-from django.core.exceptions import ValidationError
 from django.contrib.postgres.fields import ArrayField
-from django import forms
+from student.models import Student as StudentAcc
 
 SCHOOL_CHOICES = (
     ('بنين','بنين'),
@@ -18,7 +17,7 @@ class School(models.Model):
     school = models.CharField(max_length=5)
     count = models.PositiveSmallIntegerField()
     def __str__(self):
-        return self.school+" "+str(self.count)
+        return f"{self.school} {self.count}"
 
 class Department(models.Model):
     name = models.CharField(max_length=20)
@@ -26,7 +25,7 @@ class Department(models.Model):
         return self.name
     class Meta:
         verbose_name='Department'
-        verbose_name_plural ='5_ اقسام وظائف'     
+        verbose_name_plural ='الأقسام '     
 
 class Job(models.Model):
 
@@ -48,20 +47,20 @@ class Job(models.Model):
     grade = models.CharField(max_length=2, choices=GRADE_CHOICES, null=True,blank=True,verbose_name='المرحلة الدراسية')
 
     def __str__(self):
-        if self.department!=None:
-            if self.grade != None:
-                return  self.title + " " + self.department.name + ' ( ' + self.get_grade_display() + ' )'
+        if self.department:
+            if self.grade:
+                return f"{self.title} {self.department.name} ( {self.get_grade_display()} )"
             else:
-                return  self.title + " " + self.department.name
+                return f"{self.title} {self.department.name}"
         else:
-            if self.grade != None:
-                return self.title + ' ( ' + self.get_grade_display() + ' )'
+            if self.grade:
+                return f"{self.title} ( {self.get_grade_display()} )"
             else:
                 return self.title
 
     class Meta:
         verbose_name='job'
-        verbose_name_plural ='4_ وظائف'        
+        verbose_name_plural ='الوظائف '        
 
 class Employee(models.Model):
     school = models.CharField( max_length=6, choices=SCHOOL_CHOICES,verbose_name='المدرسة ')
@@ -95,31 +94,21 @@ class Employee(models.Model):
     vacations_s = models.PositiveSmallIntegerField(default=0,verbose_name='اجازات مرضي ')
     
     def get_code(self):
-        if self.code == "":
-            code_gen = []
-            code_gen.append(self.na_id[1:3])
-            if self.school == "بنين":
-                code_gen.append('b')
-                myschool = School.objects.get(school='بنين')
-            else:
-                code_gen.append('g')
-                myschool = School.objects.get(school='بنات')
-            myschool.count +=1
-            code_gen.append(format(myschool.count,'04'))
+        if not self.code:
+            code_gen = [self.na_id[1:3]]
+            school_code = 'b' if self.school == "بنين" else 'g'
+            myschool = School.objects.get(school=self.school)
+            myschool.count += 1
+            code_gen.extend([school_code, format(myschool.count, '04')])
             myschool.save()
             return ''.join(code_gen)
 
     def get_birth_date(self):
-        if self.birth_date is None:
-            if self.na_id[0] == "2" or self.na_id[0] =="3":
-                if self.na_id[0] =="2":
-                    year_prefix = '19'
-                elif self.na_id[0] == "3":
-                    year_prefix ='20'
+        if not self.birth_date:
+            if self.na_id[0] in ["2", "3"]:
+                year_prefix = '19' if self.na_id[0] == "2" else '20'
                 birth_date = datetime.strptime(year_prefix + self.na_id[1:3] + '-' + self.na_id[3:5] + '-' + self.na_id[5:7], '%Y-%m-%d').date()
                 return birth_date
-            else:
-                return None
 
     def save(self, *args, **kwargs):
         if self.code == "":
@@ -133,7 +122,7 @@ class Employee(models.Model):
 
     class Meta:
         verbose_name='employee'
-        verbose_name_plural ='1_ سجلات الموظفين'     
+        verbose_name_plural =' سجل الموظفين '     
 
 class ModifiedArrayField(ArrayField):
     def formfield(self, **kwargs):
@@ -219,7 +208,7 @@ class SalaryItem(models.Model):
 
     class Meta:
         verbose_name='SalaryItem'
-        verbose_name_plural ='4_ مفردات رواتب'   
+        verbose_name_plural ='مفردات رواتب '   
 
 class Vacation(models.Model):
     OFF_CHOICES = (
@@ -251,7 +240,7 @@ class Vacation(models.Model):
 
     class Meta:
         verbose_name='vacation'
-        verbose_name_plural ='3_ إجازات سنوية'   
+        verbose_name_plural ='سجل الاجازات '   
 
 class Employee_month(models.Model):   
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE,verbose_name='إسم الموظف')
@@ -337,11 +326,10 @@ class Permission(models.Model):
     ('داخلي','داخلي'),
     ('مسائي','مسائي'),
 )
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE,verbose_name='إسم الموظف')
-    month = models.ForeignKey(MonthN, on_delete=models.CASCADE, null=True,verbose_name='شهر ')
-    date = models.DateField(verbose_name='تاريخ الإذن')
-    reason = models.CharField (max_length=24,blank=True,null=True,verbose_name='السبب')
-    type = models.CharField( max_length=5, choices=PERM_CHOICES,null=True,verbose_name='النوع ')
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE,verbose_name='موظف')
+    month = models.ForeignKey(MonthN, on_delete=models.CASCADE,blank=True,null=True,verbose_name='شهر ')
+    date = models.DateField(verbose_name='يوم ')
+    type = models.CharField( max_length=5, choices=PERM_CHOICES,null=True,verbose_name='إذن ')
     school = models.CharField( max_length=6, choices=SCHOOL_CHOICES,null=True,verbose_name='المدرسة ')
     created = models.DateTimeField(auto_now_add=True)
     ok1 = models.BooleanField(default=False,verbose_name='م.مدير مباشر')
@@ -352,25 +340,12 @@ class Permission(models.Model):
     total = models.PositiveSmallIntegerField(default=0,verbose_name='من ')
     job_code = models.CharField(max_length=6,blank=True,null=True,verbose_name='كود وظيفي')
 
-    def save(self, *args, **kwargs):
-        if self.month == "":
-            self.month = MonthN.objects.last()
-        if not self.job_code:
-            try:
-                # Assuming you have a ForeignKey from Permission to Employee
-                employee = self.employee  # Replace with your actual ForeignKey field name
-                self.job_code = employee.job_code
-            except Employee.DoesNotExist:
-                # Handle the case where the associated employee doesn't exist
-                pass
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return self.employee.name
 
     class Meta:
         verbose_name='permission'
-        verbose_name_plural ='2_ اُذون يومية'   
+        verbose_name_plural =' سجل الاَذون '   
 
 def create_employ(sender, instance, created, **kwargs):
     if created:
