@@ -197,13 +197,16 @@ class Time_settingAdmin(ImportExportModelAdmin):
             return False
 
 class PermissionAdmin(ImportExportModelAdmin):
-    list_display = ('employee','type', 'formatted_date','reason','count','total','ok1','ok2','job_code')
+    list_display = ('employee','type', 'formatted_date','count','total','ok1','ok2','job_code')
     # list_display_links = ('employee',)
     autocomplete_fields = ['employee']
-    readonly_fields = ('school','created','reason','ok1','ok2','start_time','end_time','count','total')
+    readonly_fields = ('school','created','ok1','ok2','start_time','end_time','count','total','job_code')
     filter_horizontal = ()
     search_fields = ('employee__code','employee__name')
     list_filter = ('school','month','type')
+    fieldsets = (
+    ('', { 'fields': (('employee','type'),('month','date'))}),
+                )
     
     def get_readonly_fields(self, request, obj=None):
         if obj:
