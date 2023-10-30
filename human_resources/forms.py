@@ -24,19 +24,19 @@ class EmployeeContact(forms.ModelForm):
 class PermForm(forms.ModelForm):
     class Meta:
         model = Permission
-        fields = ('date','type','reason','start_time','end_time')
+        fields = ('date','type','start_time','end_time')
         start_time = forms.TimeInput(format='%H:%M'),
         end_time = forms.TimeInput(format='%H:%M'),
         # exclude = ('date','type')
 
-    # date = forms.DateField(widget=DateInput(attrs={'type': 'date', 'min': month_start, 'max': month_end,'class': 'form-control','id':'dateInput','required':""}))
+    date = forms.DateField(widget=DateInput(attrs={'type': 'date', 'min': month_start, 'max': month_end,'class': 'form-control','id':'dateInput','required':""}))
 
 class VacationForm(forms.ModelForm):
     class Meta:
         model = Vacation
-        fields = ('date_from','date_to','type','reason')
+        fields = ('date_from','date_to','type')
         # exclude = ('date','type')
 
-    # date_from = forms.DateField(widget=DateInput(attrs={'type': 'date', 'min': month_start, 'max': month_end,'class': 'form-control','id':'date_from','required':""}))
-    # date_to = forms.DateField(widget=DateInput(attrs={'type': 'date', 'min': month_start, 'max': month_end,'class': 'form-control','id':'date_to','required':"",'readOnly':'true'}))
+    date_from = forms.DateField(widget=DateInput(attrs={'type': 'date', 'min': month_start, 'max': month_end,'class': 'form-control','id':'date_from','required':""}))
+    date_to = forms.DateField(widget=DateInput(attrs={'type': 'date', 'min': month_start, 'max': month_end,'class': 'form-control','id':'date_to','required':"",'readOnly':'true'}))
     
