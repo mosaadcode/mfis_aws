@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin,messages
 from .models import School,Department,Job, Employee, MonthN as Month,SalaryItem,Permission,Vacation,Permission_setting,Employee_month,Time_setting,Vacation_setting
 from import_export.admin import ImportExportModelAdmin
 from .resources import SalaryItemResource,PermResource,EmployeeResource,Employee_monthResource,Time_settingResource,JobResource
@@ -10,6 +10,8 @@ from django.db.models import Min
 from datetime import date,datetime,timedelta
 from django.contrib.auth.hashers import make_password
 from django.utils import formats
+from django.core.exceptions import ValidationError
+
 try:
     active_month = Month.objects.get(active=True)
 except Month.DoesNotExist:
@@ -207,7 +209,8 @@ class PermissionAdmin(ImportExportModelAdmin):
     fieldsets = (
     ('', { 'fields': (('employee','type'),('month','date'))}),
                 )
-    
+
+
     def get_readonly_fields(self, request, obj=None):
         if obj:
             if obj.ok2==True:
@@ -219,6 +222,40 @@ class PermissionAdmin(ImportExportModelAdmin):
         return formats.date_format(obj.date, "M-d")
 
     formatted_date.short_description = 'التاريخ'  # Set a custom column header name
+
+    def save_model(self, request, obj, form, change):
+        if not obj.month:
+            obj.month = active_month
+
+        employee = obj.employee
+
+        try:
+            employee_month = Employee_month.objects.get(employee=employee, month=obj.month)
+        except Employee_month.DoesNotExist:
+            self.send_error_message(request, "لم يتم العثور على السجل الشهري للموظف")
+            return
+
+        permission_setting = employee.perms
+
+        if not permission_setting:
+            self.send_error_message(request, "برجاء ضبط إعدادات اَذون الموظف")
+            return
+
+        obj.school = employee.school
+        obj.job_code = employee.job_code
+        obj.total = permission_setting.perms
+        obj.count = employee_month.permissions + 1
+
+        try:
+            super().save_model(request, obj, form, change)
+        except ValidationError as e:
+            self.send_error_message(request, str(e))
+
+    def send_error_message(self, request, message):
+        self.message_user(request, message, level=messages.ERROR)
+
+
+
 
     def ok1(self, request, queryset):
         updated = 0
@@ -344,7 +381,7 @@ class PermissionAdmin(ImportExportModelAdmin):
     resource_class = PermResource
 
     def get_queryset(self, request):
-        qs = super().get_queryset(request)
+        qs = super().get_queryset(request).order_by('created')
         if request.user.code!='mosaad':           
             user_code = request.user.code[:3]
             employee = Employee.objects.get(code=request.user.code)
@@ -384,6 +421,16 @@ class PermissionAdmin(ImportExportModelAdmin):
             if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
                 return True
             return False
+    def has_import_permission(self, request):
+        if request.user.code in ('mosaad',):
+            return True
+        return False
+
+    def has_export_permission(self, request):
+        if request.user.code in ('mosaad',):
+            return True
+        return False
+    
     def delete_queryset(self, request, queryset):
         print('==========================delete_queryset==========================')
         print(queryset)
@@ -627,16 +674,16 @@ class PermissionInline(admin.TabularInline):
         return False
 
 class EmployeeAdmin(ImportExportModelAdmin):
-    list_display = ('name','job','perms','vecation_role','code','job_code','time_code','is_active')
+    list_display = ('name','job','permission_setting','vacation_setting','code','job_code','time_code','is_active')
     # autocomplete_fields = ['perms','vecation_role']
     raw_id_fields = ('job',)
-    readonly_fields = ('birth_date','job_code','vacations','vacations_s')
+    readonly_fields = ('birth_date','job_code','used_vacations','used_vacations_s')
     search_fields = ('code','name','na_id','insurance_no')
     filter_horizontal = ()
     list_filter = ('school','job__type','job__grade','is_educational','job__title','job__department')
     fieldsets = (
     ('بيانات الموظف', { 'fields': (('name','code'),('job_code','job'),('na_id','birth_date','school'),('mobile_number','phone_number'),('emergency_phone','email'),'address',('basic_certificate','is_educational'),('notes','is_active'))}),
-    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code','perms','vecation_role',('vacations','vacations_s'))}),
+    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code','permission_setting','vacation_setting',('used_vacations','used_vacations_s'))}),
                 )
 
     list_per_page = 50
@@ -759,6 +806,17 @@ class EmployeeAdmin(ImportExportModelAdmin):
     def has_delete_permission(self, request, obj=None):
         if request.user.is_authenticated:
             if request.user.code in ('mosaad',):
+                return True
+            return False
+
+    def has_change_permission(self, request, obj=None):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
+                return True
+            return False
+    def has_add_permission(self, request, obj=None):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
                 return True
             return False
 
@@ -1064,9 +1122,26 @@ class MonthAdmin(ImportExportModelAdmin):
     MonthlyRecords.short_description = 'إنشاء السجلات الشهرية للموظفين'
     Create_Time_setting.short_description = 'انشاء جداول الحضور والانصراف الافتراضية'
     actions = ['activate','MonthlyRecords','Create_Time_setting','publish']
+
     def has_module_permission(self, request):
         if request.user.is_authenticated:
             if request.user.code in ('mosaad',):
+                return True
+            return False
+    def has_delete_permission(self, request, obj=None):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad',):
+                return True
+            return False
+
+    def has_change_permission(self, request, obj=None):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
+                return True
+            return False
+    def has_add_permission(self, request, obj=None):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
                 return True
             return False
 

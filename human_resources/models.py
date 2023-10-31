@@ -43,7 +43,7 @@ class Job(models.Model):
     )
     type = models.CharField(max_length=7, choices=TYPES_CHOICES, verbose_name='نوع الوظيفة')
     title = models.CharField(max_length=20 ,verbose_name='المسمى الوظيفي')
-    department = models.ForeignKey(Department, on_delete=SET_NULL, null=True,verbose_name='القسم')
+    department = models.ForeignKey(Department, on_delete=SET_NULL, null=True,related_name='jobs',verbose_name='القسم')
     grade = models.CharField(max_length=2, choices=GRADE_CHOICES, null=True,blank=True,verbose_name='المرحلة الدراسية')
 
     def __str__(self):
@@ -88,10 +88,10 @@ class Employee(models.Model):
     salary = models.PositiveSmallIntegerField(null=True,blank=True,verbose_name='قيمة الراتب')
     message = models.CharField(max_length=260, null=True, blank=True)
     time_code = models.CharField(max_length=6,unique=True,blank=True,null=True,verbose_name='كود البصمة')
-    perms = models.ForeignKey("Permission_setting", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='إعدادات الاَذون ')
-    vecation_role = models.ForeignKey("Vacation_setting", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='حضور وإجازات')
-    vacations = models.PositiveSmallIntegerField(default=0,verbose_name='اجازات ')
-    vacations_s = models.PositiveSmallIntegerField(default=0,verbose_name='اجازات مرضي ')
+    permission_setting = models.ForeignKey("Permission_setting", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='إعدادات الاَذون ')
+    vacation_setting = models.ForeignKey("Vacation_setting", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='حضور وإجازات')
+    used_vacations = models.PositiveSmallIntegerField(default=0,verbose_name='اجازات ')
+    used_vacations_s = models.PositiveSmallIntegerField(default=0,verbose_name='اجازات مرضي ')
     
     def get_code(self):
         if not self.code:
@@ -216,8 +216,8 @@ class Vacation(models.Model):
     ('مرضي','مرضي'),
     ('من الرصيد','من الرصيد'),
 )
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE,verbose_name='إسم الموظف')
-    month = models.ForeignKey(MonthN, on_delete=models.CASCADE, null=True,verbose_name='شهر ')
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE,related_name='emp_vacations',verbose_name='إسم الموظف')
+    month = models.ForeignKey(MonthN, on_delete=models.CASCADE, related_name='month_vacations',null=True,verbose_name='شهر ')
     date_from = models.DateField(verbose_name='من')
     date_to = models.DateField(verbose_name='الى')
     reason = models.CharField (max_length=24,blank=True,null=True,verbose_name='السبب')
@@ -243,9 +243,9 @@ class Vacation(models.Model):
         verbose_name_plural ='سجل الاجازات '   
 
 class Employee_month(models.Model):   
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE,verbose_name='إسم الموظف')
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE,related_name='emp_months',verbose_name='إسم الموظف')
     school = models.CharField(max_length=6, choices=SCHOOL_CHOICES,null=True,verbose_name='المدرسة')    
-    month = models.ForeignKey(MonthN, on_delete=models.CASCADE, null=True,verbose_name='شهر')
+    month = models.ForeignKey(MonthN, on_delete=models.CASCADE,related_name='month_emp_months',null=True,verbose_name='شهر')
     is_active = models.BooleanField(default=True,verbose_name='نشط')
     permissions = models.PositiveSmallIntegerField(default=0,verbose_name='اَذون')
     vacations = models.PositiveSmallIntegerField(default=0,verbose_name='إجازات')
@@ -326,8 +326,8 @@ class Permission(models.Model):
     ('داخلي','داخلي'),
     ('مسائي','مسائي'),
 )
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE,verbose_name='موظف')
-    month = models.ForeignKey(MonthN, on_delete=models.CASCADE,blank=True,null=True,verbose_name='شهر ')
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE,related_name='emp_permissions',verbose_name='موظف')
+    month = models.ForeignKey(MonthN, on_delete=models.CASCADE,related_name='month_permissions',blank=True,null=True,verbose_name='شهر ')
     date = models.DateField(verbose_name='يوم ')
     type = models.CharField( max_length=5, choices=PERM_CHOICES,null=True,verbose_name='إذن ')
     school = models.CharField( max_length=6, choices=SCHOOL_CHOICES,null=True,verbose_name='المدرسة ')
