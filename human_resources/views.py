@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from .models import Employee,SalaryItem,MonthN as Month,Permission,Vacation,Employee_month,Time_setting
 from .forms import PermForm,VacationForm,EmployeeContact
-from datetime import datetime,date
+from datetime import datetime,date,timedelta
 from django.http import JsonResponse
 import json
 
@@ -45,19 +45,29 @@ def salary(request):
         context = {}
     return render(request, 'human_resources/salary.html',context)
 
+# to auto get permission work time 
+def get_work_time(type, work_time):
+    if type == 'صباحي':
+        return work_time.time_in, work_time.time_in_perm
+    elif type == 'مسائي':
+        return work_time.time_out_perm, work_time.time_out
+
 def perm(request):
+    employee = Employee.objects.select_related('permission_setting','vacation_setting').get(code=request.user.code)
     try:
-        employee_month = Employee_month.objects.get(employee__code=request.user.code,month=active_month)
+        employee_month = Employee_month.objects.get(employee=employee,month=active_month)
     except Employee_month.DoesNotExist:
         request.session['error'] = 'لم يتم العثور على السجل الشهري برجاء التواصل مع قسم شؤون العاملين'
         return redirect('home2')
-    month_perms= Permission.objects.filter(employee__code=request.user.code,month=active_month).order_by('-created')
-    employee = Employee.objects.get(code=request.user.code)
-    settings = employee.perms
-    times = employee.times
+    
+    month_perms= Permission.objects.filter(employee=employee,month=active_month).order_by('-created')
+    settings = employee.permission_setting
+    times = employee.vacation_setting
+
     if settings is None or times is None:
         request.session['error'] = 'إعدادات اَذون غير صحيحة برجاء التواصل مع قسم شؤون العاملين'
-        return redirect('home2')       
+        return redirect('home2')   
+        
     total = settings.perms
     used = month_perms.count()
     unused = total - used
@@ -99,27 +109,21 @@ def perm(request):
 
     else:       
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            # employee = Employee.objects.get(code=request.user.code)
             data = json.loads(request.body)
             type = data ['type']
             date = data['date']
-            work_time = Time_setting.objects.get(month=active_month,date=date,name=times)
-            if type == 'صباحي':
-                start_time = work_time.time_in
-                end_time = work_time.time_in_perm
-            elif type == 'مسائي':
-                start_time = work_time.time_out_perm
-                end_time = work_time.time_out
-            return JsonResponse({'start_time':start_time,'end_time': end_time })
+            work_time = Time_setting.objects.get(month=active_month, date=date, name=times)
+            start_time, end_time = get_work_time(type, work_time)
+            return JsonResponse({'start_time': start_time, 'end_time': end_time})
         else:
-            if active_month != None:
+            if active_month is not None:
                 unused_perms = request.POST.get('unused_perms')
                 if used < total :
                     form = PermForm(request.POST)
                     if form.is_valid():
                         permission = form.save(commit=False)
-                        permission.employee = Employee.objects.get(code=request.user.code)
-                        permission.school = request.user.school
+                        permission.employee = employee
+                        permission.school = employee.school
                         permission.month=active_month
                         permission.count=employee_month.permissions+1
                         permission.total=settings.perms
@@ -137,8 +141,8 @@ def perm(request):
                     else:
                         form = PermForm(request.POST)
                         permission = form.save(commit=False)
-                        permission.employee = Employee.objects.get(code=request.user.code)
-                        permission.school = request.user.school
+                        permission.employee = employee
+                        permission.school = employee.school
                         permission.month=active_month
                         permission.count=employee_month.permissions+1
                         permission.total=settings.perms
@@ -166,29 +170,156 @@ def delete_permission(request, permission_id):
 
 
 def vacation(request):
+    employee = Employee.objects.select_related('vacation_setting').get(code=request.user.code)
+    try:
+        employee_month = Employee_month.objects.get(employee=employee,month=active_month)
+    except Employee_month.DoesNotExist:
+        request.session['error'] = 'لم يتم العثور على السجل الشهري برجاء التواصل مع قسم شؤون العاملين'
+        return redirect('home2')
+    
+    vacations= Vacation.objects.filter(employee=employee,month=active_month).order_by('-created')
+    settings = employee.vacation_setting
+    if settings is None:
+        request.session['error'] = 'إعدادات إجازات غير صحيحة برجاء التواصل مع قسم شؤون العاملين'
+        return redirect('home2')  
+         
+    dayoff_settings = Time_setting.objects.filter(month=active_month,name=settings,dayoff=True)
+    total_vacations = settings.vacations
+    used_vacations = employee.used_vacations
+    unused_vacations = total_vacations - used_vacations
+    used_vacations_percentage = (used_vacations / total_vacations) * 100
+    unused_vacations_percentage = 100 - used_vacations_percentage
+    total_vacations_s = settings.vacations_s
+    used_vacations_s = employee.used_vacations_s
+    unused_vacations_s = total_vacations_s - used_vacations_s
+    used_vacations_s_percentage = (used_vacations_s / total_vacations_s) * 100
+    unused_vacations_s_percentage = 100 - used_vacations_s_percentage
+    total_absents = settings.absents
+    used_absents = vacations.filter(month=active_month,type='إذن غياب').count()
+    unused_absents = total_absents - used_absents
+    used_absents_percentage = (used_absents / total_absents) * 100
+    unused_absents_percentage = 100 - used_absents_percentage
+
+    is_absent = True if settings.is_absent and used_absents < total_absents else False
+    is_vacation = True if settings.is_vacation and used_vacations < total_vacations else False
+    is_vacation_s = True if settings.is_vacation_s and used_vacations_s < total_vacations_s else False
+
+    max_vacation = min(unused_vacations-1,15)
+    max_vacation_s = min(unused_vacations_s-1,15)
+
+
+    # Check if there are any vacation with ok2=False
+    OpenVacation = vacations.filter(ok2=False).exists()
+
     if request.method == 'GET':
         msg = request.session.get('msg')
         request.session['msg'] = ''
         error = request.session.get('error')
         request.session['error'] = ''
-        context = {
-            'form':VacationForm(),
-            'msg':msg,
-            'error':error,
-            'vacations':Vacation.objects.filter(employee__code=request.user.code).order_by('-date_from'),
-        }        
-        return render( request, "human_resources/vacation.html", context)
+        if settings.is_vacation == False and settings.is_vacation_s == False and settings.is_absent == False:
+            request.session['error'] = 'ليس لك الحق في إستخدام الإجازات'
+            return redirect('home2')
+        else:
+            context = {
+                'form':VacationForm(),
+                'msg':msg,
+                'error':error,
+                'month_start':month_start,
+                'month_end':month_end,
+                'settings':settings,
+                'vacations':vacations,
+                'total_vacations':total_vacations,
+                'total_vacations_s':total_vacations_s,
+                'total_absents':total_absents,
+                'used_vacations':used_vacations,
+                'used_vacations_s':used_vacations_s,
+                'used_absents':used_absents,
+                'unused_vacations':unused_vacations,
+                'unused_vacations_s':unused_vacations_s,
+                'unused_absents':unused_absents,
+                'used_vacations_percentage' : used_vacations_percentage,
+                'unused_vacations_percentage' :unused_vacations_percentage,
+                'used_vacations_s_percentage' : used_vacations_s_percentage,
+                'unused_vacations_s_percentage' :unused_vacations_s_percentage,
+                'used_absents_percentage':used_absents_percentage,
+                'unused_absents_percentage':unused_absents_percentage,
+                'OpenVacation' :OpenVacation,
+                'is_absent':is_absent,
+                'is_vacation':is_vacation,
+                'is_vacation_s':is_vacation_s,
+                'max_vacation':max_vacation,
+                'max_vacation_s':max_vacation_s,
+            }
+            return render( request, "human_resources/vacation.html", context)
+
+
     else:
-        form = VacationForm(request.POST)
-        vacation = form.save(commit=False)
-        vacation.employee = Employee.objects.get(code=request.user.code)
-        vacation.school = request.user.school
-        vacation.month = active_month
-        vacation.save()
+        
+        form = VacationForm(request.POST, request.FILES)
+        if form.is_valid():
+            if request.POST.get('type') == 'إذن غياب':
+                vacation = form.save(commit=False)
+                vacation.employee = Employee.objects.get(code=request.user.code)
+                vacation.school = request.user.school
+                vacation.month = active_month
+                vacation.job_code = employee.job_code
+
+                vacation.count = used_absents +1
+                vacation.total = unused_absents
+
+                vacation.save()
+
+            else:
+                date_from = request.POST['date_from']
+                date_to = request.POST['date_to']
+
+                # Parse date strings into datetime objects
+                date_from = datetime.strptime(date_from, '%Y-%m-%d')
+                date_to = datetime.strptime(date_to, '%Y-%m-%d')
+                # Create a list of day-offs based on the dayoff_settings
+                dayoffs = [setting.date for setting in dayoff_settings]
+
+                days_count = 0
+                days = []  # Initialize an empty list to store the day component of non-day-off dates
+
+                # Iterate through the date range
+                current_date = date_from
+                while current_date <= date_to:
+                    # Check if the current date is not a day-off
+                    if current_date.date() not in dayoffs:
+                        days_count += 1
+                        days.append(current_date.date().day)  # Add the day component to the 'days' list
+                    current_date += timedelta(days=1)
+
+                vacation = form.save(commit=False)
+                vacation.employee = Employee.objects.get(code=request.user.code)
+                vacation.school = request.user.school
+                vacation.month = active_month
+                vacation.job_code = employee.job_code
+                vacation.count = days_count
+                vacation.days = days
+                if request.POST['type'] == 'مرضي':
+                    vacation.total = unused_vacations_s
+                else:
+                    vacation.total = unused_vacations
+                vacation.save()
+
+        else:
+            print(form.errors)
 
         request.session['msg'] = '( تم تسجيل الإجازة ( قيد الموافقة'
         return redirect('vacation')
 
+def delete_vacation(request, vacation_id):
+    try:
+        vacation = get_object_or_404(Vacation, id=vacation_id)    
+        # Check if both ok1 and ok2 are False
+        if  not vacation.ok2:
+            vacation.delete()
+    except:
+        pass
+    
+    return redirect('vacation')
 
 def employee_contact(request):
         if request.method == 'GET':

@@ -34,9 +34,11 @@ class PermForm(forms.ModelForm):
 class VacationForm(forms.ModelForm):
     class Meta:
         model = Vacation
-        fields = ('date_from','date_to','type')
+        fields = ('date_from','date_to','type', 'photo')
         # exclude = ('date','type')
+
 
     date_from = forms.DateField(widget=DateInput(attrs={'type': 'date', 'min': month_start, 'max': month_end,'class': 'form-control','id':'date_from','required':""}))
     date_to = forms.DateField(widget=DateInput(attrs={'type': 'date', 'min': month_start, 'max': month_end,'class': 'form-control','id':'date_to','required':"",'readOnly':'true'}))
+    photo = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*', 'label': 'مرفق'}))
     

@@ -11,6 +11,10 @@ from datetime import date,datetime,timedelta
 from django.contrib.auth.hashers import make_password
 from django.utils import formats
 from django.core.exceptions import ValidationError
+from django.utils.html import format_html
+
+from django.urls import reverse
+from django.http import HttpResponseRedirect
 
 try:
     active_month = Month.objects.get(active=True)
@@ -235,15 +239,15 @@ class PermissionAdmin(ImportExportModelAdmin):
             self.send_error_message(request, "لم يتم العثور على السجل الشهري للموظف")
             return
 
-        permission_setting = employee.perms
+        setting = employee.permission_setting
 
-        if not permission_setting:
+        if not setting:
             self.send_error_message(request, "برجاء ضبط إعدادات اَذون الموظف")
             return
 
         obj.school = employee.school
         obj.job_code = employee.job_code
-        obj.total = permission_setting.perms
+        obj.total = setting.perms
         obj.count = employee_month.permissions + 1
 
         try:
@@ -381,7 +385,7 @@ class PermissionAdmin(ImportExportModelAdmin):
     resource_class = PermResource
 
     def get_queryset(self, request):
-        qs = super().get_queryset(request).order_by('created')
+        qs = super().get_queryset(request).order_by('-created')
         if request.user.code!='mosaad':           
             user_code = request.user.code[:3]
             employee = Employee.objects.get(code=request.user.code)
@@ -432,12 +436,7 @@ class PermissionAdmin(ImportExportModelAdmin):
         return False
     
     def delete_queryset(self, request, queryset):
-        print('==========================delete_queryset==========================')
-        print(queryset)
 
-        """
-        you can do anything here BEFORE deleting the object(s)
-        """
         for obj in queryset:
             if obj.ok2 == True and obj.month == active_month:
                 employee_month = Employee_month.objects.get(employee=obj.employee,month=active_month)
@@ -447,21 +446,12 @@ class PermissionAdmin(ImportExportModelAdmin):
                 obj.delete()
             else:
                 obj.delete()
-        # queryset.delete()
 
-        """
-        you can do anything here AFTER deleting the object(s)
-        """
 
-        print('==========================delete_queryset==========================')
+
 
     def delete_model(self, request, obj):
-        print('============================delete_model============================')
-        print(obj)
 
-        """
-        you can do anything here BEFORE deleting the object
-        """
         if obj.ok2 == True and obj.month == active_month:
             employee_month = Employee_month.objects.get(employee=obj.employee,month=active_month)
             employee_month.permissions=F('permissions') - 1
@@ -477,17 +467,16 @@ class PermissionAdmin(ImportExportModelAdmin):
         print('============================delete_model============================')
 
 class VacationAdmin(ImportExportModelAdmin):
-    list_display = ('employee','DateFrom','DateTo','reason','count','total','ok1','ok2','job_code')
+    list_display = ('employee','type','DateFrom','DateTo','count','total','ok1','ok2','job_code')
     # list_display_links = None
     autocomplete_fields = ['employee'] 
-    readonly_fields = ('created','reason','ok1','ok2','count','total')
+    readonly_fields = ('created','ok1','ok2','count','total','days')
     filter_horizontal = ()
     search_fields = ('employee__code','employee__name')
     list_filter = ('school','month','type')
-    fieldsets =(
-        ('-----------', { 'fields': (('employee','month'),'type',('date_from','date_to'),'reason',('ok1','ok2'),('count','total'),'created','school')}),
-    )
-
+    fieldsets = (
+    ('', { 'fields': (('employee','days'),('type','month'),('date_from','date_to'))}),
+                )
     def DateFrom(self, obj):
         return formats.date_format(obj.date_from, "M-d")
     
@@ -504,6 +493,13 @@ class VacationAdmin(ImportExportModelAdmin):
             return self.readonly_fields
         return self.readonly_fields
 
+    # def view_photo_link(self, obj):
+    #     if obj.photo:
+    #         photo_url = obj.photo.url
+    #         return format_html('<a href="{}" target="_blank">صورة</a>', photo_url)
+    #     return ""
+
+    # view_photo_link.short_description = "مرفق"
 
     def ok1(self, request, queryset):
         updated = 0
@@ -596,7 +592,7 @@ class VacationAdmin(ImportExportModelAdmin):
                 return actions
 
     def get_queryset(self, request):
-        qs = super().get_queryset(request)
+        qs = super().get_queryset(request).order_by('-created')
         if request.user.code!='mosaad':           
             user_code = request.user.code[:3]
             employee = Employee.objects.get(code=request.user.code)
@@ -616,6 +612,59 @@ class VacationAdmin(ImportExportModelAdmin):
                 return qs.none()
         else:
             return qs
+
+    def save_model(self, request, obj, form, change):
+        if not obj.month:
+            obj.month = active_month
+
+        employee = obj.employee
+
+        try:
+            employee_month = Employee_month.objects.get(employee=employee, month=obj.month)
+        except Employee_month.DoesNotExist:
+            self.send_error_message(request, "لم يتم العثور على السجل الشهري للموظف")
+            return
+
+        settings = employee.vacation_setting
+
+        if not settings:
+            self.send_error_message(request, "برجاء ضبط إعدادات اجازات الموظف")
+            return
+
+        obj.school = employee.school
+        obj.job_code = employee.job_code
+
+
+        dayoff_settings = Time_setting.objects.filter(month=active_month,name=settings,dayoff=True)
+        dayoffs = [setting.date for setting in dayoff_settings]
+        days_count = 0
+        days = []
+        current_date = obj.date_from
+        while current_date <= obj.date_to:
+            # Check if the current date is not a day-off
+            if current_date not in dayoffs:
+                days_count += 1
+                days.append(current_date.day)  # Add the day component to the 'days' list
+            current_date += timedelta(days=1)
+
+        obj.days = days
+        obj.count = days_count
+
+        if obj.type == 'إذن غياب':
+            obj.total = settings.absents - employee_month.absent_ok
+        elif obj.type == 'من الرصيد':
+            obj.total = settings.vacations - employee.used_vacations
+        else:
+            obj.total = settings.vacations_s - employee.used_vacations_s
+
+        try:
+            super().save_model(request, obj, form, change)
+        except ValidationError as e:
+            self.send_error_message(request, str(e))
+            
+
+    def send_error_message(self, request, message):
+        self.message_user(request, message, level=messages.ERROR)
 
     def has_module_permission(self, request):
         if request.user.is_authenticated:

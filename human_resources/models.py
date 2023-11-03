@@ -220,15 +220,16 @@ class Vacation(models.Model):
     month = models.ForeignKey(MonthN, on_delete=models.CASCADE, related_name='month_vacations',null=True,verbose_name='شهر ')
     date_from = models.DateField(verbose_name='من')
     date_to = models.DateField(verbose_name='الى')
-    reason = models.CharField (max_length=24,blank=True,null=True,verbose_name='السبب')
     type = models.CharField(max_length=9, choices=OFF_CHOICES,null=True,verbose_name='النوع')
     school = models.CharField(max_length=6, choices=SCHOOL_CHOICES,null=True,verbose_name='المدرسة')
     created = models.DateTimeField(auto_now_add=True)
     ok1 = models.BooleanField(default=False,verbose_name='مدير مباشر')
     ok2 = models.BooleanField(default=False,verbose_name='مدير أعلى')
-    count = models.PositiveSmallIntegerField(default=0,verbose_name='إذن')
-    total = models.PositiveSmallIntegerField(default=0,verbose_name='من ')
+    count = models.PositiveSmallIntegerField(default=0,verbose_name='عدد ايام')
+    total = models.PositiveSmallIntegerField(default=0,verbose_name='متاح ')
     job_code = models.CharField(max_length=6,blank=True,null=True,verbose_name='كود وظيفي')
+    days = ArrayField(models.IntegerField(), default=list,verbose_name='ايام ')
+    photo = models.ImageField(upload_to='vacation_photos/', null=True, blank=True, verbose_name='صورة الإجازة')
 
     def save(self, *args, **kwargs):
         if self.month == "":
