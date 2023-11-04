@@ -33,7 +33,7 @@ class Class(models.Model):
     name = models.CharField(max_length=11)
     class Meta:
         verbose_name='class'
-        verbose_name_plural =' B -  الفصول الدراسية'
+        verbose_name_plural =' الفصول الدراسية'
     def __str__(self):
         return self.name
 
@@ -41,7 +41,7 @@ class Class_group(models.Model):
     name = models.CharField(max_length=6)
     class Meta:
         verbose_name='group'
-        verbose_name_plural =' C -  مجموعات الفصول'
+        verbose_name_plural =' مجموعات الفصول'
     def __str__(self):
         return self.name
 
@@ -143,7 +143,7 @@ class Student(models.Model):
     email = models.EmailField(max_length=60, blank=True,null=True)
     notes = models.TextField( max_length=250,null=True,blank=True,verbose_name='ملاحظات ')
     payment_status = models.BooleanField(default=False,verbose_name='حالة السداد ')
-    document_status = models.BooleanField(default=False,verbose_name=' تم تقديم الأوراق   ')
+    document_status = models.BooleanField(default=True,verbose_name=' تم تقديم الأوراق   ')
     contact_status = models.BooleanField(default=False,verbose_name='   تم تحديث بيانات التواصل ')
     application_status = models.BooleanField(default=False,verbose_name='   تم فتح الملف ')
 
@@ -203,7 +203,7 @@ class Student(models.Model):
 
     class Meta:
         verbose_name='student'
-        verbose_name_plural =' A -  سجلات الطلاب'
+        verbose_name_plural ='    سجلات الطلاب'
 
 class Archive(models.Model):
     student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True)
@@ -218,7 +218,7 @@ class Archive(models.Model):
 
     class Meta:
         verbose_name='study_year'
-        verbose_name_plural =' G -  سنوات سابقة'
+        verbose_name_plural ='ارشيف السنوات السابقة'
 
 class Contact(models.Model):
     SCHOOL1_CHOICES = (
@@ -241,7 +241,7 @@ class Contact(models.Model):
 
     class Meta:
         verbose_name='contact'
-        verbose_name_plural =' D -  بيانات التواصل'
+        verbose_name_plural ='   تحديث بيانات تواصل'
 
 class Application(models.Model):
     PARENTS_CHOICES = (
@@ -286,8 +286,8 @@ class Application(models.Model):
 
     class Meta:
         verbose_name='application'
-        verbose_name_plural =' E -  تحديث البيانات'
-        
+        verbose_name_plural ='   تحديث ملفات'
+
 def create_student(sender, instance, created, **kwargs):
     if created:
         if instance.code[0] != "C":

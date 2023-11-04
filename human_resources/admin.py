@@ -60,6 +60,8 @@ class SalaryItemAdmin(ImportExportModelAdmin):
     search_fields = ('employee__code','employee__name','item')
     list_filter = ('school','month',)
 
+    list_per_page = 30
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.code == "hrgirls":
@@ -92,6 +94,8 @@ class Employee_monthAdmin(ImportExportModelAdmin):
     # fieldsets = (
     # ('', { 'fields': ('employee','is_perms','is_over',('is_evening','is_between','is_morning'),( 'perms',))}),
     #             )
+
+    list_per_page = 30
 
     resource_class = Employee_monthResource
 
@@ -213,7 +217,7 @@ class PermissionAdmin(ImportExportModelAdmin):
     fieldsets = (
     ('', { 'fields': (('employee','type'),('month','date'))}),
                 )
-
+    list_per_page = 30
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
@@ -406,11 +410,6 @@ class PermissionAdmin(ImportExportModelAdmin):
         else:
             return qs
 
-    def has_module_permission(self, request):
-        if request.user.is_authenticated:
-            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr','m1','m2'):
-                return True
-            return False
 
     def get_list_display_links(self, request, obj=None):
         if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
@@ -419,12 +418,40 @@ class PermissionAdmin(ImportExportModelAdmin):
         else:
             self.list_display_links = None
             return self.list_display_links
+        
+    
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            if obj.ok2 == True and obj.month == active_month:
+                employee_month = Employee_month.objects.get(employee=obj.employee,month=active_month)
+                employee_month.permissions=F('permissions') - 1
+                employee_month.save(update_fields=['permissions'])
+                obj.delete()
+            else:
+                obj.delete()
+
+    def delete_model(self, request, obj):
+        if obj.ok2 == True and obj.month == active_month:
+            employee_month = Employee_month.objects.get(employee=obj.employee,month=active_month)
+            employee_month.permissions=F('permissions') - 1
+            employee_month.save(update_fields=['permissions'])
+
+            obj.delete()
+        else:
+            obj.delete()
+
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr','m1','m2'):
+                return True
+            return False
 
     def has_delete_permission(self, request, obj=None):
         if request.user.is_authenticated:
             if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
                 return True
             return False
+        
     def has_import_permission(self, request):
         if request.user.code in ('mosaad',):
             return True
@@ -434,37 +461,6 @@ class PermissionAdmin(ImportExportModelAdmin):
         if request.user.code in ('mosaad',):
             return True
         return False
-    
-    def delete_queryset(self, request, queryset):
-
-        for obj in queryset:
-            if obj.ok2 == True and obj.month == active_month:
-                employee_month = Employee_month.objects.get(employee=obj.employee,month=active_month)
-                employee_month.permissions=F('permissions') - 1
-                employee_month.save(update_fields=['permissions'])
-
-                obj.delete()
-            else:
-                obj.delete()
-
-
-
-
-    def delete_model(self, request, obj):
-
-        if obj.ok2 == True and obj.month == active_month:
-            employee_month = Employee_month.objects.get(employee=obj.employee,month=active_month)
-            employee_month.permissions=F('permissions') - 1
-            employee_month.save(update_fields=['permissions'])
-
-            obj.delete()
-        else:
-            obj.delete()
-        """
-        you can do anything here AFTER deleting the object
-        """
-
-        print('============================delete_model============================')
 
 class VacationAdmin(ImportExportModelAdmin):
     list_display = ('employee','type','DateFrom','DateTo','count','total','ok1','ok2','job_code')
@@ -477,6 +473,8 @@ class VacationAdmin(ImportExportModelAdmin):
     fieldsets = (
     ('', { 'fields': (('employee','days'),('type','month'),('date_from','date_to'))}),
                 )
+    list_per_page = 30
+
     def DateFrom(self, obj):
         return formats.date_format(obj.date_from, "M-d")
     
@@ -616,7 +614,6 @@ class VacationAdmin(ImportExportModelAdmin):
     def save_model(self, request, obj, form, change):
         if not obj.month:
             obj.month = active_month
-
         employee = obj.employee
 
         try:
@@ -633,7 +630,6 @@ class VacationAdmin(ImportExportModelAdmin):
 
         obj.school = employee.school
         obj.job_code = employee.job_code
-
 
         dayoff_settings = Time_setting.objects.filter(month=active_month,name=settings,dayoff=True)
         dayoffs = [setting.date for setting in dayoff_settings]
@@ -662,7 +658,6 @@ class VacationAdmin(ImportExportModelAdmin):
         except ValidationError as e:
             self.send_error_message(request, str(e))
             
-
     def send_error_message(self, request, message):
         self.message_user(request, message, level=messages.ERROR)
 
@@ -686,41 +681,41 @@ class VacationAdmin(ImportExportModelAdmin):
                 return True
             return False
 
-class SalaryItemInline(admin.TabularInline):
-    model = SalaryItem
-    # can_delete = False
-    exclude = ('month',)
-    # readonly_fields = [
-    #     'month'
-    # ]
-    extra = 0
-    # ordering = ('-month',)
+# class SalaryItemInline(admin.TabularInline):
+#     model = SalaryItem
+#     # can_delete = False
+#     exclude = ('month',)
+#     # readonly_fields = [
+#     #     'month'
+#     # ]
+#     extra = 0
+#     # ordering = ('-month',)
     
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        try:
-            return qs.filter(month=active_month)
-        except Month.DoesNotExist:
-            return qs
+#     def get_queryset(self, request):
+#         qs = super().get_queryset(request)
+#         try:
+#             return qs.filter(month=active_month)
+#         except Month.DoesNotExist:
+#             return qs
 
-class PermissionInline(admin.TabularInline):
-    model = Permission
-    can_delete = False
-    # exclude = ('month',)
-    readonly_fields = ['ok1','ok2']
-    extra = 0
-    ordering = ('-date',)
+# class PermissionInline(admin.TabularInline):
+#     model = Permission
+#     can_delete = False
+#     # exclude = ('month',)
+#     readonly_fields = ['ok1','ok2']
+#     extra = 0
+#     ordering = ('-date',)
     
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        try:
-            return qs.filter(month=active_month)
-        except Month.DoesNotExist:
-            return qs
+#     def get_queryset(self, request):
+#         qs = super().get_queryset(request)
+#         try:
+#             return qs.filter(month=active_month)
+#         except Month.DoesNotExist:
+#             return qs
 
 
-    def has_change_permission(self, request, obj=None):
-        return False
+#     def has_change_permission(self, request, obj=None):
+#         return False
 
 class EmployeeAdmin(ImportExportModelAdmin):
     list_display = ('name','job','permission_setting','vacation_setting','code','job_code','time_code','is_active')
@@ -734,7 +729,6 @@ class EmployeeAdmin(ImportExportModelAdmin):
     ('بيانات الموظف', { 'fields': (('name','code'),('job_code','job'),('na_id','birth_date','school'),('mobile_number','phone_number'),('emergency_phone','email'),'address',('basic_certificate','is_educational'),('notes','is_active'))}),
     ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code','permission_setting','vacation_setting',('used_vacations','used_vacations_s'))}),
                 )
-
     list_per_page = 50
     
     def get_queryset(self, request):
@@ -751,7 +745,7 @@ class EmployeeAdmin(ImportExportModelAdmin):
             return ('code','na_id','school') + self.readonly_fields
         return self.readonly_fields
 
-    inlines = [PermissionInline,SalaryItemInline]
+    # inlines = [PermissionInline,SalaryItemInline]
     resource_class = EmployeeResource
 
     def manager_1(self, request, queryset):
@@ -847,27 +841,6 @@ class EmployeeAdmin(ImportExportModelAdmin):
                 notupdated,
             ) % notupdated, messages.ERROR)
 
-    def has_module_permission(self, request):
-        if request.user.is_authenticated:
-            if request.user.code in ('mosaad','hrboys','hrgirls'):
-                return True
-            return False
-    def has_delete_permission(self, request, obj=None):
-        if request.user.is_authenticated:
-            if request.user.code in ('mosaad',):
-                return True
-            return False
-
-    def has_change_permission(self, request, obj=None):
-        if request.user.is_authenticated:
-            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
-                return True
-            return False
-    def has_add_permission(self, request, obj=None):
-        if request.user.is_authenticated:
-            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
-                return True
-            return False
 
     def Fix_job_code(self, request, queryset):
         # updated = queryset.update(verified=True)
@@ -960,12 +933,7 @@ class EmployeeAdmin(ImportExportModelAdmin):
     actions = ['manager_1','manager_2','manager_out','Fix_job_code','Fix_birth_date']
 
     def delete_queryset(self, request, queryset):
-            print('==========================delete_queryset==========================')
-            print(queryset)
 
-            """
-            you can do anything here BEFORE deleting the object(s)
-            """
             for obj in queryset:
                 try:
                     employee = Student.objects.get(code=obj.code)
@@ -975,11 +943,29 @@ class EmployeeAdmin(ImportExportModelAdmin):
                 obj.delete()
             # queryset.delete()
 
-            """
-            you can do anything here AFTER deleting the object(s)
-            """
+    def has_module_permission(self, request):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls'):
+                return True
+            return False
+        
+    def has_delete_permission(self, request, obj=None):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad',):
+                return True
+            return False
 
-            print('==========================delete_queryset==========================')
+    def has_change_permission(self, request, obj=None):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
+                return True
+            return False
+        
+    def has_add_permission(self, request, obj=None):
+        if request.user.is_authenticated:
+            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
+                return True
+            return False
 
 class MonthAdmin(ImportExportModelAdmin):
     list_display = ('code','active','published','status')
@@ -1138,7 +1124,6 @@ class MonthAdmin(ImportExportModelAdmin):
             message = f'تم انشاء جداول الحضور والانصراف الافتراضية لفئات {vacation_names_str}'
             self.message_user(request, message)
 
-    
     def publish(self, request, queryset):
         count = 0
         for obj in queryset:
@@ -1165,7 +1150,6 @@ class MonthAdmin(ImportExportModelAdmin):
                     obj.save(update_fields=['published'])
                     self.message_user(request,obj.code  + 'تم عرض بيانات الشهر للموظفين', messages.SUCCESS)
 
-
     activate.short_description = 'إعداد الشهر لبداية التسجيل'
     publish.short_description = 'عرض بيانات شهر للموظفين'
     MonthlyRecords.short_description = 'إنشاء السجلات الشهرية للموظفين'
@@ -1177,6 +1161,7 @@ class MonthAdmin(ImportExportModelAdmin):
             if request.user.code in ('mosaad',):
                 return True
             return False
+        
     def has_delete_permission(self, request, obj=None):
         if request.user.is_authenticated:
             if request.user.code in ('mosaad',):
@@ -1188,6 +1173,7 @@ class MonthAdmin(ImportExportModelAdmin):
             if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
                 return True
             return False
+        
     def has_add_permission(self, request, obj=None):
         if request.user.is_authenticated:
             if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):

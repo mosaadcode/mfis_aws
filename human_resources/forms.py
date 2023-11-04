@@ -41,4 +41,12 @@ class VacationForm(forms.ModelForm):
     date_from = forms.DateField(widget=DateInput(attrs={'type': 'date', 'min': month_start, 'max': month_end,'class': 'form-control','id':'date_from','required':""}))
     date_to = forms.DateField(widget=DateInput(attrs={'type': 'date', 'min': month_start, 'max': month_end,'class': 'form-control','id':'date_to','required':"",'readOnly':'true'}))
     photo = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*', 'label': 'مرفق'}))
+
+    # def clean_photo(self):
+    #     photo = self.cleaned_data.get('photo')
+    #     if photo:
+    #         if not photo.content_type.startswith('image'):
+    #             raise forms.ValidationError(' وحجم مناسب (jpg, jpeg, png, gif)يرجى التحقق من الصورة. يجب ان تكون احد الامتدادات التالية')
+    #     return photo
+    
     

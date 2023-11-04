@@ -51,6 +51,18 @@ def get_work_time(type, work_time):
         return work_time.time_in, work_time.time_in_perm
     elif type == 'مسائي':
         return work_time.time_out_perm, work_time.time_out
+# to fix dvided by zero when get percentage
+def calculate_permission_percentage(used, total):
+    if total > 0:
+        return (used / total) * 100
+    else:
+        return 0
+def calculate_vacation_percentage(used, total):
+    if total > 0:
+        return (used / total) * 100
+    else:
+        return 0
+
 
 def perm(request):
     employee = Employee.objects.select_related('permission_setting','vacation_setting').get(code=request.user.code)
@@ -71,7 +83,7 @@ def perm(request):
     total = settings.perms
     used = month_perms.count()
     unused = total - used
-    used_perms_percentage = (used / total) * 100
+    used_perms_percentage = calculate_permission_percentage(used, total)
     unused_perms_percentage = 100 - used_perms_percentage
     over = employee_month.permissions - total
 
@@ -187,17 +199,17 @@ def vacation(request):
     total_vacations = settings.vacations
     used_vacations = employee.used_vacations
     unused_vacations = total_vacations - used_vacations
-    used_vacations_percentage = (used_vacations / total_vacations) * 100
+    used_vacations_percentage = calculate_vacation_percentage(used_vacations, total_vacations)
     unused_vacations_percentage = 100 - used_vacations_percentage
     total_vacations_s = settings.vacations_s
     used_vacations_s = employee.used_vacations_s
     unused_vacations_s = total_vacations_s - used_vacations_s
-    used_vacations_s_percentage = (used_vacations_s / total_vacations_s) * 100
+    used_vacations_s_percentage = calculate_vacation_percentage(used_vacations_s, total_vacations_s)
     unused_vacations_s_percentage = 100 - used_vacations_s_percentage
     total_absents = settings.absents
     used_absents = vacations.filter(month=active_month,type='إذن غياب').count()
     unused_absents = total_absents - used_absents
-    used_absents_percentage = (used_absents / total_absents) * 100
+    used_absents_percentage = calculate_permission_percentage(used_absents, total_absents)
     unused_absents_percentage = 100 - used_absents_percentage
 
     is_absent = True if settings.is_absent and used_absents < total_absents else False
@@ -304,10 +316,11 @@ def vacation(request):
                     vacation.total = unused_vacations
                 vacation.save()
 
+            request.session['msg'] = '( تم تسجيل الإجازة ( قيد الموافقة'
         else:
-            print(form.errors)
+            request.session['error'] = form['photo'].errors
+            # request.session['error'] = ' وحجم مناسب (jpg, jpeg, png, gif)يرجى التحقق من الصورة. يجب ان تكون احد الامتدادات التالية'
 
-        request.session['msg'] = '( تم تسجيل الإجازة ( قيد الموافقة'
         return redirect('vacation')
 
 def delete_vacation(request, vacation_id):

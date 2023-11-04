@@ -203,6 +203,19 @@
             const maxDate = currentDate.toISOString().split('T')[0];
             return maxDate;
         }
+
+        // Client-Side Validation for uploaded Photo
+        document.getElementById('form102').addEventListener('submit', function (event) {
+            var fileInput = document.getElementById('id_photo');
+            var fileName = fileInput.value;
+            var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
+    
+            if (fileName && !allowedExtensions.exec(fileName)) {
+                alert('(jpg, jpeg, png, gif)يرجى التحقق من الصورة. يجب ان تكون احد الامتدادات التالية');
+                event.preventDefault(); // Prevent form submission
+            }
+        }); 
+
     </script>
     
       

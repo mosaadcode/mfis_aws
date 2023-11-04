@@ -44,8 +44,8 @@ INSTALLED_APPS = [
     'import_export',
     'student',
     'fees',
-    'student_affairs',
-    'human_resources',
+    'student_affairs.apps.StudentAffairsConfig',
+    'human_resources.apps.HumanResourcesConfig',
 ]
 
 MIDDLEWARE = [

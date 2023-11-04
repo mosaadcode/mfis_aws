@@ -3,9 +3,10 @@ from django import forms
 from django.contrib.auth.hashers import make_password
 from django.db import models
 from django.db.models.deletion import SET_NULL
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save,pre_delete
 from django.contrib.postgres.fields import ArrayField
 from student.models import Student as StudentAcc
+from django.dispatch import receiver
 
 SCHOOL_CHOICES = (
     ('بنين','بنين'),
@@ -25,7 +26,7 @@ class Department(models.Model):
         return self.name
     class Meta:
         verbose_name='Department'
-        verbose_name_plural ='الأقسام '     
+        verbose_name_plural ='  الأقسام '     
 
 class Job(models.Model):
 
@@ -60,7 +61,7 @@ class Job(models.Model):
 
     class Meta:
         verbose_name='job'
-        verbose_name_plural ='الوظائف '        
+        verbose_name_plural ='  الوظائف '        
 
 class Employee(models.Model):
     school = models.CharField( max_length=6, choices=SCHOOL_CHOICES,verbose_name='المدرسة ')
@@ -122,7 +123,7 @@ class Employee(models.Model):
 
     class Meta:
         verbose_name='employee'
-        verbose_name_plural =' سجل الموظفين '     
+        verbose_name_plural ='    سجلات الموظفين'     
 
 class ModifiedArrayField(ArrayField):
     def formfield(self, **kwargs):
@@ -188,7 +189,7 @@ class MonthN(models.Model):
 
     class Meta:
         verbose_name = 'month'
-        verbose_name_plural = 'إعدادات الشهور'
+        verbose_name_plural = '  إعدادات الشهور'
 
 class SalaryItem(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE,verbose_name='إسم الموظف')
@@ -208,7 +209,7 @@ class SalaryItem(models.Model):
 
     class Meta:
         verbose_name='SalaryItem'
-        verbose_name_plural ='مفردات رواتب '   
+        verbose_name_plural ='  مفردات الرواتب '   
 
 class Vacation(models.Model):
     OFF_CHOICES = (
@@ -241,7 +242,7 @@ class Vacation(models.Model):
 
     class Meta:
         verbose_name='vacation'
-        verbose_name_plural ='سجل الاجازات '   
+        verbose_name_plural ='   سجلات الاجازات'   
 
 class Employee_month(models.Model):   
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE,related_name='emp_months',verbose_name='إسم الموظف')
@@ -264,7 +265,7 @@ class Employee_month(models.Model):
 
     class Meta:
         verbose_name='Employee Month'
-        verbose_name_plural ='السجلات الشهرية' 
+        verbose_name_plural ='   سجلات شهرية' 
 
 class Permission_setting(models.Model):
     name = models.CharField(unique=True,max_length=26,verbose_name='الإسم')
@@ -280,7 +281,7 @@ class Permission_setting(models.Model):
 
     class Meta:
         verbose_name='permation setting'
-        verbose_name_plural ='إعدادات الاَذون'
+        verbose_name_plural ='  إعدادات الاَذون'
 
 class Vacation_setting(models.Model):
     name = models.CharField(unique=True,max_length=26,verbose_name='الإسم')
@@ -301,7 +302,7 @@ class Vacation_setting(models.Model):
 
     class Meta:
         verbose_name='vacation setting'
-        verbose_name_plural ='إعدادات الاجازات'
+        verbose_name_plural ='  إعدادات الاجازات'
 
 class Time_setting(models.Model):
     name = models.ForeignKey(Vacation_setting, on_delete=models.CASCADE,null=True,verbose_name='مواعيد ')
@@ -319,7 +320,7 @@ class Time_setting(models.Model):
 
     class Meta:
         verbose_name='Time setting'
-        verbose_name_plural ='مواعيد الحضور والإنصراف'
+        verbose_name_plural ='  مواعيد الحضور والإنصراف والعطلات'
 
 class Permission(models.Model):
     PERM_CHOICES = (
@@ -346,7 +347,7 @@ class Permission(models.Model):
 
     class Meta:
         verbose_name='permission'
-        verbose_name_plural =' سجل الاَذون '   
+        verbose_name_plural ='   سجلات الاَذون'   
 
 def create_employ(sender, instance, created, **kwargs):
     if created:
@@ -359,3 +360,9 @@ def create_employ(sender, instance, created, **kwargs):
             is_employ=True,
             )
 post_save.connect(create_employ, sender=Employee)
+
+
+@receiver(pre_delete, sender=Vacation)
+def delete_vacation_photo(sender, instance, **kwargs):
+    if instance.photo:
+        instance.photo.delete()
