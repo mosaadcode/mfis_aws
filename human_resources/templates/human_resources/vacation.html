@@ -34,8 +34,8 @@
                                   <!-- Use a CSS class for styling form elements -->
                                   <div class="form-row">
                                       <div class="col-6">
-                                          <label for="reason" class="form-text float-right"> :إرفق صورة</label>
-                                          {{ form.photo }}
+                                          {% comment %} <label for="reason" class="form-text float-right"> :إرفق صورة</label>
+                                          {{ form.photo }} {% endcomment %}
                                           {% comment %} <input type="text" name="reason" class="form-control" placeholder="سبب الاجازة"> {% endcomment %}
                                       </div>
                                       <div class="col-6">
@@ -205,7 +205,7 @@
         }
 
         // Client-Side Validation for uploaded Photo
-        document.getElementById('form102').addEventListener('submit', function (event) {
+        {% comment %} document.getElementById('form102').addEventListener('submit', function (event) {
             var fileInput = document.getElementById('id_photo');
             var fileName = fileInput.value;
             var allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
@@ -214,7 +214,7 @@
                 alert('(jpg, jpeg, png, gif)يرجى التحقق من الصورة. يجب ان تكون احد الامتدادات التالية');
                 event.preventDefault(); // Prevent form submission
             }
-        }); 
+        });  {% endcomment %}
 
     </script>
     

@@ -38,7 +38,7 @@ class JobAdmin(ImportExportModelAdmin):
     
     def has_module_permission(self, request):
         if request.user.is_authenticated:
-            if request.user.code in ('mosaad','hrboys','hrgirls'):
+            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
                 return True
             return False
 
@@ -48,7 +48,7 @@ class DepartmentAdmin(ImportExportModelAdmin):
     search_fields = ('name',)
     def has_module_permission(self, request):
         if request.user.is_authenticated:
-            if request.user.code in ('mosaad','hrboys','hrgirls'):
+            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
                 return True
             return False
 
@@ -79,7 +79,7 @@ class SalaryItemAdmin(ImportExportModelAdmin):
 
     def has_module_permission(self, request):
         if request.user.is_authenticated:
-            if request.user.code in ('mosaad','hrboys','hrgirls'):
+            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
                 return True
             return False
 
@@ -109,7 +109,7 @@ class Employee_monthAdmin(ImportExportModelAdmin):
 
     def has_module_permission(self, request):
         if request.user.is_authenticated:
-            if request.user.code in ('mosaad','hrboys','hrgirls'):
+            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
                 return True
             return False
     def has_add_permission(self, request, obj=None):
@@ -138,7 +138,7 @@ class Permission_settingAdmin(ImportExportModelAdmin):
 
     def has_module_permission(self, request):
         if request.user.is_authenticated:
-            if request.user.code in ('mosaad','hrboys','hrgirls'):
+            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
                 return True
             return False
         
@@ -156,7 +156,7 @@ class Vacation_settingAdmin(ImportExportModelAdmin):
 
     def has_module_permission(self, request):
         if request.user.is_authenticated:
-            if request.user.code in ('mosaad','hrboys','hrgirls'):
+            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
                 return True
             return False
 
@@ -202,7 +202,7 @@ class Time_settingAdmin(ImportExportModelAdmin):
     actions = ['Fridays',]
     def has_module_permission(self, request):
         if request.user.is_authenticated:
-            if request.user.code in ('mosaad','hrboys','hrgirls'):
+            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
                 return True
             return False
 
@@ -945,7 +945,7 @@ class EmployeeAdmin(ImportExportModelAdmin):
 
     def has_module_permission(self, request):
         if request.user.is_authenticated:
-            if request.user.code in ('mosaad','hrboys','hrgirls'):
+            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr',):
                 return True
             return False
         
@@ -1158,7 +1158,7 @@ class MonthAdmin(ImportExportModelAdmin):
 
     def has_module_permission(self, request):
         if request.user.is_authenticated:
-            if request.user.code in ('mosaad',):
+            if request.user.code in ('mosaad',) or request.user.code[:2] in ('hr',):
                 return True
             return False
         
