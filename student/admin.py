@@ -2,19 +2,38 @@ from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin
 from .models import Student,Bus,BusStudent,Teacher,SchoolFee,Manager,Program, Archive
 from fees.admin import FeesInline
-# from django.http import HttpResponse
-# import csv
 from import_export.admin import ImportExportMixin, ImportExportModelAdmin
 from .resources import StudentResource,BusStudentResource
 from django.contrib.auth.models import Group
 from django.utils.translation import ngettext
 from django.contrib.auth.hashers import make_password
 from human_resources.models import Employee
-# from django.db.models import Q
 
 admin.site.unregister(Group)
 
 current_year = '23-22'
+
+class AccAdmin:
+    def has_module_permission(self, request):
+        return self.has_permission(request)
+    
+    def has_view_permission(self, request, obj=None):
+        return self.has_permission(request)
+
+    def has_change_permission(self, request, obj=None):
+        return self.has_permission(request)
+
+    def has_add_permission(self, request, obj=None):
+        return self.has_permission(request)
+
+    def has_permission(self, request, obj=None):
+        if request.user.is_authenticated:
+            user_code = request.user.code
+            return user_code == 'mosaad'
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.code == "mosaad"
 
 class ArchivesInline(admin.TabularInline):
     model = Archive
@@ -60,61 +79,66 @@ class StudentAdmin(ImportExportMixin, UserAdmin):
             return qs.filter(school__in = ('.بنات.', 'بنات',),is_employ=False)
         return qs
 
-    # def export_bus(self, request, queryset):
-
-    #     meta = self.model._meta
-    #     # field_names = [field.name for field in meta.fields]
-    #     field_names = ['code', 'username', 'school', 'grade', 'old_bus', 'living_area', 'address']
-    #     response = HttpResponse(content_type='text/csv')
-    #     response['Content-Disposition'] = 'attachment; filename=bus.csv'.format(meta)
-    #     writer = csv.writer(response)
-
-    #     writer.writerow(field_names)
-    #     for obj in queryset:
-    #         row = writer.writerow([getattr(obj, field) for field in field_names])
-
-    #     return response
-
-    # export_bus.short_description = "Bus Data"
-
-
-
-    # def export_student(self, request, queryset):
-
-    #     meta = self.model._meta
-    #     # field_names = [field.name for field in meta.fields]
-    #     field_names = ['code', 'username', 'school', 'grade']
-    #     response = HttpResponse(content_type='text/csv')
-    #     response['Content-Disposition'] = 'attachment; filename=Students.csv'.format(meta)
-    #     writer = csv.writer(response)
-
-    #     writer.writerow(field_names)
-    #     for obj in queryset:
-    #         row = writer.writerow([getattr(obj, field) for field in field_names])
-
-    #     return response
-
-    # export_student.short_description = "تصدير بيانات الطلبة"
-
-
-
-    # actions = ["export_bus", "export_student"]
-
     inlines = [ArchivesInline,FeesInline]
 
+    def deactivate(self, request, queryset):
+        updated = 0
+        notupdated = 0
+        for obj in queryset:
+            if  obj.is_active :
+                obj.is_active = False
+                obj.can_pay = False
+                obj.study_payment1 = 0
+                obj.study_payment2 = 0
+                obj.study_payment3 = 0
+                obj.bus_active = False
+                obj.bus_payment1 = 0
+                obj.bus_payment2 = 0
+                obj.old_fee = 0
+                self.log_change(request, obj, 'طالب منقطع - تم إلغاء المصروفات المستحقة')
+                obj.save()
+                updated +=1
+            else:
+                notupdated +=1
+
+        if updated != 0:
+            self.message_user(request, ngettext(
+                '%d تم تحويل الطالب الى طالب منقطع لعدد',
+                '%d تم تحويل الطالب الى طالب منقطع لعدد',
+                updated,
+            ) % updated, messages.SUCCESS)
+        if notupdated != 0:
+            self.message_user(request, ngettext(
+                '%d طالب منقطع بالفعل',
+                '%d طالب منقطع بالفعل',
+                notupdated,
+            ) % notupdated, messages.ERROR)
+            
+    deactivate.short_description = "طالب منقطع"
+
+    actions = ['deactivate',]
+
+    # Adjust User Access ''''''''''''''''''''''''''''''''''''''''''
     def has_module_permission(self, request):
-        if request.user.is_authenticated:
-            if request.user.code in ('mosaad','mfisb','mfisg') or request.user.code[:2]=="ac":
-                return True
-            return False
-    def has_delete_permission(self, request, obj=None):
-        if request.user.code == "mosaad":
-            return True
-        return False
+        return self.has_permission(request)
+
+    def has_view_permission(self, request, obj=None):
+        return self.has_permission(request)
+
+    def has_change_permission(self, request, obj=None):
+        return self.has_permission(request)
+
     def has_add_permission(self, request, obj=None):
-        if request.user.code == "mosaad":
-            return True
+        return request.user.code == "mosaad"
+
+    def has_permission(self, request, obj=None):
+        if request.user.is_authenticated:
+            user_code = request.user.code
+            return user_code in ('mosaad', 'mfisb', 'mfisg') or user_code[0] == 'a' and user_code[1] == 'c'
         return False
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.code == "mosaad"
         
 class BusAdmin(ImportExportMixin, admin.ModelAdmin):
     list_display = ('number','supervisor_name','supervisor_mobile','driver_name','driver_mobile')
@@ -281,19 +305,13 @@ class SchoolFeeAdmin(ImportExportMixin, admin.ModelAdmin):
     update.short_description='تحديث مصروفات المرحلة'
     actions = ['update']
 
-class ProgramAdmin(ImportExportModelAdmin):
+class ProgramAdmin(AccAdmin,ImportExportModelAdmin):
     # list_display = ('app', 'model')
     filter_horizontal = ()
     list_filter = ('name',)
     fieldsets = ((None, {'fields':('name','code','count'),}),)
 
-    def has_module_permission(self, request):
-        if request.user.is_authenticated:
-            if request.user.code in ('mosaad',):
-                return True
-            return False
-
-class ManagerAdmin(ImportExportModelAdmin):
+class ManagerAdmin(AccAdmin,ImportExportModelAdmin):
     list_display = ('user', 'program','level')
     autocomplete_fields = ['user']
     # raw_id_fields = ('program',)
@@ -344,32 +362,14 @@ class ManagerAdmin(ImportExportModelAdmin):
 
     actions = ['manager',]
 
-    def has_module_permission(self, request):
-        if request.user.is_authenticated:
-            if request.user.code in ('mosaad',):
-                return True
-            return False
-
     def delete_queryset(self, request, queryset):
-            print('==========================delete_queryset==========================')
-            print(queryset)
 
-            """
-            you can do anything here BEFORE deleting the object(s)
-            """
             for obj in queryset:
                 employee = Student.objects.get(id=obj.user.id)
                 employee.is_admin = False
                 employee.is_staff = False
                 employee.save(update_fields=["is_admin", "is_staff"])
                 obj.delete()
-            # queryset.delete()
-
-            """
-            you can do anything here AFTER deleting the object(s)
-            """
-
-            print('==========================delete_queryset==========================')
 
 class ArchiveAdmin(ImportExportModelAdmin):
     list_display = ('student','grade','study','bus','discount','total','old_fee','old_paid','year_status')
