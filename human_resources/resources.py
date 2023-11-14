@@ -32,12 +32,12 @@ class EmployeeResource(resources.ModelResource):
         """
         return RowResult
     
-    perms = fields.Field(column_name='perms',
-                      attribute='perms',
+    permission_setting = fields.Field(column_name='permission_setting',
+                      attribute='permission_setting',
                       widget=ForeignKeyWidget(Permission_setting, 'name'))
     
-    vecation_role = fields.Field(column_name='vecation_role',
-                      attribute='vecation_role',
+    vacation_setting = fields.Field(column_name='vacation_setting',
+                      attribute='vacation_setting',
                       widget=ForeignKeyWidget(Vacation_setting, 'name'))
     
     def before_import_row(self, row, **kwargs):
@@ -59,8 +59,8 @@ class EmployeeResource(resources.ModelResource):
     class Meta:
         model = Employee
         import_id_fields = ('code',)
-        fields = ('code', 'school', 'name', 'na_id', 'birth_date', 'mobile_number', 'phone_number', 'emergency_phone', 'email', 'address', 'basic_certificate', 'is_educational', 'attendance_date', 'insurance_date', 'participation_date', 'contract_date', 'insurance_no', 'notes', 'job', 'is_active', 'salary_parameter', 'salary', 'message', 'time_code', 'perms', 'vecation_role')
-        export_order = ('code', 'school', 'name', 'na_id', 'birth_date', 'mobile_number', 'phone_number', 'emergency_phone', 'email', 'address', 'basic_certificate', 'is_educational', 'attendance_date', 'insurance_date', 'participation_date', 'contract_date', 'insurance_no', 'notes', 'job', 'is_active', 'salary_parameter', 'salary', 'message', 'time_code', 'perms', 'vecation_role')
+        fields = ('code', 'school', 'name', 'na_id', 'birth_date', 'mobile_number', 'phone_number', 'emergency_phone', 'email', 'address', 'basic_certificate', 'is_educational', 'attendance_date', 'insurance_date', 'participation_date', 'contract_date', 'insurance_no', 'notes', 'job', 'is_active', 'salary_parameter', 'salary', 'message','job_code', 'time_code', 'permission_setting', 'vacation_setting')
+        export_order = ('code', 'school', 'name', 'na_id', 'birth_date', 'mobile_number', 'phone_number', 'emergency_phone', 'email', 'address', 'basic_certificate', 'is_educational', 'attendance_date', 'insurance_date', 'participation_date', 'contract_date', 'insurance_no', 'notes', 'job', 'is_active', 'salary_parameter', 'salary', 'message','job_code', 'time_code', 'permission_setting', 'vacation_setting')
 
 
 
