@@ -139,7 +139,8 @@ def perm(request):
                         permission.month=active_month
                         permission.count=employee_month.permissions+1
                         permission.total=settings.perms
-                        permission.job_code=employee.job_code
+                        permission.dep_code=employee.dep_code
+                        permission.grade_code=employee.grade_code
                         permission.save()
                         request.session['msg'] = '( تم تسجيل الإذن ( قيد الموافقة'
                         return redirect('perm')
@@ -307,7 +308,8 @@ def vacation(request):
                 vacation.employee = Employee.objects.get(code=request.user.code)
                 vacation.school = request.user.school
                 vacation.month = active_month
-                vacation.job_code = employee.job_code
+                vacation.dep_code = employee.dep_code
+                vacation.grade_code = employee.grade_code
                 vacation.count = days_count
                 vacation.days = days
                 if request.POST['type'] == 'مرضي':

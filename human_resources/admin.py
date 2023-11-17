@@ -91,16 +91,20 @@ class HrAdmin:
 def get_filtered_queryset(request, model_class):
     qs = model_class.objects.all().order_by('-id')
     if request.user.code != 'mosaad':
-        user_code = request.user.code[:3]
+        user_code = request.user.code[:4]
         employee = Employee.objects.get(code=request.user.code)
 
         code_filters = {
-            'hrb': dict(school='بنين'),
-            'hrg': dict(school__in=('بنات', 'Ig')),
-            'm1b': dict(school='بنين', ok1=False, ok2=False, job_code=employee.job_code),
-            'm2b': dict(school='بنين', ok2=False, job_code__startswith=employee.job_code),
-            'm1g': dict(school__in=('بنات', 'Ig'), ok1=False, ok2=False, job_code=employee.job_code),
-            'm2g': dict(school__in=('بنات', 'Ig'), ok2=False, job_code__startswith=employee.job_code)
+            'hrb0': dict(school='بنين'),
+            'hrg0': dict(school__in=('بنات', 'Ig')),
+            'm1b0': dict(school='بنين', dep_code=employee.dep_code,grade_code=employee.grade_code),
+            'm1bd': dict(school='بنين', dep_code=employee.dep_code),
+            'm2b0': dict(school='بنين', grade_code=employee.grade_code),
+            'm1g0': dict(school__in=('بنات', 'Ig'), dep_code=employee.dep_code,grade_code=employee.grade_code),
+            'm1gd': dict(school__in=('بنات', 'Ig'), dep_code=employee.dep_code),
+            'm2g0': dict(school__in=('بنات', 'Ig'), grade_code=employee.grade_code),
+            'm1s0': dict( dep_code=employee.dep_code,grade_code=employee.grade_code),
+            'm1sd': dict( dep_code=employee.dep_code),
         }
         if user_code in code_filters:
             return qs.filter(**code_filters[user_code])
@@ -243,7 +247,11 @@ class Permission_settingAdmin(HrEmployees,ImportExportModelAdmin):
     fieldsets = (
     ('', { 'fields': ('name','is_perms','is_over',('is_evening','is_between','is_morning'),( 'perms'))}),
                 )
-    
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super().get_readonly_fields(request, obj)
+        return tuple(readonly_fields) + ('name',) if obj is not None else tuple(readonly_fields)
+       
     def has_import_permission(self, request):
         return request.user.code in ('mosaad',)
 
@@ -259,7 +267,11 @@ class Vacation_settingAdmin(HrEmployees,ImportExportModelAdmin):
     fieldsets = (
     ('', { 'fields': ('name',('vacations','is_vacation'),('vacations_s','is_vacation_s'),('absents','is_absent','saturday'),('time_in','time_in_perm'),('time_out', 'time_out_perm'))}),
                 )
-    
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super().get_readonly_fields(request, obj)
+        return tuple(readonly_fields) + ('name',) if obj is not None else tuple(readonly_fields)
+     
     def has_import_permission(self, request):
         return request.user.code in ('mosaad',)
 
@@ -291,12 +303,13 @@ class Time_settingAdmin(HrEmployees,ImportExportModelAdmin):
         return request.user.code in ('mosaad',)
 
 class PermissionAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
-    list_display = ('employee','type', 'formatted_date','count','total','ok1','ok2','job_code')
+    list_display = ('employee','type', 'formatted_date','count','total','ok1','ok2','dep_code','grade_code')
     autocomplete_fields = ['employee']
-    readonly_fields = ('school','created','ok1','ok2','start_time','end_time','count','total','job_code')
+    readonly_fields = ('school','created','ok1','ok2','start_time','end_time','count','total','dep_code','grade_code')
     filter_horizontal = ()
     search_fields = ('employee__code','employee__name')
-    list_filter = ('school','month','type')
+    # list_filter = ('school','ok2','employee__job__department__name','month','type')
+    list_filter = ('school','ok2','month','type')
     fieldsets = (
     ('', { 'fields': (('employee','type'),('month','date'))}),
                 )
@@ -349,7 +362,8 @@ class PermissionAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
                 raise ValidationError("برجاء ضبط إعدادات اَذون الموظف")
 
             obj.school = employee.school
-            obj.job_code = employee.job_code
+            obj.dep_code = employee.dep_code
+            obj.grade_code = employee.grade_code
             obj.total = setting.perms
             obj.count = employee_month.permissions + 1
 
@@ -490,12 +504,12 @@ class PermissionAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
             obj.delete()
         
 class VacationAdmin(ImportExportModelAdmin):
-    list_display = ('employee','type','DateFrom','DateTo','count','total','ok1','ok2','job_code')
+    list_display = ('employee','type','DateFrom','DateTo','count','total','ok1','ok2','dep_code','grade_code')
     autocomplete_fields = ['employee'] 
-    readonly_fields = ('created','ok1','ok2','count','total','days','job_code')
+    readonly_fields = ('created','ok1','ok2','count','total','days','dep_code','grade_code')
     filter_horizontal = ()
     search_fields = ('employee__code','employee__name')
-    list_filter = ('school','month','type')
+    list_filter = ('school','ok2','month','type')
     fieldsets = (
     ('', { 'fields': (('employee','days'),('type','month'),('date_from','date_to'))}),
                 )
@@ -552,7 +566,8 @@ class VacationAdmin(ImportExportModelAdmin):
                 raise ValidationError("برجاء ضبط إعدادات اجازات الموظف")
 
             obj.school = employee.school
-            obj.job_code = employee.job_code
+            obj.dep_code = employee.dep_code
+            obj.grade_code = employee.grade_code
 
             dayoff_settings = Time_setting.objects.filter(month=active_month, name=settings, dayoff=True)
             dayoffs = [setting.date for setting in dayoff_settings]
@@ -781,19 +796,19 @@ class VacationAdmin(ImportExportModelAdmin):
         return request.user.code in ('mosaad',)
 
 class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
-    list_display = ('name','job','permission_setting','vacation_setting','code','job_code','time_code','is_active')
+    list_display = ('name','job','permission_setting','vacation_setting','code','dep_code','grade_code','time_code','is_active')
     # autocomplete_fields = ['perms','vecation_role']
     raw_id_fields = ('job',)
-    readonly_fields = ('birth_date','job_code','used_vacations','used_vacations_s')
+    readonly_fields = ('birth_date','dep_code','grade_code','used_vacations','used_vacations_s')
     search_fields = ('code','name','na_id','insurance_no')
     filter_horizontal = ()
-    list_filter = ('school','job__type','job__grade','is_educational','job__title','job__department')
+    list_filter = ('school','job__type','job__grade','is_educational','job__department','job__title')
     fieldsets = (
-    ('بيانات الموظف', { 'fields': (('name','code'),('job_code','job'),('na_id','birth_date','school'),('mobile_number','phone_number'),('emergency_phone','email'),'address',('basic_certificate','is_educational'),('notes','is_active'))}),
-    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code','permission_setting','vacation_setting',('used_vacations','used_vacations_s'))}),
+    ('بيانات الموظف', { 'fields': (('name','code'),'job',('na_id','birth_date','school'),('mobile_number','phone_number'),('emergency_phone','email'),'address',('basic_certificate','is_educational'),('notes','is_active'))}),
+    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code',('dep_code','grade_code'),'permission_setting','vacation_setting',('used_vacations','used_vacations_s'))}),
                 )
     list_per_page = 50
-    
+
     def get_queryset(self, request):
         qs = get_filtered_queryset(request, Employee)  # Use the function to filter the queryset
         return qs
@@ -804,6 +819,12 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
         return self.readonly_fields
 
     resource_class = EmployeeResource
+
+    def has_import_permission(self, request):
+        return request.user.code in ('mosaad',)
+
+    def has_export_permission(self, request):
+        return request.user.code in ('mosaad',)
 
     def manager_1(self, request, queryset):
         updated = 0
@@ -819,20 +840,20 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
                 obj.code = new_code
                 obj.save(update_fields=["code",])
                 employee_acc.save(update_fields=["code", "password", "is_staff", "is_admin"])
-                self.log_change(request, obj, 'إعطاء صلاحية الرئيس المباشر')
+                self.log_change(request, obj, 'منح صلاحيات رئيس القسم')
                 updated += 1
             else:
                 notupdated +=1
         if updated != 0:
             self.message_user(request, ngettext(
-                '%d تم إعطاء صلاحية الرئيس المباشر الى',
-                '%d تم إعطاء صلاحية الرئيس المباشر الى',
+                '%d تم منح صلاحيات رئيس القسم الى',
+                '%d تم منح صلاحيات رئيس القسم الى',
                 updated,
             ) % updated, messages.SUCCESS)
         if notupdated != 0:
             self.message_user(request, ngettext(
-                '%d بالفعل يمتلك صلاحية الرئيس المباشر ',
-                '%d بالفعل يمتلك صلاحية الرئيس المباشر ',
+                '%d بالفعل يمتلك منح صلاحيات رئيس القسم ',
+                '%d بالفعل يمتلك منح صلاحيات رئيس القسم ',
                 notupdated,
             ) % notupdated, messages.ERROR)
 
@@ -850,20 +871,20 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
                 obj.code = new_code
                 obj.save(update_fields=["code",])
                 employee_acc.save(update_fields=["code", "password", "is_staff", "is_admin"])
-                self.log_change(request, obj, 'إعطاء صلاحية الرئيس الأعلى')
+                self.log_change(request, obj, 'منح صلاحيات ناظر المرحلة')
                 updated += 1
             else:
                 notupdated +=1
         if updated != 0:
             self.message_user(request, ngettext(
-                '%d تم إعطاء صلاحية الرئيس الأعلى الى',
-                '%d تم إعطاء صلاحية الرئيس الأعلى الى',
+                '%d تم منح صلاحيات ناظر المرحلة الى',
+                '%d تم منح صلاحيات ناظر المرحلة الى',
                 updated,
             ) % updated, messages.SUCCESS)
         if notupdated != 0:
             self.message_user(request, ngettext(
-                '%d بالفعل يمتلك صلاحية الرئيس الأعلى ',
-                '%d بالفعل يمتلك صلاحية الرئيس الأعلى ',
+                '%d بالفعل يمتلك صلاحيات ناظر المرحلة ',
+                '%d بالفعل يمتلك صلاحيات ناظر المرحلة ',
                 notupdated,
             ) % notupdated, messages.ERROR)
 
@@ -872,7 +893,8 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
         notupdated = 0
         for obj in queryset:
             if obj.code[:2] == "m1" or obj.code[:2] == "m2":
-                new_code = obj.na_id[1:3] + obj.code[2:]
+                school = 'b' if obj.school == "بنين" else 'g'
+                new_code = obj.na_id[1:3] + school + '0' + obj.code[4:]
                 employee_acc = Student.objects.get(code=obj.code)
                 employee_acc.code = new_code
                 employee_acc.password=make_password(new_code)
@@ -881,14 +903,14 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
                 obj.code = new_code
                 obj.save(update_fields=["code",])
                 employee_acc.save(update_fields=["code", "password", "is_staff", "is_admin"])
-                self.log_change(request, obj, 'سحب صلاحية الرئيس ')
+                self.log_change(request, obj, 'سحب جميع صلاحيات الإدارة ')
                 updated += 1
             else:
                 notupdated +=1
         if updated != 0:
             self.message_user(request, ngettext(
-                '%d تم سحب صلاحية الرئيس من',
-                '%d تم سحب صلاحية الرئيس من',
+                '%d تم سحب جميع الصلاحيات من',
+                '%d تم سحب جميع الصلاحيات من',
                 updated,
             ) % updated, messages.SUCCESS)
         if notupdated != 0:
@@ -898,40 +920,157 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
                 notupdated,
             ) % notupdated, messages.ERROR)
 
+    def general_manager(self, request, queryset):
+        updated = 0
+        notupdated = 0
+        for obj in queryset:
+            if obj.code[:2] == "m1":
+                new_code = "m1s" + obj.code[3:]
+                employee_acc = Student.objects.get(code=obj.code)
+                employee_acc.code = new_code
+                employee_acc.password=make_password(new_code)
+                obj.code = new_code
+                obj.save(update_fields=["code",])
+                employee_acc.save(update_fields=["code", "password"])
+                self.log_change(request, obj, 'منح صلاحية إدارة المدرستين')
+                updated += 1
+            else:
+                notupdated +=1
+        if updated != 0:
+            self.message_user(request, ngettext(
+                '%d تم منح صلاحية إدارة المدرستين الى',
+                '%d تم منح صلاحية إدارة المدرستين الى',
+                updated,
+            ) % updated, messages.SUCCESS)
+        if notupdated != 0:
+            self.message_user(request, ngettext(
+                '%d لا يمتلك صلاحية رئيس القسم ',
+                '%d لا يمتلك صلاحية رئيس القسم ',
+                notupdated,
+            ) % notupdated, messages.ERROR)
+
+    def local_manager(self, request, queryset):
+        updated = 0
+        notupdated = 0
+        for obj in queryset:
+            if obj.code[:3] == "m1s":
+                school = 'b' if obj.school == "بنين" else 'g'
+                new_code = "m1" + school + obj.code[3:]
+                employee_acc = Student.objects.get(code=obj.code)
+                employee_acc.code = new_code
+                employee_acc.password=make_password(new_code)
+                obj.code = new_code
+                obj.save(update_fields=["code",])
+                employee_acc.save(update_fields=["code", "password"])
+                self.log_change(request, obj, 'سحب صلاحية إدارة المدرستين')
+                updated += 1
+            else:
+                notupdated +=1
+        if updated != 0:
+            self.message_user(request, ngettext(
+                '%d تم سحب صلاحية إدارة المدرستين من',
+                '%d تم سحب صلاحية إدارة المدرستين من',
+                updated,
+            ) % updated, messages.SUCCESS)
+        if notupdated != 0:
+            self.message_user(request, ngettext(
+                '%d لا يمتلك صلاحية إدارة المدرستين ',
+                '%d لا يمتلك صلاحية إدارة المدرستين ',
+                notupdated,
+            ) % notupdated, messages.ERROR)
+
+    def department_manager(self, request, queryset):
+        updated = 0
+        notupdated = 0
+        for obj in queryset:
+            if obj.code[:2] == "m1":
+                new_code = obj.code[:3] + 'd' + obj.code[4:]
+                employee_acc = Student.objects.get(code=obj.code)
+                employee_acc.code = new_code
+                employee_acc.password=make_password(new_code)
+                obj.code = new_code
+                obj.save(update_fields=["code",])
+                employee_acc.save(update_fields=["code", "password"])
+                self.log_change(request, obj, 'منح صلاحية إدارة القسم')
+                updated += 1
+            else:
+                notupdated +=1
+        if updated != 0:
+            self.message_user(request, ngettext(
+                '%d تم منح صلاحية إدارة القسم الى',
+                '%d تم منح صلاحية إدارة القسم الى',
+                updated,
+            ) % updated, messages.SUCCESS)
+        if notupdated != 0:
+            self.message_user(request, ngettext(
+                '%d لا يمتلك صلاحية رئيس القسم ',
+                '%d لا يمتلك صلاحية رئيس القسم ',
+                notupdated,
+            ) % notupdated, messages.ERROR)
+
+    def normal_manager(self, request, queryset):
+        updated = 0
+        notupdated = 0
+        for obj in queryset:
+            if obj.code[3:4] == "d":
+                new_code = obj.code[:3] + '0' + obj.code[4:]
+                print(new_code)
+                employee_acc = Student.objects.get(code=obj.code)
+                employee_acc.code = new_code
+                employee_acc.password=make_password(new_code)
+                obj.code = new_code
+                obj.save(update_fields=["code",])
+                employee_acc.save(update_fields=["code", "password"])
+                self.log_change(request, obj, 'سحب صلاحية إدارة القسم')
+                updated += 1
+            else:
+                notupdated +=1
+        if updated != 0:
+            self.message_user(request, ngettext(
+                '%d تم سحب صلاحية إدارة القسم من',
+                '%d تم سحب صلاحية إدارة القسم من',
+                updated,
+            ) % updated, messages.SUCCESS)
+        if notupdated != 0:
+            self.message_user(request, ngettext(
+                '%d لا يمتلك صلاحية إدارة القسم ',
+                '%d لا يمتلك صلاحية إدارة القسم ',
+                notupdated,
+            ) % notupdated, messages.ERROR)
 
     def Fix_job_code(self, request, queryset):
         # updated = queryset.update(verified=True)
         updated = 0
         notupdated = 0
-
         for obj in queryset:
             if obj.job is not None:
-                school=obj.school
-                if school=="بنين":
-                    school="b"
-                elif school=="بنات":
-                    school="g"         
+                # school=obj.school
+                # if school=="بنين":
+                #     school="b"
+                # elif school=="بنات":
+                #     school="g"         
                 job_dep = str(obj.job.department.id)
                 job_grade = obj.job.grade
-                if obj.job.department.name == "المرحلة":
-                    code = school+job_grade
-                elif obj.job.department.name == "المدرسة":
-                    code = school
-                else:
-                    if job_grade !=None:
-                        code = school+job_grade + job_dep
-                    else:
-                        code = school+job_dep
-                obj.job_code=code
-                obj.save(update_fields=["job_code",])
+                # if obj.job.department.name == "المرحلة":
+                #     code = school+job_grade
+                # elif obj.job.department.name == "المدرسة":
+                #     code = school
+                # else:
+                #     if job_grade !=None:
+                #         code = school+job_grade + job_dep
+                #     else:
+                #         code = school+job_dep
+                obj.dep_code=job_dep
+                obj.grade_code=job_grade
+                obj.save(update_fields=["dep_code","grade_code"])
 
                 # Update related permissions
                 related_permissions = Permission.objects.filter(employee=obj,month=active_month)
-                related_permissions.update(job_code=code)
+                related_permissions.update(dep_code=job_dep,grade_code=job_grade)
 
                 # Update related vacations
                 related_vacations= Vacation.objects.filter(employee=obj,month=active_month)
-                related_vacations.update(job_code=code)
+                related_vacations.update(dep_code=job_dep,grade_code=job_grade)
 
                 updated +=1
             else:
@@ -983,11 +1122,15 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
     
     Fix_birth_date.short_description = 'ضبط  تاريخ الميلاد'    
     Fix_job_code.short_description = 'التحقق  من الكود الوظيفي'
-    manager_1.short_description = 'إعطاء صلاحية الرئيس المباشر'
-    manager_2.short_description = 'إعطاء صلاحية الرئيس الأعلى'
-    manager_out.short_description = 'سحب صلاحية الرئيس'
+    manager_1.short_description = 'منح صلاحيات رئيس قسم'
+    manager_2.short_description = 'منح صلاحيات ناظر مرحلة'
+    manager_out.short_description = 'سحب جميع صلاحيات الإدارة'
+    general_manager.short_description = 'منح صلاحية إدارة المدرستين'
+    local_manager.short_description = 'سحب صلاحية إدارة المدرستين'
+    department_manager.short_description = 'منح صلاحية إدارة القسم'
+    normal_manager.short_description = 'سحب صلاحية إدارة القسم'
 
-    actions = ['manager_1','manager_2','manager_out','Fix_job_code','Fix_birth_date']
+    actions = ['manager_1','manager_2','department_manager','normal_manager','general_manager','local_manager','manager_out','Fix_job_code','Fix_birth_date']
 
     def delete_queryset(self, request, queryset):
 
