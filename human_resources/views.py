@@ -275,7 +275,8 @@ def vacation(request):
                 vacation.employee = Employee.objects.get(code=request.user.code)
                 vacation.school = request.user.school
                 vacation.month = active_month
-                vacation.job_code = employee.job_code
+                vacation.dep_code = employee.dep_code
+                vacation.grade_code = employee.grade_code
 
                 vacation.count = used_absents +1
                 vacation.total = unused_absents
