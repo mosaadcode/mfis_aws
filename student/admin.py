@@ -52,14 +52,14 @@ class ArchivesInline(admin.TabularInline):
 class StudentAdmin(ImportExportMixin, UserAdmin):
     list_display = ('code', 'username', 'total_paid', 'payment_status','total_books')
     search_fields = ('code', 'username')
-    readonly_fields = ('code','username','year','school','grade','living_area', 'address','bus_number','old_bus','total_paid', 'old_fee', 'old_paid','study_payment1', 'study_payment2', 'study_payment3','study_payment3', 'payment_status','last_login','bus_order','books','total_books','father_mobile','mother_mobile','phone_number', 'email','lms_code')
+    readonly_fields = ('code','username','year','school','grade','living_area', 'address','bus_number','old_bus','total_paid', 'old_fee', 'old_paid','study_payment1', 'study_payment2', 'study_payment3','study_payment4', 'payment_status','last_login','bus_order','books','total_books','father_mobile','mother_mobile','phone_number', 'email','lms_code')
 
     # filter_horizontal = ()
     list_filter = ('school','year','grade','bus_active','books','is_active','can_pay')
     fieldsets = (
         (None, { 'fields': (('code', 'year'), 'username', ('school', 'grade'),'password', ('is_active', 'can_pay', 'bus_active'))}),
         # (None, { 'fields': (('is_staff','is_admin'),)}),
-        ('الأقساط والسداد', {'fields': (('study_payment1', 'study_payment2', 'study_payment3'),('bus_payment1', 'bus_payment2'), ('old_fee','old_paid'),'discount', ('total_paid','payment_status'))}),
+        ('الأقساط والسداد', {'fields': (('study_payment1', 'study_payment2', 'study_payment3','study_payment4'),('bus_payment1', 'bus_payment2'), ('old_fee','old_paid'),'discount', ('total_paid','payment_status'))}),
         ('الكتب الدراسية', {'fields': (('books','total_books'),)}),
         ('التواصل', {'fields': ('message', ('father_mobile','mother_mobile'),('phone_number', 'email'),'lms_code','last_login')}),
         ('السيارة', {'fields': ('bus_notes','living_area', 'address','bus_number','old_bus','bus_order')}),
@@ -236,7 +236,7 @@ class TeacherAdmin(ImportExportMixin, admin.ModelAdmin):
             return False
 
 class SchoolFeeAdmin(ImportExportMixin, admin.ModelAdmin):
-    list_display = ('grade' , 'study_fee', 'activity_fee', 'computer_fee','study_payment1','study_payment2','study_payment3','bus_payment1','bus_payment2')
+    list_display = ('grade' , 'study_fee', 'activity_fee', 'computer_fee','study_payment1','study_payment2','study_payment3','study_payment4','bus_payment1','bus_payment2')
     ordering = ('id',)
     readonly_fields = ('school', 'grade','year')
 
@@ -245,7 +245,7 @@ class SchoolFeeAdmin(ImportExportMixin, admin.ModelAdmin):
     fieldsets = (
         # ('None', {'fields': ('grade',)}),
         ('المصروفات الرسمية ', {'fields': (('grade','year'),'study_fee', 'activity_fee', 'computer_fee','bus_fee','books_fee' )}),
-        ('المصروفات', {'fields': (('study_payment1','study_payment2','study_payment3'),('bus_payment1','bus_payment2'),('books_all','books_books','books_booklet','books_a_level'))}),
+        ('المصروفات', {'fields': (('study_payment1','study_payment2','study_payment3','study_payment4'),('bus_payment1','bus_payment2'),('books_all','books_books','books_booklet','books_a_level'))}),
                  )
 
     def get_queryset(self, request):
@@ -281,6 +281,7 @@ class SchoolFeeAdmin(ImportExportMixin, admin.ModelAdmin):
             study1 = obj.study_payment1
             study2 = obj.study_payment2
             study3 = obj.study_payment3
+            study4 = obj.study_payment4
             bus1 = obj.bus_payment1
             bus2 = obj.bus_payment2
             if school == 'بنين':
@@ -291,6 +292,7 @@ class SchoolFeeAdmin(ImportExportMixin, admin.ModelAdmin):
                 study_payment1 = study1,
                 study_payment2 = study2,
                 study_payment3 = study3,
+                study_payment4 = study4,
                 bus_payment1 = bus1,
                 bus_payment2 = bus2,
             )

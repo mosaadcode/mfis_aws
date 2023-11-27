@@ -163,6 +163,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
     study_payment1 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 1')
     study_payment2 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 2')
     study_payment3 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 3')
+    study_payment4 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 4')
     discount = models.PositiveSmallIntegerField(default=0)
     old_fee = models.IntegerField(default=0)
     bus_active = models.BooleanField( default=False)
@@ -172,30 +173,17 @@ class Student(AbstractBaseUser, PermissionsMixin):
     old_paid = models.IntegerField( default=0)
 
     def payment_status(self):
-#due date 1st study and 1st bus
-        if date.today() <= date(2020,9,30):
-            if self.bus_active == True:
-                return self.study_payment1 + self.bus_payment1 - self.total_paid - self.discount + self.old_fee - self.old_paid
-            else:
-                return self.study_payment1 - self.total_paid - self.discount + self.old_fee - self.old_paid
-#due date 1st study and ( 1st ,2nd ) bus payemnts
-        elif date.today() <= date(2020,10,31):
-            if self.bus_active == True:
-                return self.study_payment1 + self.bus_payment1 + self.bus_payment2 - self.total_paid - self.discount + self.old_fee - self.old_paid
-            else:
-                return self.study_payment1 - self.total_paid - self.discount + self.old_fee - self.old_paid
-#due date (1st , 2nd) study and ( 1st ,2nd ) bus payemnts
-        elif date.today() <= date(2020,12,31):
-            if self.bus_active == True:
-                return self.study_payment1 + self.study_payment2 + self.bus_payment1 + self.bus_payment2 - self.total_paid - self.discount + self.old_fee - self.old_paid
-            else:
-                return self.study_payment1 + self.study_payment2 - self.total_paid - self.discount + self.old_fee - self.old_paid
-#due date (1st , 2nd ,3rd) study and ( 1st ,2nd ) bus payemnts
-        elif date.today() >= date(2021,1,1):
+        if date.today() < date(2024,2,1):
             if self.bus_active == True:
                 return self.study_payment1 + self.study_payment2 + self.study_payment3 + self.bus_payment1 + self.bus_payment2 - self.total_paid - self.discount + self.old_fee - self.old_paid
             else:
                 return self.study_payment1 + self.study_payment2 + self.study_payment3 - self.total_paid - self.discount + self.old_fee - self.old_paid
+            
+        elif date.today() >= date(2024,2,1):
+            if self.bus_active == True:
+                return self.study_payment1 + self.study_payment2 + self.study_payment3 + self.study_payment4 + self.bus_payment1 + self.bus_payment2 - self.total_paid - self.discount + self.old_fee - self.old_paid
+            else:
+                return self.study_payment1 + self.study_payment2 + self.study_payment3 + self.study_payment4 - self.total_paid - self.discount + self.old_fee - self.old_paid
 
     payment_status
 
@@ -254,6 +242,7 @@ class SchoolFee(models.Model):
     study_payment1 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 1')
     study_payment2 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 2')
     study_payment3 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 3')
+    study_payment4 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 4')
     bus_payment1 = models.PositiveSmallIntegerField( default=10000,verbose_name='Bus 1')
     bus_payment2 = models.PositiveSmallIntegerField( default=0,verbose_name='Bus 2')
     study_fee = models.PositiveSmallIntegerField(default=0)

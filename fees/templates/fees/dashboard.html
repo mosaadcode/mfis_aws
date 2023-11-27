@@ -83,37 +83,37 @@
 	<div class="row">
 		<div class="col-md-6">
 		</div>
-		{% if oldSign == 0 %}
+	{% if oldSign == 0 %}
+	<div class="col-md-6">
+		</div>
+		<br>
+	{% elif oldSign < 0 %}
 		<div class="col-md-6">
+			<div class="alert alert-dismissable alert-danger">
+
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+					×
+				</button>
+				<h6>
+					برجاء السداد الفوري للمديونية السابقة
+				</h6> <strong>بقيمة {{ OldVale }} جنيهاً </strong>
 			</div>
-			<br>
-		{% elif oldSign < 0 %}
-			<div class="col-md-6">
-				<div class="alert alert-dismissable alert-danger">
-	
-					<button type="button" class="close" data-dismiss="alert" aria-hidden="true">
-						×
-					</button>
-					<h6>
-						برجاء السداد الفوري للمديونية السابقة
-					</h6> <strong>بقيمة {{ OldVale }} جنيهاً </strong>
-				</div>
+		</div>
+		<br>
+		{% elif oldSign > 0 %}
+		<div class="col-md-6">
+			<div class="alert alert-dismissable alert-info">
+
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">
+					×
+				</button>
+				<h6>
+					لديك رصيد من العام الدراسي السابق
+				</h6> <strong>بقيمة {{ OldVale }} جنيهاً </strong>
 			</div>
-			<br>
-			{% elif oldSign > 0 %}
-			<div class="col-md-6">
-				<div class="alert alert-dismissable alert-info">
-	
-					<button type="button" class="close" data-dismiss="alert" aria-hidden="true">
-						×
-					</button>
-					<h6>
-						لديك رصيد من العام الدراسي السابق
-					</h6> <strong>بقيمة {{ OldVale }} جنيهاً </strong>
-				</div>
-			</div>
-			<br>
-		{% endif %}
+		</div>
+		<br>
+	{% endif %}
 	</div>
 	<div class="row">
 		<div class="col-md-12">
@@ -140,14 +140,14 @@
 						</tr>
 						<tr>
 							<td><button type="button" class="btn btn-deafult text-center mt-2 p-0" style="display:inline-block;width:150px"><h6>خلال فبراير</h6></button></td>
-				    	<th scope="row"><button type="button" class="btn btn-primary cib   p-2" style="display:inline-block; width:170px" >القسط الرابع<span class="badge badge-light ml-2"><h6>المتبقي</h6></span></button></th>
+				    	<th scope="row"><button type="button" class="btn btn-primary cib   p-2" style="display:inline-block; width:170px" >القسط الرابع<span class="badge badge-light ml-2"><h6>{{ user.study_payment4 }}</h6></span></button></th>
 						</tr>
 					</tbody>
 				</table>
 			</div>
 		</div>
 	</div>
-	{% if bus == True or user.bus_active == True %}
+	{% if user.bus_active == True %}
 	<div class="row">
 	<div class="col-md-12 ">
 		<div class="table-responsive">
