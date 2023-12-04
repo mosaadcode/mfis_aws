@@ -815,7 +815,7 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
     
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ('code','na_id','school') + self.readonly_fields
+            return ('code','school') + self.readonly_fields
         return self.readonly_fields
 
     resource_class = EmployeeResource
