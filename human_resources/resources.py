@@ -59,8 +59,8 @@ class EmployeeResource(resources.ModelResource):
     class Meta:
         model = Employee
         import_id_fields = ('code',)
-        fields = ('code', 'school', 'name', 'na_id', 'birth_date', 'mobile_number', 'phone_number', 'emergency_phone', 'email', 'address', 'basic_certificate', 'is_educational', 'attendance_date', 'insurance_date', 'participation_date', 'contract_date', 'insurance_no', 'notes', 'job', 'is_active', 'salary_parameter', 'salary', 'message','job_code', 'time_code', 'permission_setting', 'vacation_setting')
-        export_order = ('code', 'school', 'name', 'na_id', 'birth_date', 'mobile_number', 'phone_number', 'emergency_phone', 'email', 'address', 'basic_certificate', 'is_educational', 'attendance_date', 'insurance_date', 'participation_date', 'contract_date', 'insurance_no', 'notes', 'job', 'is_active', 'salary_parameter', 'salary', 'message','job_code', 'time_code', 'permission_setting', 'vacation_setting')
+        fields = ('code', 'school', 'name', 'na_id', 'birth_date', 'mobile_number', 'phone_number', 'emergency_phone', 'email', 'address', 'basic_certificate', 'is_educational', 'attendance_date', 'insurance_date', 'participation_date', 'contract_date', 'insurance_no', 'notes', 'job', 'is_active', 'salary_parameter', 'salary', 'message', 'time_code', 'permission_setting', 'vacation_setting')
+        export_order = ('code', 'school', 'name', 'na_id', 'birth_date', 'mobile_number', 'phone_number', 'emergency_phone', 'email', 'address', 'basic_certificate', 'is_educational', 'attendance_date', 'insurance_date', 'participation_date', 'contract_date', 'insurance_no', 'notes', 'job', 'is_active', 'salary_parameter', 'salary', 'message', 'time_code', 'permission_setting', 'vacation_setting')
 
 
 
