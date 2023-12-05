@@ -122,7 +122,7 @@ def get_restricted_actions(user_code):
     if user_code.startswith('m1'):
         return ['ok2', 'ok', 'refused']
     if user_code.startswith('m2'):
-        return ['ok1','ok2']
+        return ['ok1','ok']
     return None
 
 class SchoolAdmin(HrAdmin,ImportExportModelAdmin):
