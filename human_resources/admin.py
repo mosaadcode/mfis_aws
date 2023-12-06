@@ -118,7 +118,7 @@ def get_restricted_actions(user_code):
     if user_code == 'mosaad':
         return []
     if user_code.startswith('hr'):
-        return ['ok1', 'ok2', 'ok']
+        return ['ok2', 'ok']
     if user_code.startswith('m1'):
         return ['ok2', 'ok', 'refused']
     if user_code.startswith('m2'):
