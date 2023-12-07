@@ -46,6 +46,7 @@ class Job(models.Model):
     title = models.CharField(max_length=20 ,verbose_name='المسمى الوظيفي')
     department = models.ForeignKey(Department, on_delete=SET_NULL, null=True,related_name='jobs',verbose_name='القسم')
     grade = models.CharField(max_length=2, choices=GRADE_CHOICES, null=True,blank=True,verbose_name='المرحلة الدراسية')
+    employees = models.ManyToManyField("Employee", blank=True,related_name='jobs',verbose_name='موظفين')
 
     def __str__(self):
         if self.department:

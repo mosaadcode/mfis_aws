@@ -14,6 +14,8 @@ from django.core.exceptions import ValidationError
 from django.utils.html import format_html
 from django.urls import reverse
 from django.http import HttpResponseRedirect
+from django.contrib.admin.widgets import FilteredSelectMultiple
+from django import forms
 
 try:
     active_month = Month.objects.get(active=True)
@@ -128,13 +130,42 @@ def get_restricted_actions(user_code):
 class SchoolAdmin(HrAdmin,ImportExportModelAdmin):
     list_display = ('school','count')
 
+class JobAdminForm(forms.ModelForm):
+    class Meta:
+        model = Job
+        fields = '__all__'  # Explicitly include all fields
+        widgets = {
+            'employees': FilteredSelectMultiple('Employees', is_stacked=False),
+        }
 class JobAdmin(HrEmployees,ImportExportModelAdmin):
     list_display = ('__str__','employee_count','grade','department','title')
-    filter_horizontal = ()
+    filter_horizontal = ('employees',)
     search_fields = ('title',)
     list_filter = ('type','grade','department')
-
+    
+    form = JobAdminForm
     resource_class = JobResource
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if db_field.name == 'employees':
+            # Limit the available employees by School
+            kwargs['queryset'] = get_filtered_queryset(request, Employee)
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
+    def save_model(self, request, obj, form, change):
+        # Save the Job model
+        super().save_model(request, obj, form, change)
+
+        # Update the job field on each selected employee
+        for employee in form.cleaned_data['employees']:
+            employee.job = obj
+            employee.save()
+
+        # Handle removal of employees from the job
+        removed_employees = form.fields['employees'].queryset.exclude(id__in=form.cleaned_data['employees'])
+        for removed_employee in removed_employees.filter(job=obj):
+            removed_employee.job = None
+            removed_employee.save()
 
     def employee_count(self, obj):
         return obj.employee_set.count()
