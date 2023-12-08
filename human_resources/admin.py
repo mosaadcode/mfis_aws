@@ -149,7 +149,7 @@ class JobAdmin(HrEmployees,ImportExportModelAdmin):
     def formfield_for_manytomany(self, db_field, request, **kwargs):
         if db_field.name == 'employees':
             # Limit the available employees by School
-            kwargs['queryset'] = get_filtered_queryset(request, Employee).filter(job=None)
+            kwargs['queryset'] = get_filtered_queryset(request, Employee)
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def save_model(self, request, obj, form, change):
