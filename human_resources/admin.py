@@ -828,15 +828,15 @@ class VacationAdmin(ImportExportModelAdmin):
 
 class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
     list_display = ('name','job','permission_setting','vacation_setting','code','dep_code','grade_code','time_code','is_active')
-    # autocomplete_fields = ['perms','vecation_role']
-    raw_id_fields = ('job',)
-    readonly_fields = ('birth_date','dep_code','grade_code')
+    autocomplete_fields = ['manager1','manager2']
+    # raw_id_fields = ('job',)
+    readonly_fields = ('birth_date','job','dep_code','grade_code','used_vacations','used_vacations_s')
     search_fields = ('code','name','na_id','insurance_no')
     filter_horizontal = ()
     list_filter = ('school','job__type','job__grade','is_educational','job__department','job__title')
     fieldsets = (
-    ('بيانات الموظف', { 'fields': (('name','code'),'job',('na_id','birth_date','school'),('mobile_number','phone_number'),('emergency_phone','email'),'address',('basic_certificate','is_educational'),('notes','is_active'))}),
-    ('بيانات التعاقد', {'fields': (('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code',('dep_code','grade_code'),'permission_setting','vacation_setting',('used_vacations','used_vacations_s'))}),
+    ('بيانات الموظف', { 'fields': (('name','code'),('na_id','birth_date','school'),('mobile_number','phone_number'),('emergency_phone','email'),'address',('basic_certificate','is_educational'))}),
+    ('بيانات التعاقد', {'fields': ('job','manager1','manager2','permission_setting','vacation_setting',('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code',('dep_code','grade_code'),('used_vacations','used_vacations_s'),('notes','is_active'))}),
                 )
     list_per_page = 50
 
