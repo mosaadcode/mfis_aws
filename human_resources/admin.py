@@ -178,8 +178,12 @@ class JobAdmin(HrEmployees,ImportExportModelAdmin):
     employee_count.short_description = 'عدد الموظفين'
 
     def get_queryset(self, request):
-        qs = super().get_queryset(request).annotate(employee_count=Count('employee')).order_by('-employee_count')
+        qs = get_filtered_queryset(request, SalaryItem).annotate(employee_count=Count('employee')).order_by('-employee_count')
         return qs
+    
+    # def get_queryset(self, request):
+    #     qs = super().get_queryset(request).annotate(employee_count=Count('employee')).order_by('-employee_count')
+    #     return qs
 
     def has_import_permission(self, request):
         return request.user.code in ('mosaad',)
