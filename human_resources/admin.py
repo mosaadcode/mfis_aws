@@ -138,10 +138,14 @@ class JobAdminForm(forms.ModelForm):
             'employees': FilteredSelectMultiple('Employees', is_stacked=False),
         }
 class JobAdmin(HrEmployees,ImportExportModelAdmin):
-    list_display = ('__str__','employee_count','grade','department','title')
+    list_display = ('__str__','employee_count','school')
+    autocomplete_fields = ['department']
     filter_horizontal = ('employees',)
     search_fields = ('title',)
     list_filter = ('type','grade','department')
+    fieldsets = (
+    ('', { 'fields': ('title',('type','grade'),('school','department'),'employees')}),
+                )
     
     form = JobAdminForm
     resource_class = JobResource
