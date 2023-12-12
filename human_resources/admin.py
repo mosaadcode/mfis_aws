@@ -142,7 +142,7 @@ class JobAdmin(HrEmployees,ImportExportModelAdmin):
     autocomplete_fields = ['department']
     filter_horizontal = ('employees',)
     search_fields = ('title',)
-    list_filter = ('type','grade','department')
+    list_filter = ('school','type','grade','department')
     fieldsets = (
     ('', { 'fields': ('title',('type','grade'),('school','department'),'employees')}),
                 )
