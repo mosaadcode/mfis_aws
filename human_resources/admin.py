@@ -93,28 +93,49 @@ class HrAdmin:
 def get_filtered_queryset(request, model_class):
     qs = model_class.objects.all().order_by('-id')
     if request.user.code != 'mosaad':
-        user_code = request.user.code[:4]
+        user_code = request.user.code[:3]
         employee = Employee.objects.get(code=request.user.code)
 
         code_filters = {
-            'hrb0': dict(school='بنين'),
-            'hrg0': dict(school__in=('بنات', 'Ig')),
-            'm1b0': dict(school='بنين', dep_code=employee.dep_code,grade_code=employee.grade_code),
-            'm1bd': dict(school='بنين', dep_code=employee.dep_code),
-            'm2b0': dict(school='بنين', grade_code=employee.grade_code),
-            'm1g0': dict(school__in=('بنات', 'Ig'), dep_code=employee.dep_code,grade_code=employee.grade_code),
-            'm1gd': dict(school__in=('بنات', 'Ig'), dep_code=employee.dep_code),
-            'm2g0': dict(school__in=('بنات', 'Ig'), grade_code=employee.grade_code),
-            'm1s0': dict( dep_code=employee.dep_code,grade_code=employee.grade_code),
-            'm1sd': dict( dep_code=employee.dep_code),
+            'hrb': dict(school='بنين'),
+            'hrg': dict(school__in=('بنات', 'Ig')),
+            'm1b': dict(employee__manager1 = employee),
+            'm1g': dict(employee__manager1 = employee),
+            'm2b': dict(employee__manager2 = employee),
+            'm2g': dict(employee__manager2 = employee),
         }
         if user_code in code_filters:
             return qs.filter(**code_filters[user_code])
         else:
-            # Handle default case when user code doesn't match any condition
+            
             return qs.none()
     else:
         return qs
+# def get_filtered_queryset(request, model_class):
+#     qs = model_class.objects.all().order_by('-id')
+#     if request.user.code != 'mosaad':
+#         user_code = request.user.code[:4]
+#         employee = Employee.objects.get(code=request.user.code)
+
+#         code_filters = {
+#             'hrb0': dict(school='بنين'),
+#             'hrg0': dict(school__in=('بنات', 'Ig')),
+#             'm1b0': dict(school='بنين', dep_code=employee.dep_code,grade_code=employee.grade_code),
+#             'm1bd': dict(school='بنين', dep_code=employee.dep_code),
+#             'm2b0': dict(school='بنين', grade_code=employee.grade_code),
+#             'm1g0': dict(school__in=('بنات', 'Ig'), dep_code=employee.dep_code,grade_code=employee.grade_code),
+#             'm1gd': dict(school__in=('بنات', 'Ig'), dep_code=employee.dep_code),
+#             'm2g0': dict(school__in=('بنات', 'Ig'), grade_code=employee.grade_code),
+#             'm1s0': dict( dep_code=employee.dep_code,grade_code=employee.grade_code),
+#             'm1sd': dict( dep_code=employee.dep_code),
+#         }
+#         if user_code in code_filters:
+#             return qs.filter(**code_filters[user_code])
+#         else:
+
+#             return qs.none()
+#     else:
+#         return qs
 
 def get_restricted_actions(user_code):
     if user_code == 'mosaad':
@@ -342,7 +363,8 @@ class Time_settingAdmin(HrEmployees,ImportExportModelAdmin):
         return request.user.code in ('mosaad',)
 
 class PermissionAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
-    list_display = ('employee','type', 'formatted_date','count','total','ok1','ok2','dep_code','grade_code')
+    # list_display = ('employee','type', 'formatted_date','count','total','ok1','ok2','dep_code','grade_code')
+    list_display = ('employee','type', 'formatted_date','count','total','ok1','ok2')
     autocomplete_fields = ['employee']
     readonly_fields = ('school','created','ok1','ok2','start_time','end_time','count','total','dep_code','grade_code')
     filter_horizontal = ()
