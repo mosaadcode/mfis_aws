@@ -453,7 +453,7 @@ class PermissionAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
                 if not obj.ok2:
                     if not obj.ok1:
                         obj.ok1 = True
-                        self.approve_obj(request, obj, 'تمت موافقة رئيس القسم')
+                        self.approve_obj(request, obj, 'تمت موافقة الرئيس المباشر')
                         updated += 1
                     else:
                         already_approved += 1
@@ -464,7 +464,7 @@ class PermissionAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
                 if not obj.ok2:
                     if obj.ok1:
                         obj.ok2 = True
-                        self.approve_obj(request, obj, 'تمت موافقة ناظر المرحلة')
+                        self.approve_obj(request, obj, 'تمت موافقة الرئيس الأعلى')
                         updated += 1
                     else:
                         not_updated += 1
@@ -474,7 +474,7 @@ class PermissionAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
             elif approval_type == 'ok':
                 if not obj.ok2:
                     obj.ok2 = True
-                    self.approve_obj(request, obj, 'تمت موافقة وكيل المدرسة')
+                    self.approve_obj(request, obj, 'تمت موافقة إستثنائية  ')
                     updated += 1
                 else:
                     already_approved += 1
@@ -539,9 +539,9 @@ class PermissionAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
                     updated,
                 ) % updated, messages.SUCCESS)
 
-    ok1.short_description = "موافقة رئيس القسم"
-    ok2.short_description = "موافقة ناظر المرحلة"
-    ok.short_description = "موافقة وكيل المدرسة"
+    ok1.short_description = "موافقة الرئيس المباشر"
+    ok2.short_description = "موافقة الرئيس الأعلى"
+    ok.short_description = "موافقة إستثنائية"
     refused.short_description = "رفض والغاء الإذن"
    
     def delete_queryset(self, request, queryset):
@@ -565,7 +565,7 @@ class PermissionAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
             obj.delete()
         
 class VacationAdmin(ImportExportModelAdmin):
-    list_display = ('employee','type','DateFrom','DateTo','count','total','ok1','ok2','dep_code','grade_code')
+    list_display = ('employee','type','DateFrom','DateTo','count','total','ok1','ok2')
     autocomplete_fields = ['employee'] 
     readonly_fields = ('created','ok1','ok2','count','total','days','dep_code','grade_code')
     filter_horizontal = ()
@@ -675,7 +675,7 @@ class VacationAdmin(ImportExportModelAdmin):
                 if obj.ok1 == False:
                     obj.ok1 = True
                     obj.save()
-                    self.log_change(request, obj, 'تمت موافقة رئيس القسم')
+                    self.log_change(request, obj, 'تمت موافقة الرئيس المباشر')
                     updated += 1
                 else:
                     notupdated +=1
@@ -725,7 +725,7 @@ class VacationAdmin(ImportExportModelAdmin):
 
                     obj.ok2 = True
                     obj.save()  # Save changes to the 'Vacation' model
-                    self.log_change(request, obj, 'تمت موافقة ناظر المرحلة')
+                    self.log_change(request, obj, 'تمت موافقة الرئيس الأعلى')
                     
                     # Log the same message to 'employee_month'
                     self.log_change(request, employee_month, f'منح اجازة  {obj.type} {obj.count} يوم')
@@ -746,8 +746,8 @@ class VacationAdmin(ImportExportModelAdmin):
             ) % updated, messages.SUCCESS)
         if notupdated != 0:
             self.message_user(request, ngettext(
-                '%d لم يتم موافقة رئيس القسم',
-                '%d لم يتم موافقة رئيس القسم',
+                '%d لم يتم موافقة الرئيس المباشر',
+                '%d لم يتم موافقة الرئيس المباشر',
                 notupdated,
             ) % notupdated, messages.ERROR)
         if already != 0:
@@ -778,7 +778,7 @@ class VacationAdmin(ImportExportModelAdmin):
 
                 obj.ok2 = True
                 obj.save()  # Save changes to the 'Vacation' model
-                self.log_change(request, obj, 'تمت موافقة وكيل المدرسة ')
+                self.log_change(request, obj, 'تمت موافقة إستثنائية   ')
                 self.log_change(request, employee_month, f'منح اجازة  {obj.type} {obj.count} يوم')
                 employee.save()  # Save changes to the 'Employee' model
                 employee_month.save()  # Save changes to the 'Employee_month' model
@@ -833,9 +833,9 @@ class VacationAdmin(ImportExportModelAdmin):
             ) % deleted, messages.SUCCESS)
 
 
-    ok1.short_description = "موافقة رئيس القسم"
-    ok2.short_description = "موافقة ناظر المرحلة"
-    ok.short_description = "موافقة وكيل المدرسة"
+    ok1.short_description = "موافقة رئيس مباشر"
+    ok2.short_description = "موافقة رئيس أعلى"
+    ok.short_description = "موافقة إستثنائية"
     refused.short_description = " رفض وإلغاء الاجازة"
 
     def has_module_permission(self, request):
@@ -902,20 +902,20 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
                 obj.code = new_code
                 obj.save(update_fields=["code",])
                 employee_acc.save(update_fields=["code", "password", "is_staff", "is_admin"])
-                self.log_change(request, obj, 'منح صلاحيات رئيس القسم')
+                self.log_change(request, obj, 'منح صلاحيات رئيس مباشر')
                 updated += 1
             else:
                 notupdated +=1
         if updated != 0:
             self.message_user(request, ngettext(
-                '%d تم منح صلاحيات رئيس القسم الى',
-                '%d تم منح صلاحيات رئيس القسم الى',
+                '%d تم منح صلاحيات رئيس مباشر الى',
+                '%d تم منح صلاحيات رئيس مباشر الى',
                 updated,
             ) % updated, messages.SUCCESS)
         if notupdated != 0:
             self.message_user(request, ngettext(
-                '%d بالفعل يمتلك منح صلاحيات رئيس القسم ',
-                '%d بالفعل يمتلك منح صلاحيات رئيس القسم ',
+                '%d بالفعل يمتلك منح صلاحيات رئيس مباشر ',
+                '%d بالفعل يمتلك منح صلاحيات رئيس مباشر ',
                 notupdated,
             ) % notupdated, messages.ERROR)
 
@@ -933,20 +933,20 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
                 obj.code = new_code
                 obj.save(update_fields=["code",])
                 employee_acc.save(update_fields=["code", "password", "is_staff", "is_admin"])
-                self.log_change(request, obj, 'منح صلاحيات ناظر المرحلة')
+                self.log_change(request, obj, 'منح صلاحيات رئيس أعلى')
                 updated += 1
             else:
                 notupdated +=1
         if updated != 0:
             self.message_user(request, ngettext(
-                '%d تم منح صلاحيات ناظر المرحلة الى',
-                '%d تم منح صلاحيات ناظر المرحلة الى',
+                '%d تم منح صلاحيات رئيس أعلى الى',
+                '%d تم منح صلاحيات رئيس أعلى الى',
                 updated,
             ) % updated, messages.SUCCESS)
         if notupdated != 0:
             self.message_user(request, ngettext(
-                '%d بالفعل يمتلك صلاحيات ناظر المرحلة ',
-                '%d بالفعل يمتلك صلاحيات ناظر المرحلة ',
+                '%d بالفعل يمتلك صلاحيات رئيس أعلى ',
+                '%d بالفعل يمتلك صلاحيات رئيس أعلى ',
                 notupdated,
             ) % notupdated, messages.ERROR)
 
@@ -982,123 +982,123 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
                 notupdated,
             ) % notupdated, messages.ERROR)
 
-    def general_manager(self, request, queryset):
-        updated = 0
-        notupdated = 0
-        for obj in queryset:
-            if obj.code[:2] == "m1":
-                new_code = "m1s" + obj.code[3:]
-                employee_acc = Student.objects.get(code=obj.code)
-                employee_acc.code = new_code
-                employee_acc.password=make_password(new_code)
-                obj.code = new_code
-                obj.save(update_fields=["code",])
-                employee_acc.save(update_fields=["code", "password"])
-                self.log_change(request, obj, 'منح صلاحية إدارة المدرستين')
-                updated += 1
-            else:
-                notupdated +=1
-        if updated != 0:
-            self.message_user(request, ngettext(
-                '%d تم منح صلاحية إدارة المدرستين الى',
-                '%d تم منح صلاحية إدارة المدرستين الى',
-                updated,
-            ) % updated, messages.SUCCESS)
-        if notupdated != 0:
-            self.message_user(request, ngettext(
-                '%d لا يمتلك صلاحية رئيس القسم ',
-                '%d لا يمتلك صلاحية رئيس القسم ',
-                notupdated,
-            ) % notupdated, messages.ERROR)
+    # def general_manager(self, request, queryset):
+    #     updated = 0
+    #     notupdated = 0
+    #     for obj in queryset:
+    #         if obj.code[:2] == "m1":
+    #             new_code = "m1s" + obj.code[3:]
+    #             employee_acc = Student.objects.get(code=obj.code)
+    #             employee_acc.code = new_code
+    #             employee_acc.password=make_password(new_code)
+    #             obj.code = new_code
+    #             obj.save(update_fields=["code",])
+    #             employee_acc.save(update_fields=["code", "password"])
+    #             self.log_change(request, obj, 'منح صلاحية إدارة المدرستين')
+    #             updated += 1
+    #         else:
+    #             notupdated +=1
+    #     if updated != 0:
+    #         self.message_user(request, ngettext(
+    #             '%d تم منح صلاحية إدارة المدرستين الى',
+    #             '%d تم منح صلاحية إدارة المدرستين الى',
+    #             updated,
+    #         ) % updated, messages.SUCCESS)
+    #     if notupdated != 0:
+    #         self.message_user(request, ngettext(
+    #             '%d لا يمتلك صلاحية رئيس القسم ',
+    #             '%d لا يمتلك صلاحية رئيس القسم ',
+    #             notupdated,
+    #         ) % notupdated, messages.ERROR)
 
-    def local_manager(self, request, queryset):
-        updated = 0
-        notupdated = 0
-        for obj in queryset:
-            if obj.code[:3] == "m1s":
-                school = 'b' if obj.school == "بنين" else 'g'
-                new_code = "m1" + school + obj.code[3:]
-                employee_acc = Student.objects.get(code=obj.code)
-                employee_acc.code = new_code
-                employee_acc.password=make_password(new_code)
-                obj.code = new_code
-                obj.save(update_fields=["code",])
-                employee_acc.save(update_fields=["code", "password"])
-                self.log_change(request, obj, 'سحب صلاحية إدارة المدرستين')
-                updated += 1
-            else:
-                notupdated +=1
-        if updated != 0:
-            self.message_user(request, ngettext(
-                '%d تم سحب صلاحية إدارة المدرستين من',
-                '%d تم سحب صلاحية إدارة المدرستين من',
-                updated,
-            ) % updated, messages.SUCCESS)
-        if notupdated != 0:
-            self.message_user(request, ngettext(
-                '%d لا يمتلك صلاحية إدارة المدرستين ',
-                '%d لا يمتلك صلاحية إدارة المدرستين ',
-                notupdated,
-            ) % notupdated, messages.ERROR)
+    # def local_manager(self, request, queryset):
+    #     updated = 0
+    #     notupdated = 0
+    #     for obj in queryset:
+    #         if obj.code[:3] == "m1s":
+    #             school = 'b' if obj.school == "بنين" else 'g'
+    #             new_code = "m1" + school + obj.code[3:]
+    #             employee_acc = Student.objects.get(code=obj.code)
+    #             employee_acc.code = new_code
+    #             employee_acc.password=make_password(new_code)
+    #             obj.code = new_code
+    #             obj.save(update_fields=["code",])
+    #             employee_acc.save(update_fields=["code", "password"])
+    #             self.log_change(request, obj, 'سحب صلاحية إدارة المدرستين')
+    #             updated += 1
+    #         else:
+    #             notupdated +=1
+    #     if updated != 0:
+    #         self.message_user(request, ngettext(
+    #             '%d تم سحب صلاحية إدارة المدرستين من',
+    #             '%d تم سحب صلاحية إدارة المدرستين من',
+    #             updated,
+    #         ) % updated, messages.SUCCESS)
+    #     if notupdated != 0:
+    #         self.message_user(request, ngettext(
+    #             '%d لا يمتلك صلاحية إدارة المدرستين ',
+    #             '%d لا يمتلك صلاحية إدارة المدرستين ',
+    #             notupdated,
+    #         ) % notupdated, messages.ERROR)
 
-    def department_manager(self, request, queryset):
-        updated = 0
-        notupdated = 0
-        for obj in queryset:
-            if obj.code[:2] == "m1":
-                new_code = obj.code[:3] + 'd' + obj.code[4:]
-                employee_acc = Student.objects.get(code=obj.code)
-                employee_acc.code = new_code
-                employee_acc.password=make_password(new_code)
-                obj.code = new_code
-                obj.save(update_fields=["code",])
-                employee_acc.save(update_fields=["code", "password"])
-                self.log_change(request, obj, 'منح صلاحية إدارة القسم')
-                updated += 1
-            else:
-                notupdated +=1
-        if updated != 0:
-            self.message_user(request, ngettext(
-                '%d تم منح صلاحية إدارة القسم الى',
-                '%d تم منح صلاحية إدارة القسم الى',
-                updated,
-            ) % updated, messages.SUCCESS)
-        if notupdated != 0:
-            self.message_user(request, ngettext(
-                '%d لا يمتلك صلاحية رئيس القسم ',
-                '%d لا يمتلك صلاحية رئيس القسم ',
-                notupdated,
-            ) % notupdated, messages.ERROR)
+    # def department_manager(self, request, queryset):
+    #     updated = 0
+    #     notupdated = 0
+    #     for obj in queryset:
+    #         if obj.code[:2] == "m1":
+    #             new_code = obj.code[:3] + 'd' + obj.code[4:]
+    #             employee_acc = Student.objects.get(code=obj.code)
+    #             employee_acc.code = new_code
+    #             employee_acc.password=make_password(new_code)
+    #             obj.code = new_code
+    #             obj.save(update_fields=["code",])
+    #             employee_acc.save(update_fields=["code", "password"])
+    #             self.log_change(request, obj, 'منح صلاحية إدارة القسم')
+    #             updated += 1
+    #         else:
+    #             notupdated +=1
+    #     if updated != 0:
+    #         self.message_user(request, ngettext(
+    #             '%d تم منح صلاحية إدارة القسم الى',
+    #             '%d تم منح صلاحية إدارة القسم الى',
+    #             updated,
+    #         ) % updated, messages.SUCCESS)
+    #     if notupdated != 0:
+    #         self.message_user(request, ngettext(
+    #             '%d لا يمتلك صلاحية رئيس القسم ',
+    #             '%d لا يمتلك صلاحية رئيس القسم ',
+    #             notupdated,
+    #         ) % notupdated, messages.ERROR)
 
-    def normal_manager(self, request, queryset):
-        updated = 0
-        notupdated = 0
-        for obj in queryset:
-            if obj.code[3:4] == "d":
-                new_code = obj.code[:3] + '0' + obj.code[4:]
-                print(new_code)
-                employee_acc = Student.objects.get(code=obj.code)
-                employee_acc.code = new_code
-                employee_acc.password=make_password(new_code)
-                obj.code = new_code
-                obj.save(update_fields=["code",])
-                employee_acc.save(update_fields=["code", "password"])
-                self.log_change(request, obj, 'سحب صلاحية إدارة القسم')
-                updated += 1
-            else:
-                notupdated +=1
-        if updated != 0:
-            self.message_user(request, ngettext(
-                '%d تم سحب صلاحية إدارة القسم من',
-                '%d تم سحب صلاحية إدارة القسم من',
-                updated,
-            ) % updated, messages.SUCCESS)
-        if notupdated != 0:
-            self.message_user(request, ngettext(
-                '%d لا يمتلك صلاحية إدارة القسم ',
-                '%d لا يمتلك صلاحية إدارة القسم ',
-                notupdated,
-            ) % notupdated, messages.ERROR)
+    # def normal_manager(self, request, queryset):
+    #     updated = 0
+    #     notupdated = 0
+    #     for obj in queryset:
+    #         if obj.code[3:4] == "d":
+    #             new_code = obj.code[:3] + '0' + obj.code[4:]
+    #             print(new_code)
+    #             employee_acc = Student.objects.get(code=obj.code)
+    #             employee_acc.code = new_code
+    #             employee_acc.password=make_password(new_code)
+    #             obj.code = new_code
+    #             obj.save(update_fields=["code",])
+    #             employee_acc.save(update_fields=["code", "password"])
+    #             self.log_change(request, obj, 'سحب صلاحية إدارة القسم')
+    #             updated += 1
+    #         else:
+    #             notupdated +=1
+    #     if updated != 0:
+    #         self.message_user(request, ngettext(
+    #             '%d تم سحب صلاحية إدارة القسم من',
+    #             '%d تم سحب صلاحية إدارة القسم من',
+    #             updated,
+    #         ) % updated, messages.SUCCESS)
+    #     if notupdated != 0:
+    #         self.message_user(request, ngettext(
+    #             '%d لا يمتلك صلاحية إدارة القسم ',
+    #             '%d لا يمتلك صلاحية إدارة القسم ',
+    #             notupdated,
+    #         ) % notupdated, messages.ERROR)
 
     def Fix_job_code(self, request, queryset):
         # updated = queryset.update(verified=True)
@@ -1184,15 +1184,16 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
     
     Fix_birth_date.short_description = 'ضبط  تاريخ الميلاد'    
     Fix_job_code.short_description = 'التحقق  من الكود الوظيفي'
-    manager_1.short_description = 'منح صلاحيات رئيس قسم'
-    manager_2.short_description = 'منح صلاحيات ناظر مرحلة'
+    manager_1.short_description = 'منح صلاحيات رئيس مباشر'
+    manager_2.short_description = 'منح صلاحيات رئيس أعلى'
     manager_out.short_description = 'سحب جميع صلاحيات الإدارة'
-    general_manager.short_description = 'منح صلاحية إدارة المدرستين'
-    local_manager.short_description = 'سحب صلاحية إدارة المدرستين'
-    department_manager.short_description = 'منح صلاحية إدارة القسم'
-    normal_manager.short_description = 'سحب صلاحية إدارة القسم'
+    # general_manager.short_description = 'منح صلاحية إدارة المدرستين'
+    # local_manager.short_description = 'سحب صلاحية إدارة المدرستين'
+    # department_manager.short_description = 'منح صلاحية إدارة القسم'
+    # normal_manager.short_description = 'سحب صلاحية إدارة القسم'
 
-    actions = ['manager_1','manager_2','department_manager','normal_manager','general_manager','local_manager','manager_out','Fix_job_code','Fix_birth_date']
+    actions = ['manager_1','manager_2','manager_out','Fix_job_code','Fix_birth_date']
+    # actions = ['manager_1','manager_2','department_manager','normal_manager','general_manager','local_manager','manager_out','Fix_job_code','Fix_birth_date']
 
     def delete_queryset(self, request, queryset):
 
