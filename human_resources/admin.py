@@ -39,7 +39,7 @@ class HrEmployeesAndApprover:
     def has_permission(self, request, obj=None):
         if request.user.is_authenticated:
             user_code = request.user.code
-            return user_code == 'mosaad' or user_code.startswith('hr') or user_code.startswith('m1') or user_code.startswith('m2')
+            return user_code == 'mosaad' or user_code.startswith('hr') or user_code.startswith('m1') or user_code.startswith('m2') or user_code.startswith('m3')
         return False
 
     def has_delete_permission(self, request, obj=None):
@@ -103,6 +103,8 @@ def get_filtered_queryset(request, model_class):
             'm1g': dict(employee__manager1 = employee),
             'm2b': dict(employee__manager2 = employee),
             'm2g': dict(employee__manager2 = employee),
+            'm3b': dict(employee__manager2 = employee),
+            'm3g': dict(employee__manager2 = employee),
         }
         if user_code in code_filters:
             return qs.filter(**code_filters[user_code])
@@ -146,6 +148,8 @@ def get_restricted_actions(user_code):
         return ['ok2', 'ok', 'refused']
     if user_code.startswith('m2'):
         return ['ok1','ok']
+    if user_code.startswith('m3'):
+        return ['ok1','ok2']
     return None
 
 class SchoolAdmin(HrAdmin,ImportExportModelAdmin):
@@ -474,7 +478,7 @@ class PermissionAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
             elif approval_type == 'ok':
                 if not obj.ok2:
                     obj.ok2 = True
-                    self.approve_obj(request, obj, 'تمت موافقة إستثنائية  ')
+                    self.approve_obj(request, obj, 'تمت موافقة مباشرة  ')
                     updated += 1
                 else:
                     already_approved += 1
@@ -541,7 +545,7 @@ class PermissionAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
 
     ok1.short_description = "موافقة الرئيس المباشر"
     ok2.short_description = "موافقة الرئيس الأعلى"
-    ok.short_description = "موافقة إستثنائية"
+    ok.short_description = "موافقة مباشرة"
     refused.short_description = "رفض والغاء الإذن"
    
     def delete_queryset(self, request, queryset):
@@ -564,7 +568,7 @@ class PermissionAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
         else:
             obj.delete()
         
-class VacationAdmin(ImportExportModelAdmin):
+class VacationAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
     list_display = ('employee','type','DateFrom','DateTo','count','total','ok1','ok2')
     autocomplete_fields = ['employee'] 
     readonly_fields = ('created','ok1','ok2','count','total','days','dep_code','grade_code')
@@ -778,7 +782,7 @@ class VacationAdmin(ImportExportModelAdmin):
 
                 obj.ok2 = True
                 obj.save()  # Save changes to the 'Vacation' model
-                self.log_change(request, obj, 'تمت موافقة إستثنائية   ')
+                self.log_change(request, obj, 'تمت موافقة مباشرة   ')
                 self.log_change(request, employee_month, f'منح اجازة  {obj.type} {obj.count} يوم')
                 employee.save()  # Save changes to the 'Employee' model
                 employee_month.save()  # Save changes to the 'Employee_month' model
@@ -835,14 +839,14 @@ class VacationAdmin(ImportExportModelAdmin):
 
     ok1.short_description = "موافقة رئيس مباشر"
     ok2.short_description = "موافقة رئيس أعلى"
-    ok.short_description = "موافقة إستثنائية"
+    ok.short_description = "موافقة مباشرة"
     refused.short_description = " رفض وإلغاء الاجازة"
 
-    def has_module_permission(self, request):
-        if request.user.is_authenticated:
-            if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr','m1','m2'):
-                return True
-            return False
+    # def has_module_permission(self, request):
+    #     if request.user.is_authenticated:
+    #         if request.user.code in ('mosaad','hrboys','hrgirls') or request.user.code[:2] in ('hr','m1','m2'):
+    #             return True
+    #         return False
 
     def has_delete_permission(self, request, obj=None):
         if request.user.is_authenticated:
@@ -950,11 +954,42 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
                 notupdated,
             ) % notupdated, messages.ERROR)
 
+    def manager_3(self, request, queryset):
+        updated = 0
+        notupdated = 0
+        for obj in queryset:
+            if obj.code[:2] != "m3":
+                new_code = "m3" + obj.code[2:]
+                employee_acc = Student.objects.get(code=obj.code)
+                employee_acc.code = new_code
+                employee_acc.password=make_password(new_code)
+                employee_acc.is_admin = True
+                employee_acc.is_staff = True
+                obj.code = new_code
+                obj.save(update_fields=["code",])
+                employee_acc.save(update_fields=["code", "password", "is_staff", "is_admin"])
+                self.log_change(request, obj, 'منح صلاحيات موافقة مباشرة')
+                updated += 1
+            else:
+                notupdated +=1
+        if updated != 0:
+            self.message_user(request, ngettext(
+                '%d تم منح صلاحيات موافقة مباشرة الى',
+                '%d تم منح صلاحيات موافقة مباشرة الى',
+                updated,
+            ) % updated, messages.SUCCESS)
+        if notupdated != 0:
+            self.message_user(request, ngettext(
+                '%d بالفعل يمتلك صلاحيات موافقة مباشرة ',
+                '%d بالفعل يمتلك صلاحيات موافقة مباشرة ',
+                notupdated,
+            ) % notupdated, messages.ERROR)
+
     def manager_out(self, request, queryset):
         updated = 0
         notupdated = 0
         for obj in queryset:
-            if obj.code[:2] == "m1" or obj.code[:2] == "m2":
+            if obj.code[:2] == "m1" or obj.code[:2] == "m2" or obj.code[:2] == "m3":
                 school = 'b' if obj.school == "بنين" else 'g'
                 new_code = obj.na_id[1:3] + school + '0' + obj.code[4:]
                 employee_acc = Student.objects.get(code=obj.code)
@@ -977,8 +1012,8 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
             ) % updated, messages.SUCCESS)
         if notupdated != 0:
             self.message_user(request, ngettext(
-                '%d لا يمتلك صلاحية الرئيس من الاساس ',
-                '%d لا يمتلك صلاحية الرئيس من الاساس ',
+                '%d لا يمتلك صلاحيات الإدارة  ',
+                '%d لا يمتلك صلاحيات الإدارة  ',
                 notupdated,
             ) % notupdated, messages.ERROR)
 
@@ -1186,13 +1221,14 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
     Fix_job_code.short_description = 'التحقق  من الكود الوظيفي'
     manager_1.short_description = 'منح صلاحيات رئيس مباشر'
     manager_2.short_description = 'منح صلاحيات رئيس أعلى'
+    manager_3.short_description = 'منح صلاحيات الموافقة المباشرة'
     manager_out.short_description = 'سحب جميع صلاحيات الإدارة'
     # general_manager.short_description = 'منح صلاحية إدارة المدرستين'
     # local_manager.short_description = 'سحب صلاحية إدارة المدرستين'
     # department_manager.short_description = 'منح صلاحية إدارة القسم'
     # normal_manager.short_description = 'سحب صلاحية إدارة القسم'
 
-    actions = ['manager_1','manager_2','manager_out','Fix_job_code','Fix_birth_date']
+    actions = ['manager_1','manager_2','manager_3','manager_out','Fix_job_code','Fix_birth_date']
     # actions = ['manager_1','manager_2','department_manager','normal_manager','general_manager','local_manager','manager_out','Fix_job_code','Fix_birth_date']
 
     def delete_queryset(self, request, queryset):
