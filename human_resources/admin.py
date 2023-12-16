@@ -89,7 +89,7 @@ class HrAdmin:
     def has_delete_permission(self, request, obj=None):
         return request.user.code == "mosaad"
 
-# FILTER All QUERYSETS
+# FILTER PERMISSIONS AND VICATIONS
 def get_filtered_queryset(request, model_class):
     qs = model_class.objects.all().order_by('-id')
     if request.user.code != 'mosaad':
@@ -113,31 +113,30 @@ def get_filtered_queryset(request, model_class):
             return qs.none()
     else:
         return qs
-# def get_filtered_queryset(request, model_class):
-#     qs = model_class.objects.all().order_by('-id')
-#     if request.user.code != 'mosaad':
-#         user_code = request.user.code[:4]
-#         employee = Employee.objects.get(code=request.user.code)
+# FILTER EMPLOYEES
+def get_filtered_employees(request, Employee):
+    qs = Employee.objects.all().order_by('name')
+    if request.user.code != 'mosaad':
+        user_code = request.user.code[:3]
+        employee = Employee.objects.get(code=request.user.code)
 
-#         code_filters = {
-#             'hrb0': dict(school='بنين'),
-#             'hrg0': dict(school__in=('بنات', 'Ig')),
-#             'm1b0': dict(school='بنين', dep_code=employee.dep_code,grade_code=employee.grade_code),
-#             'm1bd': dict(school='بنين', dep_code=employee.dep_code),
-#             'm2b0': dict(school='بنين', grade_code=employee.grade_code),
-#             'm1g0': dict(school__in=('بنات', 'Ig'), dep_code=employee.dep_code,grade_code=employee.grade_code),
-#             'm1gd': dict(school__in=('بنات', 'Ig'), dep_code=employee.dep_code),
-#             'm2g0': dict(school__in=('بنات', 'Ig'), grade_code=employee.grade_code),
-#             'm1s0': dict( dep_code=employee.dep_code,grade_code=employee.grade_code),
-#             'm1sd': dict( dep_code=employee.dep_code),
-#         }
-#         if user_code in code_filters:
-#             return qs.filter(**code_filters[user_code])
-#         else:
-
-#             return qs.none()
-#     else:
-#         return qs
+        code_filters = {
+            'hrb': dict(school='بنين'),
+            'hrg': dict(school__in=('بنات', 'Ig')),
+            'm1b': dict(manager1 = employee),
+            'm1g': dict(manager1 = employee),
+            'm2b': dict(manager2 = employee),
+            'm2g': dict(manager2 = employee),
+            'm3b': dict(manager2 = employee),
+            'm3g': dict(manager2 = employee),
+        }
+        if user_code in code_filters:
+            return qs.filter(**code_filters[user_code])
+        else:
+            
+            return qs.none()
+    else:
+        return qs
 
 def get_restricted_actions(user_code):
     if user_code == 'mosaad':
@@ -876,7 +875,7 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
     list_per_page = 50
 
     def get_queryset(self, request):
-        qs = get_filtered_queryset(request, Employee)  # Use the function to filter the queryset
+        qs = get_filtered_employees(request, Employee)  # Use the function to filter the queryset
         return qs
     
     def get_readonly_fields(self, request, obj=None):
