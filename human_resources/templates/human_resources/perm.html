@@ -198,19 +198,24 @@
             let to_time = document.getElementById('end_time')
             let type = e.target.value
             let date = dateInput.value
-            if(type !== 'صباحي') {
+            if(type == 'داخلي') {
             from_time.readOnly = false
             end_time.readOnly = false
             from_time.value = ''
             to_time.value = ''
         }else{
             let data = await makeRequest('/',method='post',body=JSON.stringify({'type':type,'date':date}))
-
+            if(type == 'صباحي') {
+              from_time.value = await data ['start_time']
+              to_time.value = await data ['end_time']
+              from_time.readOnly = true
+              end_time.readOnly = true
+          }else{
             from_time.value = await data ['start_time']
             to_time.value = await data ['end_time']
-            from_time.readOnly = true
+            from_time.readOnly = false
             end_time.readOnly = true
-
+          }
         }}
     </script>
 {% endblock %}
