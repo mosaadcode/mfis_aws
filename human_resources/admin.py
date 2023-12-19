@@ -424,6 +424,10 @@ class PermissionAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
 
             if not setting:
                 raise ValidationError("برجاء ضبط إعدادات اَذون الموظف")
+            
+            OpenPerm = Permission.objects.filter(employee=employee,ok2=False).exists()
+            if OpenPerm:
+                raise ValidationError("يجب إلغاء الإذن السابق او الموافقة عليه قبل تسجيل إذن جديد")
 
             obj.school = employee.school
             obj.dep_code = employee.dep_code
@@ -629,6 +633,10 @@ class VacationAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
             if not settings:
                 raise ValidationError("برجاء ضبط إعدادات اجازات الموظف")
 
+            OpenVacation = Vacation.objects.filter(employee=employee,ok2=False).exists()
+            if OpenVacation:
+                raise ValidationError("يجب إلغاء الاجازة السابقة او الموافقة عليها قبل تسجيل اجازة جديدة")
+            
             obj.school = employee.school
             obj.dep_code = employee.dep_code
             obj.grade_code = employee.grade_code
