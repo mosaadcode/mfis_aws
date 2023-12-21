@@ -146,7 +146,7 @@ def get_restricted_actions(user_code):
     if user_code.startswith('m1'):
         return ['ok2', 'ok', 'refused']
     if user_code.startswith('m2'):
-        return ['ok1','ok']
+        return ['ok1']
     if user_code.startswith('m3'):
         return ['ok1','ok2']
     return None
