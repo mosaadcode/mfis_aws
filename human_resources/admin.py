@@ -454,7 +454,9 @@ class PermissionAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
         updated = 0
         already_approved = 0
         not_updated = 0
-
+        cannot = 0
+        user_code = request.user.code[:2]
+        manager = Employee.objects.get(code=request.user.code)
         for obj in queryset:
             if approval_type == 'ok1':
                 if not obj.ok2:
@@ -480,9 +482,18 @@ class PermissionAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
 
             elif approval_type == 'ok':
                 if not obj.ok2:
-                    obj.ok2 = True
-                    self.approve_obj(request, obj, 'تمت موافقة مباشرة  ')
-                    updated += 1
+                    if user_code=="m3":
+                        obj.ok2 = True
+                        self.approve_obj(request, obj, 'تمت موافقة مباشرة  ')
+                        updated += 1
+                    else:
+                        manager1 = obj.employee.manager1
+                        if manager1==manager:
+                            obj.ok2 = True
+                            self.approve_obj(request, obj, 'تمت موافقة مباشرة  ')
+                            updated += 1
+                        else:
+                            cannot +=1
                 else:
                     already_approved += 1
 
@@ -506,6 +517,12 @@ class PermissionAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
                 '%d تمت الموافقة من قبل على',
                 already_approved,
             ) % already_approved, messages.ERROR)
+        if cannot > 0:
+            self.message_user(request, ngettext(
+                '%d يجب موافقة الرئيس المباشر أولاً',
+                '%d يجب موافقة الرئيس المباشر أولاً',
+                cannot,
+            ) % cannot, messages.ERROR)
 
     def approve_obj(self, request, obj, message):
         obj.save()
@@ -771,31 +788,63 @@ class VacationAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
     def ok(self, request, queryset):
         updated = 0
         already = 0
+        cannot = 0
+        user_code = request.user.code[:2]
+        manager = Employee.objects.get(code=request.user.code)
+        if user_code =="m3":
+            for obj in queryset:
+                if not obj.ok2:
+                    dayoffs = int(obj.count)
+                    employee = Employee.objects.get(id=obj.employee.id)
+                    employee_month = Employee_month.objects.get(employee=employee, month=obj.month)
 
-        for obj in queryset:
-            if not obj.ok2:
-                dayoffs = int(obj.count)
-                employee = Employee.objects.get(id=obj.employee.id)
-                employee_month = Employee_month.objects.get(employee=employee, month=obj.month)
+                    if obj.type == 'من الرصيد':
+                        employee.used_vacations = F('used_vacations') + dayoffs
+                        employee_month.vacations = F('vacations') + dayoffs
+                    elif obj.type == 'مرضي':
+                        employee.used_vacations_s = F('used_vacations_s') + dayoffs
+                        employee_month.vacations_s = F('vacations_s') + dayoffs
+                    elif obj.type == 'إذن غياب':
+                        employee_month.absent_ok = F('absent_ok') + dayoffs
 
-                if obj.type == 'من الرصيد':
-                    employee.used_vacations = F('used_vacations') + dayoffs
-                    employee_month.vacations = F('vacations') + dayoffs
-                elif obj.type == 'مرضي':
-                    employee.used_vacations_s = F('used_vacations_s') + dayoffs
-                    employee_month.vacations_s = F('vacations_s') + dayoffs
-                elif obj.type == 'إذن غياب':
-                    employee_month.absent_ok = F('absent_ok') + dayoffs
+                    obj.ok2 = True
+                    obj.save()  # Save changes to the 'Vacation' model
+                    self.log_change(request, obj, 'تمت موافقة مباشرة   ')
+                    self.log_change(request, employee_month, f'منح اجازة  {obj.type} {obj.count} يوم')
+                    employee.save()  # Save changes to the 'Employee' model
+                    employee_month.save()  # Save changes to the 'Employee_month' model
+                    updated += 1
+                else:
+                    already +=1
+        else:
+            for obj in queryset:
+                if not obj.ok2:
+                    manager1 = obj.employee.manager1
+                    if manager1==manager:
+                        dayoffs = int(obj.count)
+                        employee = Employee.objects.get(id=obj.employee.id)
+                        employee_month = Employee_month.objects.get(employee=employee, month=obj.month)
 
-                obj.ok2 = True
-                obj.save()  # Save changes to the 'Vacation' model
-                self.log_change(request, obj, 'تمت موافقة مباشرة   ')
-                self.log_change(request, employee_month, f'منح اجازة  {obj.type} {obj.count} يوم')
-                employee.save()  # Save changes to the 'Employee' model
-                employee_month.save()  # Save changes to the 'Employee_month' model
-                updated += 1
-            else:
-                already +=1
+                        if obj.type == 'من الرصيد':
+                            employee.used_vacations = F('used_vacations') + dayoffs
+                            employee_month.vacations = F('vacations') + dayoffs
+                        elif obj.type == 'مرضي':
+                            employee.used_vacations_s = F('used_vacations_s') + dayoffs
+                            employee_month.vacations_s = F('vacations_s') + dayoffs
+                        elif obj.type == 'إذن غياب':
+                            employee_month.absent_ok = F('absent_ok') + dayoffs
+
+                        obj.ok2 = True
+                        obj.save()  # Save changes to the 'Vacation' model
+                        self.log_change(request, obj, 'تمت موافقة مباشرة   ')
+                        self.log_change(request, employee_month, f'منح اجازة  {obj.type} {obj.count} يوم')
+                        employee.save()  # Save changes to the 'Employee' model
+                        employee_month.save()  # Save changes to the 'Employee_month' model
+                        updated += 1
+                    else:
+                        cannot +=1
+                else:
+                    already +=1
 
         if updated != 0:
             self.message_user(request, ngettext(
@@ -809,6 +858,12 @@ class VacationAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
                 '%d  تمت الموافقة من قبل',
                 already,
             ) % already, messages.ERROR)
+        if cannot != 0:
+            self.message_user(request, ngettext(
+                '%d  يجب موافقة الرئيس المباشر اولاً',
+                '%d  يجب موافقة الرئيس المباشر اولاً',
+                cannot,
+            ) % cannot, messages.ERROR)
 
     def refused(self, request, queryset):
         deleted = 0
