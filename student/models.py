@@ -14,6 +14,7 @@ class Grade(models.Model):
         return self.name
 
 YEAR_CHOICES = (
+    ('25-24' , '25-24'),
     ('24-23' , '24-23'),
     ('23-22' , '23-22'),
     ('22-21' , '22-21'),

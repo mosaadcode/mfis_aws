@@ -43,6 +43,7 @@ class Fee(models.Model):
     )
 
     YEAR_CHOICES = (
+        ('25-24' , '25-24'),
         ('24-23' , '24-23'),
         ('23-22' , '23-22'),
         ('22-21' , '22-21'),
@@ -56,7 +57,7 @@ class Fee(models.Model):
     school = models.CharField( max_length=6, choices=SCHOOL_CHOICES, blank=True)
     student = models.ForeignKey(to='student.Student', on_delete=models.CASCADE, null=True)
     verified = models.BooleanField(default=False)
-    year = models.CharField( max_length=5,choices=YEAR_CHOICES, default='23-22')
+    year = models.CharField( max_length=5,choices=YEAR_CHOICES, default='25-24')
 
     # class Meta:
     #     verbose_name='fee'

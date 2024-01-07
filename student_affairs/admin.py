@@ -7,7 +7,7 @@ from django.utils.translation import ngettext
 from student.models import Student as StudentAcc
 from fees.models import Fee
 
-current_year = '24-23'
+current_year = '25-24'
 
 class GovernorateAdmin(ImportExportModelAdmin):
     list_display = ('name',)
@@ -66,13 +66,13 @@ class ArchivesInline(admin.TabularInline):
         return False
     def has_add_permission(self, request, obj=None):
         return False
-    
+
 class StudentAdmin(ImportExportModelAdmin):
     list_display = ('code', 'name','grade','Class','status','age1oct','father_mobile','mother_mobile','payment_status')
     ordering = ('name',)
     autocomplete_fields = ['birth_gov','nationality']
     search_fields = ('code','name','student_id','father_id','notes')
-    readonly_fields = ('payment_status',)
+    readonly_fields = ('payment_status')
 
     filter_horizontal = ()
     list_filter = ('study_year','school','grade','Class','status','is_over','payment_status')
@@ -132,7 +132,7 @@ class StudentAdmin(ImportExportModelAdmin):
                         try:
                             CopyRecord = Student.objects.get(code=NewCode)
                             CopyRecord.delete()
-                        except Student.DoesNotExist:
+                        except Student.DoesNotExist:    
                             NewRecord = obj
                             NewRecord.code = NewCode
                             NewRecord.school = "بنات"
@@ -532,7 +532,7 @@ class ContactAdmin(ImportExportModelAdmin):
                     'لا يمكن  تحديث بيانات %d طالب',
                     passed,
                     ) % passed, messages.ERROR)
-                    
+
     AddressUpdate.short_description = 'تحديث بيانات العنوان'
     PhoneUpdate.short_description = 'تحديث ارقام الهاتف'
     actions = ['PhoneUpdate','AddressUpdate']
@@ -571,7 +571,7 @@ class ArchiveAdmin(ImportExportModelAdmin):
         if request.user.code == "mosaad":
             return True
         return False
-        
+
 class ApplicationAdmin(ImportExportModelAdmin):
     list_display = ('student','father_mobile', 'mother_mobile', 'phone_number')
     autocomplete_fields = ['student']
@@ -606,7 +606,7 @@ class ApplicationAdmin(ImportExportModelAdmin):
         if request.user.code == "mosaad":
             return True
         return False
-    
+
 admin.site.register(Student,StudentAdmin)
 admin.site.register(School,SchoolAdmin)
 admin.site.register(Class,ClassAdmin)

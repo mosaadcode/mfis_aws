@@ -178,8 +178,8 @@ class FeeAdmin(ImportExportModelAdmin):
             if obj.verified == True:
                 # if obj.year == current_year:
                 mystudent = Student.objects.get(id=obj.student_id)
-                SYear=mystudent.year
-                if obj.year == SYear:
+                StudentYear = mystudent.year
+                if obj.year == StudentYear:
                     #for book and book
                     if obj.kind[:3] == 'Boo':
                         mystudent.total_books = F('total_books')-obj.value
@@ -188,7 +188,7 @@ class FeeAdmin(ImportExportModelAdmin):
                         mystudent.total_books = F('total_books')-obj.value
                     elif obj.kind == 'دراسية':
                         mystudent.total_paid=F('total_paid') - obj.value
-                        if Fee.objects.filter(student=obj.student_id,kind='دراسية',year=CURRENT_YEAR,verified=True).count()==1:
+                        if Fee.objects.filter(student=obj.student_id,kind='دراسية',year=StudentYear,verified=True).count()==1:
                             try:
                                 mystudentAff = StudentAff.objects.get(code=mystudent.code)
                                 mystudentAff.payment_status = False
@@ -197,7 +197,7 @@ class FeeAdmin(ImportExportModelAdmin):
                                 pass
                     elif obj.kind == 'سيارة':
                         mystudent.total_paid=F('total_paid') - obj.value                                                                     
-                        if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=CURRENT_YEAR,verified=True).count()==1:
+                        if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=StudentYear,verified=True).count()==1:
                             mystudent.bus_active = False
                     mystudent.save()
                     obj.verified = False
@@ -244,8 +244,8 @@ class FeeAdmin(ImportExportModelAdmin):
         for obj in queryset:
             if obj.verified == True:
                 mystudent = Student.objects.get(id=obj.student_id)
-                SYear=mystudent.year
-                if obj.year == SYear:
+                StudentYear = mystudent.year
+                if obj.year == StudentYear:
                     #for book and book
                     if obj.kind[:3] == 'Boo':
                         mystudent.total_books = F('total_books')-obj.value
@@ -254,7 +254,7 @@ class FeeAdmin(ImportExportModelAdmin):
                         mystudent.total_books = F('total_books')-obj.value
                     elif obj.kind == 'دراسية':
                         mystudent.total_paid=F('total_paid') - obj.value
-                        if Fee.objects.filter(student=obj.student_id,kind='دراسية',year=CURRENT_YEAR,verified=True).count()==1:
+                        if Fee.objects.filter(student=obj.student_id,kind='دراسية',year=StudentYear,verified=True).count()==1:
                             try:
                                 mystudentAff = StudentAff.objects.get(code=mystudent.code)
                                 mystudentAff.payment_status = False
@@ -263,7 +263,7 @@ class FeeAdmin(ImportExportModelAdmin):
                                 pass
                     elif obj.kind == 'سيارة':
                         mystudent.total_paid=F('total_paid') - obj.value                                                                     
-                        if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=CURRENT_YEAR,verified=True).count()==1:
+                        if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=StudentYear,verified=True).count()==1:
                             mystudent.bus_active = False
                     mystudent.save()
                 else:
@@ -281,8 +281,8 @@ class FeeAdmin(ImportExportModelAdmin):
 
         if obj.verified == True:
             mystudent = Student.objects.get(id=obj.student_id)
-            SYear=mystudent.year
-            if obj.year == SYear:
+            StudentYear = mystudent.year
+            if obj.year == StudentYear:
                 #for book and book
                 if obj.kind[:3] == 'Boo':
                     mystudent.total_books = F('total_books')-obj.value
@@ -291,7 +291,7 @@ class FeeAdmin(ImportExportModelAdmin):
                     mystudent.total_books = F('total_books')-obj.value
                 elif obj.kind == 'دراسية':
                     mystudent.total_paid=F('total_paid') - obj.value
-                    if Fee.objects.filter(student=obj.student_id,kind='دراسية',year=CURRENT_YEAR,verified=True).count()==1:
+                    if Fee.objects.filter(student=obj.student_id,kind='دراسية',year=StudentYear,verified=True).count()==1:
                         try:
                             mystudentAff = StudentAff.objects.get(code=mystudent.code)
                             mystudentAff.payment_status = False
@@ -300,7 +300,7 @@ class FeeAdmin(ImportExportModelAdmin):
                             pass
                 elif obj.kind == 'سيارة':
                     mystudent.total_paid=F('total_paid') - obj.value                                                                     
-                    if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=CURRENT_YEAR,verified=True).count()==1:
+                    if Fee.objects.filter(student=obj.student_id,kind="سيارة",year=StudentYear,verified=True).count()==1:
                         mystudent.bus_active = False
                     mystudent.save()
             else:
