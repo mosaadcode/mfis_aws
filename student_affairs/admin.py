@@ -72,14 +72,14 @@ class StudentAdmin(ImportExportModelAdmin):
     ordering = ('name',)
     autocomplete_fields = ['birth_gov','nationality']
     search_fields = ('code','name','student_id','father_id','notes')
-    readonly_fields = ('payment_status',)
+    readonly_fields = ('payment_status','application_status','created','admission_id')
 
     filter_horizontal = ()
     list_filter = ('study_year','school','grade','Class','status','is_over','payment_status')
 
     fieldsets = (
         ('بيانات الطالب', { 'fields': (('name','document_status'),'en_name',('student_id','kind'),('birth_date', 'age1oct'),'birth_gov',('nationality','religion'))}),
-        ('بيانات الالتحاق', { 'fields': (('study_year','application_status','payment_status'),('start_year','start_grade'),('school','code'), 'grade', ('status','from_to'),'status_no',('Class','group','is_over'),('global_code',))}),
+        ('بيانات الالتحاق', { 'fields': (('study_year','application_status','payment_status'),('start_year','start_grade'),('school','code'), 'grade', ('status','from_to'),'status_no',('Class','group','is_over'),('global_code',),('created','admission_id'))}),
         ('بيانات ولي الامر', { 'fields': (('responsibility','contact_status'),('father_name','father_job'),('father_id','father_mobile'),('mother_name','mother_job'),'mother_mobile',('phone_number','phone_number2'),('address_1' ,'email'),'notes')}),
 
                  )

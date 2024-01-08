@@ -146,6 +146,8 @@ class Student(models.Model):
     document_status = models.BooleanField(default=True,verbose_name=' تم تقديم الأوراق   ')
     contact_status = models.BooleanField(default=False,verbose_name='   تم تحديث بيانات التواصل ')
     application_status = models.BooleanField(default=False,verbose_name='   تم فتح الملف ')
+    created = models.DateTimeField(auto_now_add=True,blank=True,null=True)
+    admission_id = models.PositiveIntegerField(blank=True,null=True)
 
 
     def __str__(self):
