@@ -161,7 +161,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(max_length=13, null=True, blank=True,verbose_name='تليفون المنزل ')
     email = models.EmailField(max_length=60, null=True, blank=True)
     year = models.CharField( max_length=5,choices=YEAR_CHOICES, default=current_year)
-    study_payment1 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 1')
+    study_payment1 = models.PositiveIntegerField(default=0,verbose_name='Study 1')
     study_payment2 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 2')
     study_payment3 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 3')
     study_payment4 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 4')
@@ -240,7 +240,7 @@ class BusStudent(Student):
 class SchoolFee(models.Model):
     school = models.CharField( max_length=6)
     grade = models.CharField( max_length=16)
-    study_payment1 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 1')
+    study_payment1 = models.PositiveIntegerField(default=0,verbose_name='Study 1')
     study_payment2 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 2')
     study_payment3 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 3')
     study_payment4 = models.PositiveSmallIntegerField(default=0,verbose_name='Study 4')
