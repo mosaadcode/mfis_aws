@@ -139,8 +139,6 @@ def perm(request):
                         permission.month=active_month
                         permission.count=employee_month.permissions+1
                         permission.total=settings.perms
-                        permission.dep_code=employee.dep_code
-                        permission.grade_code=employee.grade_code
                         permission.save()
                         request.session['msg'] = '( تم تسجيل الإذن ( قيد الموافقة'
                         return redirect('perm')
@@ -270,54 +268,40 @@ def vacation(request):
         
         form = VacationForm(request.POST, request.FILES)
         if form.is_valid():
-            if request.POST.get('type') == 'إذن غياب':
-                vacation = form.save(commit=False)
-                vacation.employee = Employee.objects.get(code=request.user.code)
-                vacation.school = request.user.school
-                vacation.month = active_month
-                vacation.dep_code = employee.dep_code
-                vacation.grade_code = employee.grade_code
+            date_from = request.POST['date_from']
+            date_to = request.POST['date_to']
 
-                vacation.count = used_absents +1
-                vacation.total = unused_absents
+            # Parse date strings into datetime objects
+            date_from = datetime.strptime(date_from, '%Y-%m-%d')
+            date_to = datetime.strptime(date_to, '%Y-%m-%d')
+            # Create a list of day-offs based on the dayoff_settings
+            dayoffs = [setting.date for setting in dayoff_settings]
 
-                vacation.save()
+            days_count = 0
+            days = []  # Initialize an empty list to store the day component of non-day-off dates
 
+            # Iterate through the date range
+            current_date = date_from
+            while current_date <= date_to:
+                # Check if the current date is not a day-off
+                if current_date.date() not in dayoffs:
+                    days_count += 1
+                    days.append(current_date.date().day)  # Add the day component to the 'days' list
+                current_date += timedelta(days=1)
+
+            vacation = form.save(commit=False)
+            vacation.employee = Employee.objects.get(code=request.user.code)
+            vacation.school = request.user.school
+            vacation.month = active_month
+            vacation.count = days_count
+            vacation.days = days
+            if request.POST['type'] == 'مرضي':
+                vacation.total = unused_vacations_s
+            elif request.POST['type'] == 'من الرصيد':
+                vacation.total = unused_vacations
             else:
-                date_from = request.POST['date_from']
-                date_to = request.POST['date_to']
-
-                # Parse date strings into datetime objects
-                date_from = datetime.strptime(date_from, '%Y-%m-%d')
-                date_to = datetime.strptime(date_to, '%Y-%m-%d')
-                # Create a list of day-offs based on the dayoff_settings
-                dayoffs = [setting.date for setting in dayoff_settings]
-
-                days_count = 0
-                days = []  # Initialize an empty list to store the day component of non-day-off dates
-
-                # Iterate through the date range
-                current_date = date_from
-                while current_date <= date_to:
-                    # Check if the current date is not a day-off
-                    if current_date.date() not in dayoffs:
-                        days_count += 1
-                        days.append(current_date.date().day)  # Add the day component to the 'days' list
-                    current_date += timedelta(days=1)
-
-                vacation = form.save(commit=False)
-                vacation.employee = Employee.objects.get(code=request.user.code)
-                vacation.school = request.user.school
-                vacation.month = active_month
-                vacation.dep_code = employee.dep_code
-                vacation.grade_code = employee.grade_code
-                vacation.count = days_count
-                vacation.days = days
-                if request.POST['type'] == 'مرضي':
-                    vacation.total = unused_vacations_s
-                else:
-                    vacation.total = unused_vacations
-                vacation.save()
+                vacation.total = unused_absents
+            vacation.save()
 
             request.session['msg'] = '( تم تسجيل الإجازة ( قيد الموافقة'
         else:

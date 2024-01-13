@@ -85,8 +85,6 @@ class Employee(models.Model):
     insurance_no = models.CharField(max_length=10, unique=True,null=True,blank=True,verbose_name='الرقم التأميني')
     notes = models.TextField( max_length=260,null=True,blank=True,verbose_name='ملاحظات ')
     job = models.ForeignKey(Job, on_delete=SET_NULL,null=True, blank=True,verbose_name='الوظيفة')
-    dep_code = models.CharField(max_length=3,blank=True,null=True,verbose_name='كود القسم')
-    grade_code = models.CharField(max_length=2,blank=True,null=True,verbose_name='كود المرحلة')
     is_active = models.BooleanField(default=True,verbose_name='الحالة')
     salary_parameter = models.TextField( max_length=120,blank=True,null=True,verbose_name='عوامل تحديد الراتب ')
     salary = models.PositiveSmallIntegerField(null=True,blank=True,verbose_name='قيمة الراتب')
@@ -233,8 +231,6 @@ class Vacation(models.Model):
     ok2 = models.BooleanField(default=False,verbose_name='رئيس أعلى ')
     count = models.PositiveSmallIntegerField(default=0,verbose_name='عدد ايام')
     total = models.PositiveSmallIntegerField(default=0,verbose_name='متاح ')
-    dep_code = models.CharField(max_length=3,blank=True,null=True,verbose_name='كود القسم')
-    grade_code = models.CharField(max_length=2,blank=True,null=True,verbose_name='كود المرحلة')
     days = ArrayField(models.IntegerField(), default=list,verbose_name='ايام ')
     photo = models.ImageField(upload_to='vacation_photos/', null=True, blank=True, verbose_name='صورة الإجازة')
 
@@ -346,8 +342,6 @@ class Permission(models.Model):
     end_time = models.CharField(max_length=5,blank=True,null=True,verbose_name='الى ساعة')
     count = models.PositiveSmallIntegerField(default=0,verbose_name='إذن')
     total = models.PositiveSmallIntegerField(default=0,verbose_name='من ')
-    dep_code = models.CharField(max_length=3,blank=True,null=True,verbose_name='كود القسم')
-    grade_code = models.CharField(max_length=2,blank=True,null=True,verbose_name='كود المرحلة')
 
     # @property
     # def department_name(self):
