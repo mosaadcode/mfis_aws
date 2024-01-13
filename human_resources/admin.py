@@ -679,7 +679,7 @@ class VacationAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
         except ValidationError as e:
             self.message_user(request, str(e), level="ERROR")
 
-    actions = ['ok1', 'ok2', 'ok', 'refused','absent_days']   
+    actions = ['ok1', 'ok2', 'ok', 'refused']   
     def get_actions(self, request):
         actions = super().get_actions(request)
         user_code = request.user.code
@@ -723,46 +723,46 @@ class VacationAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
                 useless,
             ) % useless, messages.ERROR)
 
-    def absent_days(self, request, queryset):
-        updated = 0
-        notupdated = 0
-        for obj in queryset:
-            if obj.type == 'إذن غياب':
-                employee = obj.employee
-                settings = employee.vacation_setting
-                dayoff_settings = Time_setting.objects.filter(month=active_month, name=settings, dayoff=True)
+    # def absent_days(self, request, queryset):
+    #     updated = 0
+    #     notupdated = 0
+    #     for obj in queryset:
+    #         if obj.type == 'إذن غياب':
+    #             employee = obj.employee
+    #             settings = employee.vacation_setting
+    #             dayoff_settings = Time_setting.objects.filter(month=active_month, name=settings, dayoff=True)
 
-                dayoffs = [setting.date for setting in dayoff_settings]
-                days_count = 0
-                days = []
-                current_date = obj.date_from
-                while current_date <= obj.date_to:
-                    # Check if the current date is not a day-off
-                    if current_date not in dayoffs:
-                        days_count += 1
-                        days.append(current_date.day)  # Add the day component to the 'days' list
-                    current_date += timedelta(days=1)
+    #             dayoffs = [setting.date for setting in dayoff_settings]
+    #             days_count = 0
+    #             days = []
+    #             current_date = obj.date_from
+    #             while current_date <= obj.date_to:
+    #                 # Check if the current date is not a day-off
+    #                 if current_date not in dayoffs:
+    #                     days_count += 1
+    #                     days.append(current_date.day)  # Add the day component to the 'days' list
+    #                 current_date += timedelta(days=1)
 
-                obj.days = days
-                obj.count = days_count
-                obj.save()
-                updated += 1
-            else:
-                notupdated +=1
+    #             obj.days = days
+    #             obj.count = days_count
+    #             obj.save()
+    #             updated += 1
+    #         else:
+    #             notupdated +=1
 
 
-        if updated != 0:
-            self.message_user(request, ngettext(
-                '%d تم الموافقة على',
-                '%d تم الموافقة على',
-                updated,
-            ) % updated, messages.SUCCESS)
-        if notupdated != 0:
-            self.message_user(request, ngettext(
-                '%d تم الموافقة من قبل على',
-                '%d تم الموافقة من قبل على',
-                notupdated,
-            ) % notupdated, messages.ERROR)
+    #     if updated != 0:
+    #         self.message_user(request, ngettext(
+    #             '%d تم الموافقة على',
+    #             '%d تم الموافقة على',
+    #             updated,
+    #         ) % updated, messages.SUCCESS)
+    #     if notupdated != 0:
+    #         self.message_user(request, ngettext(
+    #             '%d تم الموافقة من قبل على',
+    #             '%d تم الموافقة من قبل على',
+    #             notupdated,
+    #         ) % notupdated, messages.ERROR)
 
 
     def ok2(self, request, queryset):
