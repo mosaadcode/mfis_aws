@@ -94,6 +94,7 @@ class Employee(models.Model):
     vacation_setting = models.ForeignKey("Vacation_setting", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='حضور وإجازات')
     used_vacations = models.PositiveSmallIntegerField(default=0,verbose_name='اجازات ')
     used_vacations_s = models.PositiveSmallIntegerField(default=0,verbose_name='اجازات مرضي ')
+    used_absents = models.PositiveSmallIntegerField(default=0,verbose_name='غياب بإذن ')
     manager1 = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True,verbose_name='رئيس مباشر ',related_name="employees1")
     manager2 = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True,verbose_name='رئيس أعلى ',related_name="employees2")
     

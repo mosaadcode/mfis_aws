@@ -679,7 +679,7 @@ class VacationAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
         except ValidationError as e:
             self.message_user(request, str(e), level="ERROR")
 
-    actions = ['ok1', 'ok2', 'ok', 'refused']   
+    actions = ['ok1', 'ok2', 'ok', 'refused','absent_days']   
     def get_actions(self, request):
         actions = super().get_actions(request)
         user_code = request.user.code
@@ -723,6 +723,47 @@ class VacationAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
                 useless,
             ) % useless, messages.ERROR)
 
+    def absent_days(self, request, queryset):
+        updated = 0
+        notupdated = 0
+        for obj in queryset:
+            if obj.type == 'إذن غياب':
+                employee = obj.employee
+                settings = employee.vacation_setting
+                dayoff_settings = Time_setting.objects.filter(month=active_month, name=settings, dayoff=True)
+
+                dayoffs = [setting.date for setting in dayoff_settings]
+                days_count = 0
+                days = []
+                current_date = obj.date_from
+                while current_date <= obj.date_to:
+                    # Check if the current date is not a day-off
+                    if current_date not in dayoffs:
+                        days_count += 1
+                        days.append(current_date.day)  # Add the day component to the 'days' list
+                    current_date += timedelta(days=1)
+
+                obj.days = days
+                obj.count = days_count
+                obj.save()
+                updated += 1
+            else:
+                notupdated +=1
+
+
+        if updated != 0:
+            self.message_user(request, ngettext(
+                '%d تم الموافقة على',
+                '%d تم الموافقة على',
+                updated,
+            ) % updated, messages.SUCCESS)
+        if notupdated != 0:
+            self.message_user(request, ngettext(
+                '%d تم الموافقة من قبل على',
+                '%d تم الموافقة من قبل على',
+                notupdated,
+            ) % notupdated, messages.ERROR)
+
 
     def ok2(self, request, queryset):
         updated = 0
@@ -743,6 +784,7 @@ class VacationAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
                         employee.used_vacations_s = F('used_vacations_s') + dayoffs
                         employee_month.vacations_s = F('vacations_s') + dayoffs
                     elif obj.type == 'إذن غياب':
+                        employee.used_absents = F('used_absents') + dayoffs
                         employee_month.absent_ok = F('absent_ok') + dayoffs
 
                     obj.ok2 = True
@@ -799,6 +841,7 @@ class VacationAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
                         employee.used_vacations_s = F('used_vacations_s') + dayoffs
                         employee_month.vacations_s = F('vacations_s') + dayoffs
                     elif obj.type == 'إذن غياب':
+                        employee.used_absents = F('used_absents') + dayoffs
                         employee_month.absent_ok = F('absent_ok') + dayoffs
 
                     obj.ok2 = True
@@ -920,13 +963,14 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
     list_display = ('name','job','manager1','manager2','permission_setting','vacation_setting','code','time_code')
     autocomplete_fields = ['manager1','manager2']
     # raw_id_fields = ('job',)
-    readonly_fields = ('birth_date','job','used_vacations','used_vacations_s')
+    readonly_fields = ('birth_date','job')
+    # readonly_fields = ('birth_date','job','used_vacations','used_vacations_s','used_absents')
     search_fields = ('code','name','na_id','insurance_no')
     filter_horizontal = ()
     list_filter = ('school','job__type','job__grade','is_educational','job__department','job__title')
     fieldsets = (
     ('بيانات الموظف', { 'fields': (('name','code'),('na_id','birth_date','school'),('mobile_number','phone_number'),('emergency_phone','email'),'address',('basic_certificate','is_educational'))}),
-    ('بيانات التعاقد', {'fields': ('job','manager1','manager2','permission_setting','vacation_setting',('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code',('used_vacations','used_vacations_s'),('notes','is_active'))}),
+    ('بيانات التعاقد', {'fields': ('job','manager1','manager2','permission_setting','vacation_setting',('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code',('used_vacations','used_vacations_s','used_absents'),('notes','is_active'))}),
                 )
     list_per_page = 50
 
