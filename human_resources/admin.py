@@ -991,6 +991,23 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
     def has_export_permission(self, request):
         return request.user.code in ('mosaad',)
 
+    def change_password(self,request,queryset):
+        changed = 0
+        notchanged =0
+        for obj in queryset:
+            code = obj.code
+            employee_acc = Student.objects.get(code=obj.code)
+            employee_acc.password=make_password(code)
+            self.log_change(request, obj, 'تم إعادة ضبط المرور')
+            employee_acc.save(update_fields=["password",])
+            changed +=1
+        if changed != 0:
+            self.message_user(request, ngettext(
+                '%d تم إعادة ضبط المرور لعدد',
+                '%d تم إعادة ضبط المرور لعدد',
+                changed,
+            ) % changed, messages.SUCCESS)  
+
     def manager_1(self, request, queryset):
         updated = 0
         notupdated = 0
@@ -1152,8 +1169,9 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
     manager_2.short_description = 'منح صلاحيات رئيس أعلى'
     manager_3.short_description = 'منح صلاحيات الموافقة المباشرة'
     manager_out.short_description = 'سحب جميع صلاحيات الإدارة'
+    change_password.short_description = 'إعادة ضبط كلمة المرور'
 
-    actions = ['manager_1','manager_2','manager_3','manager_out','Fix_birth_date']
+    actions = ['manager_1','manager_2','manager_3','manager_out','change_password','Fix_birth_date']
 
     def delete_queryset(self, request, queryset):
 
