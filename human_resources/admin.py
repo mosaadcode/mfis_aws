@@ -960,7 +960,7 @@ class VacationAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
         return request.user.code in ('mosaad',)
 
 class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
-    list_display = ('name','job','manager1','manager2','permission_setting','vacation_setting','code','time_code')
+    list_display = ('name','salary','job','manager1','manager2','permission_setting','vacation_setting','code','time_code')
     autocomplete_fields = ['manager1','manager2']
     # raw_id_fields = ('job',)
     readonly_fields = ('birth_date','job')
@@ -972,7 +972,8 @@ class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
     ('بيانات الموظف', { 'fields': (('name','code'),('na_id','birth_date','school'),('mobile_number','phone_number'),('emergency_phone','email'),'address',('basic_certificate','is_educational'))}),
     ('بيانات التعاقد', {'fields': ('job','manager1','manager2','permission_setting','vacation_setting',('attendance_date','insurance_date'),('participation_date','contract_date'),'insurance_no',('salary_parameter','salary'),'message','time_code',('used_vacations','used_vacations_s','used_absents'),('notes','is_active'))}),
                 )
-    list_per_page = 50
+    list_per_page = 20
+    list_editable = ('salary',)
 
     def get_queryset(self, request):
         qs = get_filtered_employees(request, Employee)  # Use the function to filter the queryset
