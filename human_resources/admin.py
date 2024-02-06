@@ -960,7 +960,7 @@ class VacationAdmin(HrEmployeesAndApprover,ImportExportModelAdmin):
         return request.user.code in ('mosaad',)
 
 class EmployeeAdmin(HrEmployees,ImportExportModelAdmin):
-    list_display = ('name','salary','job','manager1','manager2','permission_setting','vacation_setting','code','time_code')
+    list_display = ('name','salary','job','permission_setting','vacation_setting','code','time_code')
     autocomplete_fields = ['manager1','manager2']
     # raw_id_fields = ('job',)
     readonly_fields = ('birth_date','job')
