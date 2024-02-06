@@ -87,7 +87,7 @@ class Employee(models.Model):
     job = models.ForeignKey(Job, on_delete=SET_NULL,null=True, blank=True,verbose_name='الوظيفة')
     is_active = models.BooleanField(default=True,verbose_name='الحالة')
     salary_parameter = models.TextField( max_length=120,blank=True,null=True,verbose_name='عوامل تحديد الراتب ')
-    salary = models.PositiveSmallIntegerField(null=True,blank=True,verbose_name='قيمة الراتب')
+    salary = models.DecimalField(max_digits=7,decimal_places=2,null=True,blank=True,verbose_name='الراتب')
     message = models.CharField(max_length=260, null=True, blank=True)
     time_code = models.CharField(max_length=6,unique=True,blank=True,null=True,verbose_name='كود البصمة')
     permission_setting = models.ForeignKey("Permission_setting", on_delete=models.SET_NULL,blank=True, null=True,verbose_name='إعدادات الاَذون ')
@@ -255,7 +255,7 @@ class Employee_month(models.Model):
     permissions = models.PositiveSmallIntegerField(default=0,verbose_name='اَذون')
     vacations = models.PositiveSmallIntegerField(default=0,verbose_name='إجازات')
     vacations_s = models.PositiveSmallIntegerField(default=0,verbose_name='مرضي ')
-    salary_value =models.PositiveSmallIntegerField(default=0,verbose_name='الراتب')
+    salary_value = models.DecimalField(max_digits=7,decimal_places=2,null=True,blank=True,verbose_name='الراتب')
     absent =models.PositiveSmallIntegerField(default=0,verbose_name='غياب')
     absent_ok =models.PositiveSmallIntegerField(default=0,verbose_name='غياب بإذن')
 
