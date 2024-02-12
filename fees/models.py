@@ -40,6 +40,7 @@ class Fee(models.Model):
         ('.بنات.', '.بنات.'),
         ('Out-b','Out-b'),
         ('Out-g','Out-g'),
+        ('FIS','FIS'),
     )
 
     YEAR_CHOICES = (

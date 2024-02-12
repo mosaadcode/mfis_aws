@@ -131,6 +131,7 @@ class Student(AbstractBaseUser, PermissionsMixin):
         ('Ig','Ig'),
         ('Out-b','Out-b'),
         ('Out-g','Out-g'),
+        ('FIS','FIS'),
     )
     GRADE_CHOICES = (
         (None, ""),
@@ -150,6 +151,12 @@ class Student(AbstractBaseUser, PermissionsMixin):
         ('الثانى الثانوى','الثانى الثانوى'),
         ('الثالث الثانوى','الثالث الثانوى'),
         ('خريج','خريج'),
+        ('Pre-School','Pre-School'),
+        ('PK (Kg1)','PK (Kg1)'),
+        ('K (Kg2)','K (Kg2)'),
+        ('Grade 1','Grade 1'),
+        ('Grade 2','Grade 2'),
+        ('Grade 3','Grade 3'),
     )
 
     code = models.CharField(max_length=7, unique=True)

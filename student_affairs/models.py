@@ -64,6 +64,7 @@ class Student(models.Model):
         ('محول من', 'محول من'),
         ('عائد','عائد'),
         ('وافد','وافد'),
+        ('FIS','FIS'),
     )
     GRADE_CHOICES = (
         ('تمهيدى حضانة', 'تمهيدى حضانة'),
@@ -82,6 +83,12 @@ class Student(models.Model):
         ('الثانى الثانوى','الثانى الثانوى'),
         ('الثالث الثانوى','الثالث الثانوى'),
         ('خريج','خريج'),
+        ('Pre-School','Pre-School'),
+        ('PK (Kg1)','PK (Kg1)'),
+        ('K (Kg2)','K (Kg2)'),
+        ('Grade 1','Grade 1'),
+        ('Grade 2','Grade 2'),
+        ('Grade 3','Grade 3'),
     )
 
     RELIGION_CHOICES = (
