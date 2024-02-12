@@ -6,6 +6,8 @@ from django.db.models import Sum
 # from .forms import StudentProfile
 from human_resources.models import Employee
 from student_affairs.models import Student as StudentAff
+from fees.models import Fee
+from fees.forms import FeesForm
 from django.http import JsonResponse
 import json
 
@@ -26,20 +28,51 @@ def fis_loginuser(request):
         else:
             user = authenticate(request, code=request.POST['username'],password=request.POST['password'])
             if user is None:
-                return render(request, 'fis/home2.html', {'form':AuthenticationForm, 'error':'برجاء التأكد من الكود وكلمة المرور'})
+                return render(request, 'fis/home2.html', {'form':AuthenticationForm, 'error':'Check Student code and Password'})
             else:
                 login(request, user)
-                if user.is_employ == False:
-                    studentaff = StudentAff.objects.get(code=request.user.code)        
-                    if studentaff.grade in ('الاول الابتدائى','الاول الاعدادى','الاول الثانوى'):
-                        if studentaff.document_status == False:
-                            logout(request)
-                            return render(request, 'fis/home2.html', {'form':AuthenticationForm, 'error':'لا يمكن تسجيل المصروفات قبل إستيفاء كامل الأوراق المطلوبة, برجاء التواصل مع المدرسة'})
-                        else:
-                            if studentaff.application_status == False:
-                                request.session['error'] ='برجاء تحديث البيانات التالية'
-                                return redirect('application')
-                            else:
-                                return redirect('dashboard')
-                    return redirect('dashboard')
+                if not user.is_employ:
+                    # studentaff = StudentAff.objects.get(code=request.user.code)
+                    return redirect('fis_dashboard')
                 return redirect('home2')
+            
+def fis_dashboard(request):
+        if request.method == 'GET':  
+            student=request.user
+            if len(str(request.user.living_area)) > 4 :
+                bus = True
+            else :
+                bus = False
+            msg = request.session.get('msg')
+            error = request.session.get('error')
+            request.session['msg'] = ''
+            request.session['error'] = ''
+            context = {
+                'bus':bus,
+                'msg':msg,
+                'error':error,
+                'form':FeesForm(),
+            }
+            return render(request, 'fis/fis_dashboard.html',context)
+        else:
+            try:
+                form = FeesForm(request.POST)
+                newfee = form.save(commit=False)
+                newfee.student = request.user
+                newfee.school = request.user.school
+     
+                newfee.save()
+                request.session['msg'] = 'Thank you, we will check the payment'
+                return redirect('fis_dashboard')
+            except ValueError:
+                            # tell user when error hapen
+                            return render(request, 'fis/fis_dashboard.html', {'form':FeesForm(),'error':'Check Payment Information.'})
+
+def fis_logoutuser(request):
+    if request.method == 'POST':
+        logout(request)
+        return redirect('fis_home')
+        
+def payments(request):
+    fees = Fee.objects.filter(student=request.user.id,year=request.user.year,kind__in = ('دراسية','سيارة',)).exclude(school__in=('Out-b', 'Out-g')).order_by('payment_date')
+    return render(request, 'fis/fis_payments.html',{'fees':fees})
