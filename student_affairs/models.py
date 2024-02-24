@@ -54,6 +54,7 @@ class Student(models.Model):
         ('.بنات.', '.بنات.'),
         ('Out-b','Out-b'),
         ('Out-g','Out-g'),
+        ('FIS','FIS'),
     )
     STATUS_CHOICES = (
         # (None, ""),
@@ -64,7 +65,6 @@ class Student(models.Model):
         ('محول من', 'محول من'),
         ('عائد','عائد'),
         ('وافد','وافد'),
-        ('FIS','FIS'),
     )
     GRADE_CHOICES = (
         ('تمهيدى حضانة', 'تمهيدى حضانة'),
