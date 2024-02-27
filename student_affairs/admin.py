@@ -7,6 +7,7 @@ from django.utils.translation import ngettext
 from student.models import Student as StudentAcc
 from fees.models import Fee
 
+
 current_year = '25-24'
 
 class GovernorateAdmin(ImportExportModelAdmin):
@@ -269,41 +270,38 @@ class StudentAdmin(ImportExportModelAdmin):
             if obj.code[0] == 'C':
                 passed +=1
             else:
-                if obj.study_year != current_year :
-                    passed =+1
+                if obj.school[0]=='O':
+                    passed +=1
                 else:
-                    if obj.school[0]=='O':
+                    if obj.status == "محول من":
                         passed +=1
                     else:
-                        if obj.status == "محول من":
+                        StudentPayments = StudentAcc.objects.get(code=obj.code)
+                        if StudentPayments.total_paid > 0:
                             passed +=1
-                        else:
-                            StudentPayments = StudentAcc.objects.get(code=obj.code)
-                            if StudentPayments.total_paid > 0:
-                                passed +=1
-                            else:    
-                                StudentCode = obj.code
-                                NewSchool = None
-                                obj.status = "محول من"
-                                if obj.code[0] == str(3):
-                                    NewSchool = 'Out-g'
+                        else:    
+                            StudentCode = obj.code
+                            NewSchool = None
+                            obj.status = "محول من"
+                            if obj.code[0] == str(3):
+                                NewSchool = 'Out-g'
 
-                                else:
-                                    NewSchool = 'Out-b'
+                            else:
+                                NewSchool = 'Out-b'
 
-                                self.log_change(request, obj, 'تم التحويل من المدرسة')
-                                transferd +=1
-                                obj.save(update_fields=['status'])
+                            self.log_change(request, obj, 'تم التحويل من المدرسة')
+                            transferd +=1
+                            obj.save(update_fields=['status'])
 
-                                StudentAcc.objects.filter(code=obj.code).update(
-                                school=NewSchool,bus_active=False,study_payment1=0,
-                                study_payment2=0,study_payment3=0,bus_payment1=0,bus_payment2=0,)
-                                
-                                try:
-                                    StudentFees = Fee.objects.filter(student__code=StudentCode)
-                                    StudentFees.update(school = NewSchool)
-                                except Student.DoesNotExist:
-                                    pass
+                            StudentAcc.objects.filter(code=obj.code).update(
+                            school=NewSchool,bus_active=False,study_payment1=0,
+                            study_payment2=0,study_payment3=0,bus_payment1=0,bus_payment2=0,)
+                            
+                            try:
+                                StudentFees = Fee.objects.filter(student__code=StudentCode)
+                                StudentFees.update(school = NewSchool)
+                            except Student.DoesNotExist:
+                                pass
 
         if transferd != 0:
             self.message_user(request, ngettext(
