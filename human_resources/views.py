@@ -157,7 +157,6 @@ def perm(request):
                         permission.month=active_month
                         permission.count=employee_month.permissions+1
                         permission.total=settings.perms
-                        permission.job_code=employee.job_code
                         permission.save()
                         request.session['msg'] = ' ( تم تسجيل الإذن زائد ( سيتم الخصم من الراتب'
                         return redirect('perm')
