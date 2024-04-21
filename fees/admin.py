@@ -140,12 +140,12 @@ class FeeAdmin(ImportExportModelAdmin):
                         archive = Archive.objects.get(code=mystudent.code,study_year=obj.year)
                         archive.total = F('total')+obj.value
                         archive.save()
-                        obj.verified = True
-                        obj.save()
-                        self.log_change(request, obj, 'verified')
-                        updated += 1                        
                     except Archive.DoesNotExist:
-                        cannot +=1
+                        pass
+                    obj.verified = True
+                    obj.save()
+                    self.log_change(request, obj, 'verified')
+                    updated += 1                        
             else:
                 notupdated +=1
         if updated != 0:
@@ -209,12 +209,12 @@ class FeeAdmin(ImportExportModelAdmin):
                         archive = Archive.objects.get(code=mystudent.code,study_year=obj.year)
                         archive.total = F('total')-obj.value
                         archive.save()
-                        obj.verified = False
-                        obj.save()
-                        self.log_change(request, obj, 'unverified')
-                        updated += 1                        
                     except Archive.DoesNotExist:
-                        cannot +=1
+                        pass
+                    obj.verified = False
+                    obj.save()
+                    self.log_change(request, obj, 'unverified')
+                    updated += 1                        
                 # else:
                 #     cannot +=1
             else:
