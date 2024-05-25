@@ -291,7 +291,7 @@ class Archive(models.Model):
     student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True)
     school = models.CharField( max_length=6)
     study_year = models.CharField( max_length=5)
-    code = models.CharField(max_length=7, unique=True)
+    code = models.CharField(max_length=7)
     grade = models.CharField( max_length=16)
     study = models.PositiveSmallIntegerField(default=0)
     bus = models.PositiveSmallIntegerField(default=0)
