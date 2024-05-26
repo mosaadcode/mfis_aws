@@ -11,7 +11,7 @@ from human_resources.models import Employee
 
 admin.site.unregister(Group)
 
-current_year = '23-22'
+current_year = '25-24'
 
 class AccAdmin:
     def has_module_permission(self, request):
@@ -197,7 +197,7 @@ class BusStudentAdmin(ImportExportMixin, admin.ModelAdmin):
         qs = super().get_queryset(request)
         if request.user.code in ('busg','busb'):
         #     return qs.filter(bus_active=True,school__in = ('.بنات.', 'بنات','Ig'))
-            return qs.filter(bus_active=True)
+            return qs.filter(bus_active=True,year=current_year)
         # elif request.user.code =="busb":
         #     return qs.filter(bus_active=True,school="بنين")
         return qs
