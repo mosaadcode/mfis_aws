@@ -6,7 +6,7 @@ from django.db.models import Sum
 from datetime import date
 from django.db.models.deletion import SET_NULL
 
-current_year = '24-23'
+current_year = '25-24'
 
 class Grade(models.Model):
     name = models.CharField(max_length=24, blank=True)
