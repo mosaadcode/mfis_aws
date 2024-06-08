@@ -5,7 +5,7 @@ from student.forms import StudentForm, StudentArea
 from student_affairs.models import Student as StudentAff
 from student.models import Archive
 
-last_year = '23-22'
+last_year = '24-23'
 
 def dashboard(request):
     try:
